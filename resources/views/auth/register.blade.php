@@ -49,7 +49,7 @@
                                    text-[#0b2a4a]
                                    tracking-wide"
                         >
-                            YOUR COLLEGE NAME
+                            IIT Indore
                         </h1>
 
                         <p class="text-xs text-slate-500">
@@ -68,7 +68,7 @@
                            text-slate-600
                            hover:text-[#0b2a4a]"
                 >
-                    College Website
+                    IITI Website
                 </a>
 
             </div>
