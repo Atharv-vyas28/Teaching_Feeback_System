@@ -32,13 +32,9 @@
                 <div class="flex items-center gap-4">
 
                     <div
-                        class="w-12 h-12 rounded-full
-                               bg-[#0b2a4a]
-                               flex items-center justify-center
-                               text-white font-bold text-lg
-                               border-4 border-[#d4af37]"
+                        class="w-12 h-12 rounded-full"
                     >
-                        C
+                        <img src="https://upload.wikimedia.org/wikipedia/en/1/14/IITI_Logo.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="IITI">
                     </div>
 
                     <div>
@@ -59,17 +55,6 @@
                     </div>
 
                 </div>
-
-
-                <a
-                    href="/"
-                    class="hidden sm:block
-                           text-sm font-medium
-                           text-slate-600
-                           hover:text-[#0b2a4a]"
-                >
-                    IITI Website
-                </a>
 
             </div>
 
@@ -119,23 +104,9 @@
                 {{-- Card Header --}}
                 <div
                     class="bg-[#0b2a4a]
-                           px-8 py-7
+                           px-4 py-4
                            text-center"
                 >
-
-                    <div
-                        class="mx-auto mb-4
-                               w-14 h-14
-                               rounded-full
-                               bg-white
-                               flex items-center
-                               justify-center
-                               text-[#0b2a4a]
-                               text-2xl font-bold
-                               border-4 border-[#d4af37]"
-                    >
-                        C
-                    </div>
 
                     <h2 class="text-2xl font-bold text-white">
                         Create Account
@@ -238,7 +209,7 @@
                                        text-sm font-semibold
                                        text-slate-700"
                             >
-                                College Email Address
+                                Institute Email Address
                             </label>
 
                             <input
@@ -246,7 +217,7 @@
                                 id="email"
                                 name="email"
                                 value="{{ old('email') }}"
-                                placeholder="example@college.edu"
+                                placeholder="example@iiti.ac.in"
                                 required
                                 autocomplete="email"
                                 class="w-full h-12 px-4
@@ -310,7 +281,35 @@
                                            text-slate-400
                                            hover:text-[#0b2a4a]"
                                 >
-                                    👁
+                                    <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                            stroke="currentColor"
+                                            class="w-5 h-5"
+                                        >
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943
+                                                   7.523 5 12 5c4.478 0
+                                                   8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.064
+                                                   7-9.542 7-4.477
+                                                   0-8.268-2.943
+                                                   -9.542-7Z"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0
+                                                   3 3 0 0 1 6 0Z"
+                                            />
+
+                                        </svg>
                                 </button>
 
                             </div>
@@ -368,7 +367,36 @@
                                            text-slate-400
                                            hover:text-[#0b2a4a]"
                                 >
-                                    👁
+                                    <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                            stroke="currentColor"
+                                            class="w-5 h-5"
+                                        >
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943
+                                                   7.523 5 12 5c4.478 0
+                                                   8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.064
+                                                   7-9.542 7-4.477
+                                                   0-8.268-2.943
+                                                   -9.542-7Z"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0
+                                                   3 3 0 0 1 6 0Z"
+                                            />
+
+                                        </svg>
+
                                 </button>
 
                             </div>
@@ -433,7 +461,8 @@
                                    tracking-wide
                                    transition
                                    shadow-md
-                                   shadow-[#0b2a4a]/20"
+                                   shadow-[#0b2a4a]/20
+                                   cursor-pointer"
                         >
                             CREATE ACCOUNT
                         </button>
