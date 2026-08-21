@@ -38,7 +38,7 @@
 
                             <h1 class="text-lg md:text-xl font-bold
                                        text-[#0b2a4a] tracking-wide">
-                                YOUR COLLEGE NAME
+                                IIT Indore
                             </h1>
 
                             <p class="text-xs text-slate-500 tracking-wide">
@@ -60,7 +60,7 @@
                                    hover:text-[#0b2a4a]
                                    transition"
                         >
-                            College Website
+                            IITI Website
                         </a>
 
                     </div>
@@ -357,7 +357,8 @@
                                        tracking-wide
                                        transition
                                        shadow-md
-                                       shadow-[#0b2a4a]/20"
+                                       shadow-[#0b2a4a]/20
+                                       cursor-pointer"
                             >
                                 SIGN IN
                             </button>
@@ -415,7 +416,7 @@
                         class="font-medium
                                text-[#0b2a4a]"
                     >
-                        Contact College Administration
+                        Contact Administration
                     </a>
                 </p>
 
@@ -440,7 +441,7 @@
                 >
 
                     <p class="text-xs text-white/60">
-                        © {{ date('Y') }} Your College Name.
+                        © {{ date('Y') }} IIT Indore
                         All Rights Reserved.
                     </p>
 

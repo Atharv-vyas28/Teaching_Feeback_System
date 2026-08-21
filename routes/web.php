@@ -34,3 +34,8 @@ Route::post('/logout', [
 Route::get('/dashboard', function () {
     return view('dashboard.dashboard');
 })->middleware('auth')->name('dashboard');
+
+
+Route::get('/attendance', function () {
+    return view('attendance');
+})->middleware('auth')->name('attendance');
