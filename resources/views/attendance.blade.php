@@ -1,366 +1,3333 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Sheet - Smart Feedback System</title>
-    @vite(['resources/css/app.css'])
+
+    <title>IIT Indore | Faculty Attendance</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .donut {
+            transform: rotate(-90deg);
+            transform-origin: center;
+        }
+
+        .progress-transition {
+            transition: width 0.5s ease;
+        }
+    </style>
 </head>
 
-<body class="min-h-screen bg-[#f7f9fc] font-sans text-[#27303f] antialiased">
-<div class="min-h-screen">
+<body class="bg-slate-50 text-slate-900">
 
-    <div id="sidebarOverlay" class="fixed inset-0 z-40 hidden bg-slate-900/30 lg:hidden"></div>
+    <!-- ========================================================= -->
+    <!-- MOBILE HEADER -->
+    <!-- ========================================================= -->
 
-    <aside id="sidebar"
-        class="fixed inset-y-0 left-0 z-50 w-[176px] -translate-x-full border-r border-[#dce1e8] bg-white transition-transform duration-200 lg:translate-x-0">
+    <header
+        class="sticky top-0 z-50 flex h-16 items-center justify-between
+               border-b border-slate-200 bg-white px-4 lg:hidden"
+    >
 
-        <div class="flex h-[78px] items-center gap-2.5 px-3">
-            <div class="grid h-7 w-7 shrink-0 place-items-center rounded-[7px] bg-[#2f6fdf] text-[17px] font-bold text-white">◇</div>
+        <div class="flex items-center gap-3">
+
+            <div
+                class="flex h-9 w-9 items-center justify-center
+                       rounded-lg bg-[#8f1d2c]
+                       text-xs font-bold text-white"
+            >
+                IIT
+            </div>
+
             <div>
-                <div class="text-[11px] font-extrabold leading-[1.35] text-[#202937]">
-                    Smart Feedback<br>System
-                </div>
-                <div class="text-[7px] tracking-[0.7px] text-[#a3a9b3]">IIT INDORE</div>
-            </div>
-        </div>
+                <p class="text-sm font-bold">
+                    IIT Indore
+                </p>
 
-        <nav class="px-3 pt-2">
-            <a href="#" class="mb-1.5 flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[10px] text-[#4770b3] hover:bg-[#eef5ff]">
-                <span class="w-3.5 text-center text-[15px]">▦</span> Dashboard
-            </a>
-            <a href="#" class="relative mb-1.5 flex h-9 items-center gap-2.5 rounded-lg bg-[#eef5ff] px-2.5 text-[10px] font-bold text-[#2f6fdf]">
-                <span class="w-3.5 text-center text-[15px]">▱</span> Messages
-                <span class="ml-auto h-1 w-1 rounded-full bg-[#2f6fdf]"></span>
-            </a>
-            <a href="#" class="mb-1.5 flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[10px] text-[#4770b3] hover:bg-[#eef5ff]">
-                <span class="w-3.5 text-center text-[15px]">◷</span> Attendance Records
-            </a>
-            <a href="#" class="mb-1.5 flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[10px] text-[#4770b3] hover:bg-[#eef5ff]">
-                <span class="w-3.5 text-center text-[15px]">◦</span> Profile
-            </a>
-        </nav>
-    </aside>
-
-    <main class="min-h-screen lg:ml-[176px]">
-
-        <header class="flex h-[52px] items-center border-b border-[#e6eaf0] bg-white px-4 sm:px-6">
-            <button id="menuButton" type="button"
-                class="mr-3 flex h-8 w-8 flex-col justify-center gap-1.5 rounded-md border border-[#e1e5eb] bg-white p-2 lg:hidden">
-                <span class="h-px w-full bg-slate-500"></span>
-                <span class="h-px w-full bg-slate-500"></span>
-                <span class="h-px w-full bg-slate-500"></span>
-            </button>
-
-            <div class="hidden items-center gap-2 text-[10px] sm:flex">
-                <span class="text-[#a0a8b5]">Staff</span>
-                <span class="text-[15px] text-[#c5cbd4]">›</span>
-                <span class="text-[#a0a8b5]">Messages</span>
-                <span class="text-[15px] text-[#c5cbd4]">›</span>
-                <strong class="text-[#303a4a]">Attendance Sheet CS301</strong>
-            </div>
-
-            <div class="ml-auto flex items-center gap-2.5">
-                <button class="relative grid h-7 w-7 place-items-center text-[16px] text-[#8792a3]">
-                    ♧
-                    <span class="absolute right-1 top-1 h-1.5 w-1.5 rounded-full border border-white bg-red-500"></span>
-                </button>
-                <div class="hidden flex-col text-right sm:flex">
-                    <strong class="text-[10px] text-[#303744]">Mr. Rajesh Kumar</strong>
-                    <span class="text-[7px] text-[#9aa2af]">IC: STF202610</span>
-                </div>
-                <div class="grid h-8 w-8 place-items-center rounded-full border border-[#c7d8ee] bg-[#dbe8f9] text-[9px] font-extrabold text-[#285ca9]">
-                    RK
-                </div>
-            </div>
-        </header>
-
-        <section class="mx-auto max-w-[740px] px-3 py-7 sm:px-5 sm:py-[54px]">
-
-            <div class="mb-[18px]">
-                <h1 class="text-[20px] font-bold tracking-[-0.4px] sm:text-[22px]">Attendance Sheet</h1>
-                <p class="mt-1.5 text-[11px] text-[#7f8999]">
-                    Manage attendance and anonymous student feedback.
+                <p class="text-[10px] text-slate-400">
+                    Faculty Portal
                 </p>
             </div>
 
-            <section class="mb-[22px] rounded-[9px] border border-[#e6eaf0] bg-white p-3.5 shadow-[0_3px_16px_rgba(35,48,67,0.07)] sm:p-4">
+        </div>
 
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-2.5">
+        <button
+            id="mobileMenuButton"
+            class="flex h-9 w-9 items-center justify-center
+                   rounded-lg border border-slate-200"
+        >
+            ☰
+        </button>
 
-                    <label>
-                        <span class="mb-1.5 ml-px block text-[7px] font-extrabold text-[#596474]">COURSE</span>
-                        <select id="courseSelect"
-                            class="h-[31px] w-full rounded-md border border-[#e1e5eb] bg-white px-2.5 text-[9px] text-[#4a5565] outline-none focus:border-[#91b7f3] focus:ring-2 focus:ring-[#2f6fdf]/10">
-                            <option>CS301 - Data Structures</option>
-                            <option>CS302 - Algorithms</option>
-                            <option>CS303 - Database Systems</option>
-                        </select>
-                    </label>
+    </header>
 
-                    <label>
-                        <span class="mb-1.5 ml-px block text-[7px] font-extrabold text-[#596474]">SUBJECT TOPIC</span>
-                        <select id="topicSelect"
-                            class="h-[31px] w-full rounded-md border border-[#e1e5eb] bg-white px-2.5 text-[9px] text-[#4a5565] outline-none focus:border-[#91b7f3] focus:ring-2 focus:ring-[#2f6fdf]/10">
-                            <option>Binary Search Trees (BST)</option>
-                            <option>Linked Lists</option>
-                            <option>Stacks and Queues</option>
-                            <option>Graphs</option>
-                        </select>
-                    </label>
 
-                    <label>
-                        <span class="mb-1.5 ml-px block text-[7px] font-extrabold text-[#596474]">DATE</span>
-                        <input id="attendanceDate" type="date" value="2026-08-09"
-                            class="h-[31px] w-full rounded-md border border-[#e1e5eb] bg-white px-2.5 text-[9px] text-[#4a5565] outline-none focus:border-[#91b7f3] focus:ring-2 focus:ring-[#2f6fdf]/10">
-                    </label>
+    <!-- ========================================================= -->
+    <!-- MOBILE MENU -->
+    <!-- ========================================================= -->
 
-                    <label>
-                        <span class="mb-1.5 ml-px block text-[7px] font-extrabold text-[#596474]">LECTURE NUMBER</span>
-                        <select id="lectureSelect"
-                            class="h-[31px] w-full rounded-md border border-[#e1e5eb] bg-white px-2.5 text-[9px] text-[#4a5565] outline-none focus:border-[#91b7f3] focus:ring-2 focus:ring-[#2f6fdf]/10">
-                            <option>Lecture 12</option>
-                            <option>Lecture 11</option>
-                            <option>Lecture 13</option>
-                        </select>
-                    </label>
+    <div
+        id="mobileMenu"
+        class="fixed inset-x-0 top-16 z-40 hidden
+               border-b border-slate-200 bg-white
+               p-4 shadow-lg lg:hidden"
+    >
+
+        <div class="space-y-1">
+
+            <button
+                class="w-full rounded-xl px-4 py-3 text-left
+                       text-sm text-slate-500 hover:bg-slate-50"
+            >
+                Dashboard
+            </button>
+
+            <button
+                class="w-full rounded-xl
+                       bg-[#8f1d2c]/10 px-4 py-3
+                       text-left text-sm font-semibold
+                       text-[#8f1d2c]"
+            >
+                Attendance
+            </button>
+
+            <button
+                class="w-full rounded-xl px-4 py-3 text-left
+                       text-sm text-slate-500 hover:bg-slate-50"
+            >
+                Students
+            </button>
+
+            <button
+                class="w-full rounded-xl px-4 py-3 text-left
+                       text-sm text-slate-500 hover:bg-slate-50"
+            >
+                Reports
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================================= -->
+    <!-- DESKTOP SIDEBAR -->
+    <!-- ========================================================= -->
+
+    <aside
+        class="fixed inset-y-0 left-0 z-40 hidden w-64
+               border-r border-slate-200 bg-white lg:block"
+    >
+
+        <div class="flex h-full flex-col">
+
+            <div
+                class="flex h-20 items-center gap-3
+                       border-b border-slate-100 px-6"
+            >
+
+                <div
+                    class="flex h-11 w-11 items-center
+                           justify-center rounded-xl
+                           bg-[#8f1d2c]
+                           text-sm font-bold text-white"
+                >
+                    IIT
                 </div>
 
-                <div class="mt-[17px] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex flex-col gap-2 sm:flex-row">
-                        <button id="markPresentBtn"
-                            class="h-7 rounded-[5px] border border-[#e3e7ec] bg-white px-3 text-[8px] font-bold text-[#697486] hover:bg-slate-50">
-                            Mark All Present
-                        </button>
-                        <button id="enableFeedbackBtn"
-                            class="h-7 rounded-[5px] bg-[#e5faed] px-3 text-[8px] font-bold text-[#2a9f60] hover:bg-[#d8f7e5]">
-                            Enable Feedback for All Present
-                        </button>
+                <div>
+
+                    <p class="font-bold">
+                        IIT Indore
+                    </p>
+
+                    <p class="text-[11px] text-slate-400">
+                        Faculty Portal
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <nav class="flex-1 px-4 py-6">
+
+                <p
+                    class="mb-3 px-3 text-[10px]
+                           font-bold uppercase
+                           tracking-wider text-slate-400"
+                >
+                    Main Menu
+                </p>
+
+                <button
+                    class="mb-1 w-full rounded-xl px-3 py-3
+                           text-left text-sm text-slate-500
+                           hover:bg-slate-50"
+                >
+                    Dashboard
+                </button>
+
+                <button
+                    class="mb-1 w-full rounded-xl px-3 py-3
+                           text-left text-sm text-slate-500
+                           hover:bg-slate-50"
+                >
+                    My Courses
+                </button>
+
+                <button
+                    class="mb-1 w-full rounded-xl
+                           bg-[#8f1d2c]/10 px-3 py-3
+                           text-left text-sm font-semibold
+                           text-[#8f1d2c]"
+                >
+                    Attendance
+                </button>
+
+                <button
+                    class="mb-1 w-full rounded-xl px-3 py-3
+                           text-left text-sm text-slate-500
+                           hover:bg-slate-50"
+                >
+                    Students
+                </button>
+
+                <button
+                    class="w-full rounded-xl px-3 py-3
+                           text-left text-sm text-slate-500
+                           hover:bg-slate-50"
+                >
+                    Reports
+                </button>
+
+            </nav>
+
+
+            <div class="border-t border-slate-100 p-4">
+
+                <div
+                    class="flex items-center gap-3
+                           rounded-xl bg-slate-50 p-3"
+                >
+
+                    <div
+                        class="flex h-10 w-10 items-center
+                               justify-center rounded-full
+                               bg-[#8f1d2c]
+                               text-sm font-bold text-white"
+                    >
+                        AS
                     </div>
 
-                    <button id="saveAttendanceBtn"
-                        class="h-7 rounded-[5px] bg-[#2f6fdf] px-4 text-[8px] font-bold text-white shadow-[0_3px_7px_rgba(47,111,223,0.17)] hover:bg-[#245fc8]">
-                        Save Attendance
-                    </button>
+                    <div>
+
+                        <p class="text-sm font-semibold">
+                            Prof. Arjun Sharma
+                        </p>
+
+                        <p class="text-xs text-slate-400">
+                            Computer Science
+                        </p>
+
+                    </div>
+
                 </div>
-            </section>
 
-            @php
-                $students = [
-                    ['roll'=>'CS2024001','name'=>'Rahul Sharma','present'=>true,'feedback'=>true],
-                    ['roll'=>'CS2024002','name'=>'Ananya Iyer','present'=>true,'feedback'=>true],
-                    ['roll'=>'CS2024003','name'=>'Aarav Patel','present'=>false,'feedback'=>false],
-                    ['roll'=>'CS2024004','name'=>'Sneha Reddy','present'=>true,'feedback'=>true],
-                    ['roll'=>'CS2024005','name'=>'Vikram Malhotra','present'=>true,'feedback'=>true],
-                    ['roll'=>'CS2024006','name'=>'Kabir Mehra','present'=>false,'feedback'=>false],
-                    ['roll'=>'CS2024007','name'=>'Diya Sen','present'=>true,'feedback'=>true],
-                    ['roll'=>'CS2024008','name'=>'Rohan Das','present'=>true,'feedback'=>true],
-                ];
-            @endphp
+            </div>
 
-            <section class="overflow-hidden rounded-[9px] border border-[#e6eaf0] bg-white shadow-[0_3px_16px_rgba(35,48,67,0.07)]">
-                <div class="overflow-x-auto">
-                    <div class="min-w-[640px]">
+        </div>
 
-                        <div class="grid min-h-9 grid-cols-[116px_1.25fr_.65fr_1fr] items-center bg-[#f3f6fa] px-[15px] text-[7px] font-extrabold text-[#697588]">
-                            <div>ROLL NO</div>
-                            <div>STUDENT NAME</div>
-                            <div>ATTENDANCE</div>
-                            <div>ANONYMOUS FEEDBACK</div>
-                        </div>
+    </aside>
 
-                        <div id="studentRows">
-                            @foreach ($students as $student)
-                                <div data-roll="{{ $student['roll'] }}"
-                                    class="student-row grid min-h-[43px] grid-cols-[116px_1.25fr_.65fr_1fr] items-center border-t border-[#edf0f3] px-[15px] text-[8px]">
 
-                                    <div class="font-semibold text-[#667384]">{{ $student['roll'] }}</div>
-                                    <div class="font-bold text-[#242d3a]">{{ $student['name'] }}</div>
+    <!-- ========================================================= -->
+    <!-- MAIN -->
+    <!-- ========================================================= -->
 
-                                    <div>
-                                        <button type="button"
-                                            data-present="{{ $student['present'] ? 'true' : 'false' }}"
-                                            class="attendance-status inline-flex h-[17px] min-w-[45px] items-center justify-center rounded-[5px] px-2 text-[7px] font-bold
-                                            {{ $student['present'] ? 'bg-[#e8fbef] text-[#26a75c]' : 'bg-[#ffe9e9] text-[#dc4d4d]' }}">
-                                            {{ $student['present'] ? 'Present' : 'Absent' }}
-                                        </button>
-                                    </div>
+    <div class="lg:pl-64">
 
-                                    <div class="flex items-center gap-2">
-                                        <button type="button"
-                                            data-enabled="{{ $student['feedback'] ? 'true' : 'false' }}"
-                                            @disabled(!$student['present'])
-                                            class="feedback-toggle relative h-[15px] w-7 rounded-full
-                                            {{ $student['feedback'] ? 'bg-[#2f6fdf]' : 'bg-[#cdd5df]' }}
-                                            {{ !$student['present'] ? 'cursor-not-allowed opacity-65' : '' }}">
-                                            <span class="toggle-knob absolute top-0.5 h-[11px] w-[11px] rounded-full bg-white shadow
-                                                {{ $student['feedback'] ? 'left-[15px]' : 'left-0.5' }}"></span>
-                                        </button>
+        <header
+            class="hidden h-20 items-center justify-between
+                   border-b border-slate-200
+                   bg-white px-8 lg:flex"
+        >
 
-                                        <span class="feedback-label text-[7px]
-                                            {{ $student['feedback'] ? 'text-[#2f6fdf]' : 'text-[#c2c7ce]' }}">
-                                            {{ $student['feedback'] ? 'Enabled' : 'Feedback Disabled' }}
-                                        </span>
-                                    </div>
+            <div>
+
+                <p class="text-xs text-slate-400">
+                    Faculty Portal
+                </p>
+
+                <h1 class="text-lg font-bold">
+                    Attendance Management
+                </h1>
+
+            </div>
+
+            <div
+                class="flex h-10 w-10 items-center
+                       justify-center rounded-full
+                       bg-[#8f1d2c]
+                       text-sm font-bold text-white"
+            >
+                AS
+            </div>
+
+        </header>
+
+
+        <main
+            class="mx-auto max-w-7xl
+                   px-4 py-6 sm:px-6
+                   lg:px-8 lg:py-8"
+        >
+
+
+            <!-- ================================================= -->
+            <!-- PAGE 1 : OVERALL ATTENDANCE -->
+            <!-- ================================================= -->
+
+            <section
+                id="dashboardPage"
+                class="page active"
+            >
+
+                <div class="mb-8">
+
+                    <p
+                        class="mb-2 text-xs font-semibold
+                               uppercase tracking-wider
+                               text-[#8f1d2c]"
+                    >
+                        Faculty Attendance
+                    </p>
+
+                    <h1
+                        class="text-2xl font-bold
+                               tracking-tight sm:text-3xl"
+                    >
+                        Attendance Overview
+                    </h1>
+
+                    <p
+                        class="mt-2 text-sm text-slate-500"
+                    >
+                        Monitor attendance across all the courses
+                        you teach.
+                    </p>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- OVERALL GRAPH -->
+                <!-- ================================================= -->
+
+                <div
+                    class="mb-8 grid gap-5
+                           lg:grid-cols-[1.1fr_0.9fr]"
+                >
+
+                    <!-- Overall percentage -->
+
+                    <div
+                        class="rounded-2xl border
+                               border-slate-200
+                               bg-white p-6
+                               shadow-sm sm:p-8"
+                    >
+
+                        <div
+                            class="flex flex-col
+                                   items-center
+                                   justify-center
+                                   gap-8 sm:flex-row"
+                        >
+
+                            <!-- Donut -->
+
+                            <div class="relative h-44 w-44">
+
+                                <svg
+                                    viewBox="0 0 120 120"
+                                    class="h-full w-full"
+                                >
+
+                                    <circle
+                                        cx="60"
+                                        cy="60"
+                                        r="48"
+                                        fill="none"
+                                        stroke="#f1f5f9"
+                                        stroke-width="12"
+                                    />
+
+                                    <circle
+                                        id="overallDonut"
+                                        class="donut"
+                                        cx="60"
+                                        cy="60"
+                                        r="48"
+                                        fill="none"
+                                        stroke="#8f1d2c"
+                                        stroke-width="12"
+                                        stroke-linecap="round"
+                                        stroke-dasharray="301.59"
+                                        stroke-dashoffset="301.59"
+                                    />
+
+                                </svg>
+
+
+                                <div
+                                    class="absolute inset-0
+                                           flex flex-col
+                                           items-center
+                                           justify-center"
+                                >
+
+                                    <span
+                                        id="overallPercentage"
+                                        class="text-3xl
+                                               font-bold"
+                                    >
+                                        0%
+                                    </span>
+
+                                    <span
+                                        class="text-[10px]
+                                               text-slate-400"
+                                    >
+                                        Overall
+                                    </span>
+
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </section>
-    </main>
-</div>
 
-<div id="toast"
-    class="pointer-events-none fixed bottom-5 right-5 z-[100] translate-y-2 rounded-lg bg-[#27303f] px-4 py-2.5 text-[11px] text-white opacity-0 shadow-xl transition-all duration-200">
-</div>
+                            </div>
+
+
+                            <!-- Stats -->
+
+                            <div class="w-full sm:w-auto">
+
+                                <p
+                                    class="text-xs
+                                           text-slate-400"
+                                >
+                                    Overall Attendance
+                                </p>
+
+                                <h2
+                                    class="mt-1 text-xl
+                                           font-bold"
+                                >
+                                    All Courses
+                                </h2>
+
+
+                                <div
+                                    class="mt-6 grid
+                                           grid-cols-2
+                                           gap-3"
+                                >
+
+                                    <div
+                                        class="rounded-xl
+                                               bg-slate-50
+                                               p-4"
+                                    >
+
+                                        <p
+                                            class="text-[11px]
+                                                   text-slate-400"
+                                        >
+                                            Total Lectures
+                                        </p>
+
+                                        <p
+                                            id="totalLectures"
+                                            class="mt-1 text-xl
+                                                   font-bold"
+                                        >
+                                            0
+                                        </p>
+
+                                    </div>
+
+
+                                    <div
+                                        class="rounded-xl
+                                               bg-slate-50
+                                               p-4"
+                                    >
+
+                                        <p
+                                            class="text-[11px]
+                                                   text-slate-400"
+                                        >
+                                            Courses
+                                        </p>
+
+                                        <p
+                                            id="totalCourses"
+                                            class="mt-1 text-xl
+                                                   font-bold"
+                                        >
+                                            0
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Attendance distribution -->
+
+                    <div
+                        class="rounded-2xl border
+                               border-slate-200
+                               bg-white p-6
+                               shadow-sm sm:p-8"
+                    >
+
+                        <div class="mb-5">
+
+                            <h2 class="font-bold">
+                                Attendance Distribution
+                            </h2>
+
+                            <p
+                                class="mt-1 text-xs
+                                       text-slate-400"
+                            >
+                                Overall student attendance
+                            </p>
+
+                        </div>
+
+
+                        <div class="space-y-5">
+
+                            <div>
+
+                                <div
+                                    class="mb-2 flex
+                                           justify-between
+                                           text-xs"
+                                >
+
+                                    <span
+                                        class="text-slate-500"
+                                    >
+                                        Present
+                                    </span>
+
+                                    <span
+                                        id="overallPresentText"
+                                        class="font-bold
+                                               text-emerald-600"
+                                    >
+                                        0
+                                    </span>
+
+                                </div>
+
+                                <div
+                                    class="h-3 overflow-hidden
+                                           rounded-full
+                                           bg-slate-100"
+                                >
+
+                                    <div
+                                        id="overallPresentBar"
+                                        class="progress-transition
+                                               h-full
+                                               rounded-full
+                                               bg-emerald-500"
+                                        style="width:0%"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <div
+                                    class="mb-2 flex
+                                           justify-between
+                                           text-xs"
+                                >
+
+                                    <span
+                                        class="text-slate-500"
+                                    >
+                                        Absent
+                                    </span>
+
+                                    <span
+                                        id="overallAbsentText"
+                                        class="font-bold
+                                               text-red-600"
+                                    >
+                                        0
+                                    </span>
+
+                                </div>
+
+                                <div
+                                    class="h-3 overflow-hidden
+                                           rounded-full
+                                           bg-slate-100"
+                                >
+
+                                    <div
+                                        id="overallAbsentBar"
+                                        class="progress-transition
+                                               h-full
+                                               rounded-full
+                                               bg-red-400"
+                                        style="width:0%"
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- COURSES -->
+                <!-- ================================================= -->
+
+                <div class="mb-8">
+
+                    <div class="mb-5">
+
+                        <h2 class="text-lg font-bold">
+                            Courses You Teach
+                        </h2>
+
+                        <p
+                            class="mt-1 text-xs
+                                   text-slate-400"
+                        >
+                            Select a course to view detailed
+                            attendance.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="courseContainer"
+                        class="grid gap-5
+                               sm:grid-cols-2
+                               xl:grid-cols-3"
+                    >
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- PAGE 2 : COURSE DETAILS -->
+            <!-- ================================================= -->
+
+            <section
+                id="coursePage"
+                class="page"
+            >
+
+                <button
+                    id="courseBackButton"
+                    class="mb-6 flex items-center gap-2
+                           text-sm font-medium
+                           text-slate-500
+                           hover:text-[#8f1d2c]"
+                >
+                    ← All Courses
+                </button>
+
+
+                <!-- Course heading -->
+
+                <div
+                    class="mb-7 flex flex-col
+                           gap-5
+                           lg:flex-row
+                           lg:items-end
+                           lg:justify-between"
+                >
+
+                    <div>
+
+                        <span
+                            id="coursePageCode"
+                            class="inline-flex
+                                   rounded-lg
+                                   bg-[#8f1d2c]/10
+                                   px-3 py-1
+                                   text-xs font-bold
+                                   text-[#8f1d2c]"
+                        >
+                        </span>
+
+                        <h1
+                            id="coursePageName"
+                            class="mt-3 text-2xl
+                                   font-bold
+                                   sm:text-3xl"
+                        >
+                        </h1>
+
+                        <p
+                            class="mt-2 text-sm
+                                   text-slate-500"
+                        >
+                            Course attendance overview
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        id="courseAddButton"
+                        class="flex items-center
+                               justify-center gap-2
+                               rounded-xl
+                               bg-[#8f1d2c]
+                               px-5 py-3
+                               text-sm font-semibold
+                               text-white
+                               hover:bg-[#741622]"
+                    >
+
+                        <span class="text-lg">
+                            +
+                        </span>
+
+                        Add Attendance
+
+                    </button>
+
+                </div>
+
+
+                <!-- Course Graph -->
+
+                <div
+                    class="mb-7 grid gap-5
+                           lg:grid-cols-[0.9fr_1.1fr]"
+                >
+
+                    <!-- Donut -->
+
+                    <div
+                        class="rounded-2xl
+                               border border-slate-200
+                               bg-white p-6
+                               shadow-sm"
+                    >
+
+                        <div
+                            class="flex flex-col
+                                   items-center"
+                        >
+
+                            <div
+                                class="relative
+                                       h-48 w-48"
+                            >
+
+                                <svg
+                                    viewBox="0 0 120 120"
+                                    class="h-full w-full"
+                                >
+
+                                    <circle
+                                        cx="60"
+                                        cy="60"
+                                        r="48"
+                                        fill="none"
+                                        stroke="#f1f5f9"
+                                        stroke-width="12"
+                                    />
+
+                                    <circle
+                                        id="courseDonut"
+                                        class="donut"
+                                        cx="60"
+                                        cy="60"
+                                        r="48"
+                                        fill="none"
+                                        stroke="#8f1d2c"
+                                        stroke-width="12"
+                                        stroke-linecap="round"
+                                        stroke-dasharray="301.59"
+                                        stroke-dashoffset="301.59"
+                                    />
+
+                                </svg>
+
+
+                                <div
+                                    class="absolute inset-0
+                                           flex flex-col
+                                           items-center
+                                           justify-center"
+                                >
+
+                                    <span
+                                        id="coursePercentage"
+                                        class="text-3xl
+                                               font-bold"
+                                    >
+                                        0%
+                                    </span>
+
+                                    <span
+                                        class="text-[10px]
+                                               text-slate-400"
+                                    >
+                                        Attendance
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <p
+                                id="courseAttendanceLabel"
+                                class="mt-4 text-sm
+                                       text-slate-500"
+                            >
+                                0 students present
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Lecture-wise graph -->
+
+                    <div
+                        class="rounded-2xl
+                               border border-slate-200
+                               bg-white p-6
+                               shadow-sm"
+                    >
+
+                        <div class="mb-6">
+
+                            <h2 class="font-bold">
+                                Lecture-wise Attendance
+                            </h2>
+
+                            <p
+                                class="mt-1 text-xs
+                                       text-slate-400"
+                            >
+                                Attendance percentage for each lecture
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            id="lectureGraph"
+                            class="space-y-5"
+                        >
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- PREVIOUS ATTENDANCE -->
+                <!-- ================================================= -->
+
+                <div
+                    class="overflow-hidden rounded-2xl
+                           border border-slate-200
+                           bg-white shadow-sm"
+                >
+
+                    <div
+                        class="border-b border-slate-200
+                               px-5 py-5 sm:px-6"
+                    >
+
+                        <h2 class="font-bold">
+                            Previous Attendance
+                        </h2>
+
+                        <p
+                            class="mt-1 text-xs
+                                   text-slate-400"
+                        >
+                            Click edit to view or modify student
+                            attendance.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="courseLectureTable"
+                        class="hidden md:block"
+                    >
+                    </div>
+
+
+                    <div
+                        id="courseLectureMobile"
+                        class="divide-y divide-slate-100
+                               md:hidden"
+                    >
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================================================= -->
+            <!-- PAGE 3 : ATTENDANCE EDITOR -->
+            <!-- ================================================= -->
+
+            <section
+                id="editorPage"
+                class="page"
+            >
+
+                <button
+                    id="editorBackButton"
+                    class="mb-6 flex items-center gap-2
+                           text-sm font-medium
+                           text-slate-500
+                           hover:text-[#8f1d2c]"
+                >
+                    ← Back to Course
+                </button>
+
+
+                <div
+                    class="mb-6 flex flex-col gap-5
+                           lg:flex-row lg:items-end
+                           lg:justify-between"
+                >
+
+                    <div>
+
+                        <span
+                            id="editorCourseBadge"
+                            class="rounded-lg
+                                   bg-[#8f1d2c]/10
+                                   px-3 py-1
+                                   text-xs font-bold
+                                   text-[#8f1d2c]"
+                        >
+                        </span>
+
+                        <h1
+                            id="editorTitle"
+                            class="mt-3 text-2xl
+                                   font-bold sm:text-3xl"
+                        >
+                            Add Attendance
+                        </h1>
+
+                        <p
+                            class="mt-2 text-sm
+                                   text-slate-500"
+                        >
+                            All students start as present.
+                            Click students to mark them absent.
+                        </p>
+
+                    </div>
+
+
+                    <div class="grid grid-cols-2 gap-3">
+
+                        <div
+                            class="rounded-xl border
+                                   border-emerald-100
+                                   bg-emerald-50
+                                   px-5 py-3 text-center"
+                        >
+
+                            <p
+                                class="text-[11px]
+                                       text-emerald-600"
+                            >
+                                Present
+                            </p>
+
+                            <p
+                                id="presentCounter"
+                                class="mt-1 text-xl
+                                       font-bold
+                                       text-emerald-700"
+                            >
+                                0
+                            </p>
+
+                        </div>
+
+
+                        <div
+                            class="rounded-xl border
+                                   border-red-100
+                                   bg-red-50
+                                   px-5 py-3 text-center"
+                        >
+
+                            <p
+                                class="text-[11px]
+                                       text-red-600"
+                            >
+                                Absent
+                            </p>
+
+                            <p
+                                id="absentCounter"
+                                class="mt-1 text-xl
+                                       font-bold
+                                       text-red-700"
+                            >
+                                0
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Lecture Details -->
+
+                <div
+                    class="mb-5 rounded-2xl
+                           border border-slate-200
+                           bg-white p-5
+                           shadow-sm sm:p-6"
+                >
+
+                    <h2 class="font-bold">
+                        Lecture Details
+                    </h2>
+
+
+                    <div
+                        class="mt-5 grid gap-5
+                               md:grid-cols-2
+                               lg:grid-cols-4"
+                    >
+
+                        <div class="lg:col-span-2">
+
+                            <label
+                                class="mb-2 block text-xs
+                                       font-bold text-slate-600"
+                            >
+                                Course
+                            </label>
+
+                            <select
+                                id="courseSelect"
+                                class="w-full rounded-xl
+                                       border border-slate-200
+                                       bg-white px-4 py-3
+                                       text-sm outline-none
+                                       focus:border-[#8f1d2c]"
+                            >
+
+                                <option value="">
+                                    Select Course
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div>
+
+                            <label
+                                class="mb-2 block text-xs
+                                       font-bold text-slate-600"
+                            >
+                                Lecture Number
+                            </label>
+
+                            <input
+                                id="lectureNumber"
+                                type="number"
+                                class="w-full rounded-xl
+                                       border border-slate-200
+                                       bg-slate-50 px-4 py-3
+                                       text-sm font-semibold
+                                       outline-none"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label
+                                class="mb-2 block text-xs
+                                       font-bold text-slate-600"
+                            >
+                                Date
+                            </label>
+
+                            <input
+                                id="lectureDate"
+                                type="date"
+                                class="w-full rounded-xl
+                                       border border-slate-200
+                                       px-4 py-3 text-sm
+                                       outline-none
+                                       focus:border-[#8f1d2c]"
+                            >
+
+                        </div>
+
+
+                        <div
+                            class="md:col-span-2
+                                   lg:col-span-4"
+                        >
+
+                            <label
+                                class="mb-2 block text-xs
+                                       font-bold text-slate-600"
+                            >
+                                Lecture Name / Topic
+                            </label>
+
+                            <input
+                                id="lectureName"
+                                type="text"
+                                placeholder="Example: Binary Search Trees"
+                                class="w-full rounded-xl
+                                       border border-slate-200
+                                       px-4 py-3 text-sm
+                                       outline-none
+                                       focus:border-[#8f1d2c]"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Students -->
+
+                <div
+                    class="overflow-hidden rounded-2xl
+                           border border-slate-200
+                           bg-white shadow-sm"
+                >
+
+                    <div
+                        class="flex flex-col gap-4
+                               border-b border-slate-200
+                               p-5 sm:p-6
+                               md:flex-row
+                               md:items-center
+                               md:justify-between"
+                    >
+
+                        <div>
+
+                            <h2 class="font-bold">
+                                Student Attendance
+                            </h2>
+
+                            <p
+                                class="mt-1 text-xs
+                                       text-slate-400"
+                            >
+                                Click a student to mark absent.
+                            </p>
+
+                        </div>
+
+
+                        <input
+                            id="studentSearch"
+                            type="text"
+                            placeholder="Search student..."
+                            class="w-full rounded-xl
+                                   border border-slate-200
+                                   px-4 py-3 text-sm
+                                   outline-none
+                                   focus:border-[#8f1d2c]
+                                   md:w-72"
+                        >
+
+                    </div>
+
+
+                    <div
+                        class="flex items-center
+                               justify-between
+                               border-b border-slate-100
+                               bg-slate-50
+                               px-5 py-3
+                               text-xs sm:px-6"
+                    >
+
+                        <span class="text-slate-500">
+                            Students enrolled
+                        </span>
+
+                        <span
+                            id="studentCount"
+                            class="font-bold"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="studentContainer"
+                        class="divide-y divide-slate-100"
+                    >
+                    </div>
+
+
+                    <div
+                        class="flex flex-col-reverse gap-3
+                               border-t border-slate-200
+                               bg-slate-50 p-5
+                               sm:flex-row
+                               sm:justify-end sm:px-6"
+                    >
+
+                        <button
+                            id="cancelButton"
+                            class="rounded-xl
+                                   border border-slate-200
+                                   bg-white px-6 py-3
+                                   text-sm font-semibold
+                                   text-slate-600"
+                        >
+                            Cancel
+                        </button>
+
+
+                        <button
+                            id="saveButton"
+                            class="rounded-xl
+                                   bg-[#8f1d2c]
+                                   px-6 py-3
+                                   text-sm font-semibold
+                                   text-white
+                                   hover:bg-[#741622]"
+                        >
+                            Save Attendance
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const menu = document.getElementById('menuButton');
-    const toast = document.getElementById('toast');
-    let timer;
 
-    const showToast = (message) => {
-        toast.textContent = message;
-        toast.classList.remove('translate-y-2', 'opacity-0');
-        toast.classList.add('translate-y-0', 'opacity-100');
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            toast.classList.remove('translate-y-0', 'opacity-100');
-            toast.classList.add('translate-y-2', 'opacity-0');
-        }, 2200);
-    };
+/* ============================================================= */
+/* DUMMY DATA */
+/* ============================================================= */
 
-    const closeSidebar = () => {
-        sidebar.classList.remove('translate-x-0');
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-    };
+const courses = [
 
-    menu?.addEventListener('click', () => {
-        const open = sidebar.classList.contains('translate-x-0');
-        if (open) closeSidebar();
-        else {
-            sidebar.classList.remove('-translate-x-full');
-            sidebar.classList.add('translate-x-0');
-            overlay.classList.remove('hidden');
+    {
+        id: 1,
+        code: "CSE 201",
+        name: "Data Structures & Algorithms",
+
+        students: [
+            { id: 1, roll: "230001", name: "Aarav Sharma" },
+            { id: 2, roll: "230002", name: "Aditya Patel" },
+            { id: 3, roll: "230003", name: "Ananya Singh" },
+            { id: 4, roll: "230004", name: "Arjun Verma" },
+            { id: 5, roll: "230005", name: "Dev Mehta" },
+            { id: 6, roll: "230006", name: "Dhruv Gupta" },
+            { id: 7, roll: "230007", name: "Ishita Jain" },
+            { id: 8, roll: "230008", name: "Karan Joshi" },
+            { id: 9, roll: "230009", name: "Meera Shah" },
+            { id: 10, roll: "230010", name: "Naman Agarwal" },
+            { id: 11, roll: "230011", name: "Neha Kapoor" },
+            { id: 12, roll: "230012", name: "Rohan Malhotra" },
+            { id: 13, roll: "230013", name: "Sakshi Verma" },
+            { id: 14, roll: "230014", name: "Shivam Yadav" },
+            { id: 15, roll: "230015", name: "Tanvi Mishra" },
+            { id: 16, roll: "230016", name: "Vedant Rao" },
+            { id: 17, roll: "230017", name: "Yash Thakur" },
+            { id: 18, roll: "230018", name: "Zoya Khan" }
+        ]
+    },
+
+    {
+        id: 2,
+        code: "CSE 203",
+        name: "Database Management Systems",
+
+        students: [
+            { id: 101, roll: "230021", name: "Aditi Shah" },
+            { id: 102, roll: "230022", name: "Akash Jain" },
+            { id: 103, roll: "230023", name: "Harsh Patel" },
+            { id: 104, roll: "230024", name: "Kriti Sharma" },
+            { id: 105, roll: "230025", name: "Manav Gupta" },
+            { id: 106, roll: "230026", name: "Priya Singh" },
+            { id: 107, roll: "230027", name: "Rahul Verma" },
+            { id: 108, roll: "230028", name: "Simran Kapoor" }
+        ]
+    },
+
+    {
+        id: 3,
+        code: "CSE 205",
+        name: "Operating Systems",
+
+        students: [
+            { id: 201, roll: "230041", name: "Abhishek Rao" },
+            { id: 202, roll: "230042", name: "Kunal Mehta" },
+            { id: 203, roll: "230043", name: "Manya Jain" },
+            { id: 204, roll: "230044", name: "Riya Sharma" },
+            { id: 205, roll: "230045", name: "Vivek Patel" }
+        ]
+    }
+
+];
+
+
+/* ============================================================= */
+/* PREVIOUS LECTURES */
+/* ============================================================= */
+
+let lectures = [
+
+    {
+        id: 1,
+        courseId: 1,
+        courseCode: "CSE 201",
+        number: 13,
+        name: "Trees & Graphs",
+        date: "21 Aug 2026",
+
+        attendance: {
+            1:true, 2:true, 3:false, 4:true,
+            5:true, 6:true, 7:true, 8:true,
+            9:true, 10:true, 11:true, 12:true,
+            13:true, 14:false, 15:true, 16:true,
+            17:true, 18:true
         }
+    },
+
+    {
+        id: 2,
+        courseId: 1,
+        courseCode: "CSE 201",
+        number: 12,
+        name: "Binary Search Trees",
+        date: "19 Aug 2026",
+
+        attendance: {
+            1:true, 2:true, 3:true, 4:true,
+            5:true, 6:true, 7:false, 8:true,
+            9:true, 10:true, 11:true, 12:true,
+            13:true, 14:true, 15:true, 16:true,
+            17:true, 18:false
+        }
+    },
+
+    {
+        id: 3,
+        courseId: 1,
+        courseCode: "CSE 201",
+        number: 11,
+        name: "Stacks & Queues",
+        date: "17 Aug 2026",
+
+        attendance: {
+            1:true, 2:true, 3:true, 4:true,
+            5:true, 6:true, 7:true, 8:true,
+            9:true, 10:true, 11:true, 12:true,
+            13:true, 14:true, 15:false, 16:true,
+            17:true, 18:true
+        }
+    },
+
+    {
+        id: 4,
+        courseId: 1,
+        courseCode: "CSE 201",
+        number: 10,
+        name: "Linked Lists",
+        date: "15 Aug 2026",
+
+        attendance: {
+            1:true, 2:true, 3:true, 4:true,
+            5:true, 6:true, 7:true, 8:false,
+            9:true, 10:true, 11:true, 12:true,
+            13:true, 14:true, 15:true, 16:true,
+            17:true, 18:true
+        }
+    },
+
+    {
+        id: 5,
+        courseId: 2,
+        courseCode: "CSE 203",
+        number: 8,
+        name: "SQL Joins",
+        date: "20 Aug 2026",
+
+        attendance: {
+            101:true, 102:true, 103:false,
+            104:true, 105:true, 106:true,
+            107:true, 108:true
+        }
+    },
+
+    {
+        id: 6,
+        courseId: 2,
+        courseCode: "CSE 203",
+        number: 7,
+        name: "Normalization",
+        date: "18 Aug 2026",
+
+        attendance: {
+            101:true, 102:true, 103:true,
+            104:true, 105:false, 106:true,
+            107:true, 108:true
+        }
+    },
+
+    {
+        id: 7,
+        courseId: 3,
+        courseCode: "CSE 205",
+        number: 6,
+        name: "Process Scheduling",
+        date: "21 Aug 2026",
+
+        attendance: {
+            201:true, 202:true, 203:true,
+            204:false, 205:true
+        }
+    }
+
+];
+
+
+/* ============================================================= */
+/* STATE */
+/* ============================================================= */
+
+let selectedCourseId = null;
+
+let editingLectureId = null;
+
+let attendance = {};
+
+let editing = false;
+
+
+/* ============================================================= */
+/* ELEMENTS */
+/* ============================================================= */
+
+const dashboardPage =
+    document.getElementById("dashboardPage");
+
+const coursePage =
+    document.getElementById("coursePage");
+
+const editorPage =
+    document.getElementById("editorPage");
+
+
+/* ============================================================= */
+/* LOCAL STORAGE */
+/* ============================================================= */
+
+const saved =
+    localStorage.getItem("iit-attendance");
+
+if (saved) {
+
+    try {
+        lectures = JSON.parse(saved);
+    } catch(e) {}
+
+}
+
+
+function persist() {
+
+    localStorage.setItem(
+        "iit-attendance",
+        JSON.stringify(lectures)
+    );
+
+}
+
+
+/* ============================================================= */
+/* COURSE */
+/* ============================================================= */
+
+function getCourse(id) {
+
+    return courses.find(
+        c => c.id === Number(id)
+    );
+
+}
+
+
+function getCourseLectures(courseId) {
+
+    return lectures
+        .filter(
+            lecture =>
+                lecture.courseId === courseId
+        )
+        .sort(
+            (a,b) =>
+                b.number - a.number
+        );
+
+}
+
+
+/* ============================================================= */
+/* LECTURE STATS */
+/* ============================================================= */
+
+function getLectureStats(lecture) {
+
+    const course =
+        getCourse(lecture.courseId);
+
+    const total =
+        course.students.length;
+
+    const present =
+        course.students.filter(
+            student =>
+                lecture.attendance[
+                    student.id
+                ]
+        ).length;
+
+    const absent =
+        total - present;
+
+    const percentage =
+        total === 0
+            ? 0
+            : Math.round(
+                present / total * 100
+            );
+
+    return {
+        total,
+        present,
+        absent,
+        percentage
+    };
+
+}
+
+
+/* ============================================================= */
+/* COURSE STATS */
+/* ============================================================= */
+
+function getCourseStats(courseId) {
+
+    const course =
+        getCourse(courseId);
+
+    const courseLectures =
+        getCourseLectures(courseId);
+
+    let present = 0;
+
+    let possible = 0;
+
+    courseLectures.forEach(
+        lecture => {
+
+            const stats =
+                getLectureStats(lecture);
+
+            present += stats.present;
+
+            possible += stats.total;
+
+        }
+    );
+
+
+    const percentage =
+        possible === 0
+            ? 0
+            : Math.round(
+                present / possible * 100
+            );
+
+
+    return {
+        present,
+        possible,
+        percentage,
+        lectures: courseLectures.length
+    };
+
+}
+
+
+/* ============================================================= */
+/* OVERALL STATS */
+/* ============================================================= */
+
+function getOverallStats() {
+
+    let present = 0;
+
+    let possible = 0;
+
+
+    lectures.forEach(
+        lecture => {
+
+            const stats =
+                getLectureStats(lecture);
+
+            present += stats.present;
+
+            possible += stats.total;
+
+        }
+    );
+
+
+    const percentage =
+        possible === 0
+            ? 0
+            : Math.round(
+                present / possible * 100
+            );
+
+
+    return {
+        present,
+        possible,
+        percentage,
+        absent:
+            possible - present
+    };
+
+}
+
+
+/* ============================================================= */
+/* DONUT */
+/* ============================================================= */
+
+function setDonut(element, percentage) {
+
+    const circumference =
+        2 * Math.PI * 48;
+
+    const offset =
+        circumference -
+        (percentage / 100) *
+        circumference;
+
+
+    element.style.strokeDashoffset =
+        offset;
+
+}
+
+
+/* ============================================================= */
+/* DASHBOARD */
+/* ============================================================= */
+
+function renderDashboard() {
+
+    const stats =
+        getOverallStats();
+
+
+    document
+        .getElementById("overallPercentage")
+        .textContent =
+        `${stats.percentage}%`;
+
+
+    setDonut(
+        document.getElementById(
+            "overallDonut"
+        ),
+        stats.percentage
+    );
+
+
+    document
+        .getElementById("totalLectures")
+        .textContent =
+        lectures.length;
+
+
+    document
+        .getElementById("totalCourses")
+        .textContent =
+        courses.length;
+
+
+    document
+        .getElementById("overallPresentText")
+        .textContent =
+        stats.present;
+
+
+    document
+        .getElementById("overallAbsentText")
+        .textContent =
+        stats.absent;
+
+
+    const total =
+        stats.possible || 1;
+
+
+    document
+        .getElementById("overallPresentBar")
+        .style.width =
+        `${stats.present / total * 100}%`;
+
+
+    document
+        .getElementById("overallAbsentBar")
+        .style.width =
+        `${stats.absent / total * 100}%`;
+
+
+    renderCourses();
+
+}
+
+
+/* ============================================================= */
+/* COURSE CARDS */
+/* ============================================================= */
+
+function renderCourses() {
+
+    const container =
+        document.getElementById(
+            "courseContainer"
+        );
+
+    container.innerHTML = "";
+
+
+    courses.forEach(course => {
+
+        const stats =
+            getCourseStats(course.id);
+
+
+        const card =
+            document.createElement("button");
+
+        card.className =
+            "group rounded-2xl border " +
+            "border-slate-200 bg-white p-5 " +
+            "text-left shadow-sm transition " +
+            "hover:-translate-y-1 hover:border-[#8f1d2c]/30 " +
+            "hover:shadow-lg";
+
+
+        card.innerHTML = `
+
+            <div class="flex items-start
+                        justify-between">
+
+                <div>
+
+                    <span
+                        class="rounded-lg
+                               bg-[#8f1d2c]/10
+                               px-2.5 py-1
+                               text-[11px]
+                               font-bold
+                               text-[#8f1d2c]"
+                    >
+                        ${course.code}
+                    </span>
+
+                    <h3
+                        class="mt-3 font-bold"
+                    >
+                        ${course.name}
+                    </h3>
+
+                </div>
+
+
+                <div
+                    class="flex h-10 w-10
+                           items-center
+                           justify-center
+                           rounded-xl
+                           bg-slate-50
+                           text-lg"
+                >
+                    →
+                </div>
+
+            </div>
+
+
+            <div class="mt-6">
+
+                <div
+                    class="mb-2 flex
+                           items-end
+                           justify-between"
+                >
+
+                    <div>
+
+                        <span
+                            class="text-2xl
+                                   font-bold"
+                        >
+                            ${stats.percentage}%
+                        </span>
+
+                        <span
+                            class="ml-1
+                                   text-xs
+                                   text-slate-400"
+                        >
+                            attendance
+                        </span>
+
+                    </div>
+
+                    <span
+                        class="text-xs
+                               text-slate-400"
+                    >
+                        ${stats.lectures} lectures
+                    </span>
+
+                </div>
+
+
+                <div
+                    class="h-2 overflow-hidden
+                           rounded-full
+                           bg-slate-100"
+                >
+
+                    <div
+                        class="h-full
+                               rounded-full
+                               bg-[#8f1d2c]"
+                        style="
+                            width:${stats.percentage}%
+                        "
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="mt-5 flex
+                       items-center
+                       justify-between
+                       border-t
+                       border-slate-100
+                       pt-4"
+            >
+
+                <span
+                    class="text-xs
+                           text-slate-400"
+                >
+                    ${course.students.length}
+                    students
+                </span>
+
+                <span
+                    class="text-xs
+                           font-bold
+                           text-[#8f1d2c]
+                           transition
+                           group-hover:translate-x-1"
+                >
+                    View Course →
+                </span>
+
+            </div>
+
+        `;
+
+
+        card.addEventListener(
+            "click",
+            () =>
+                openCourse(
+                    course.id
+                )
+        );
+
+
+        container.appendChild(card);
+
     });
 
-    overlay?.addEventListener('click', closeSidebar);
+}
 
-    document.querySelectorAll('.attendance-status').forEach(button => {
-        button.addEventListener('click', () => {
-            const row = button.closest('.student-row');
-            const toggle = row.querySelector('.feedback-toggle');
-            const knob = toggle.querySelector('.toggle-knob');
-            const label = row.querySelector('.feedback-label');
-            const present = button.dataset.present === 'true';
 
-            button.dataset.present = String(!present);
-            button.textContent = present ? 'Absent' : 'Present';
+/* ============================================================= */
+/* OPEN COURSE */
+/* ============================================================= */
 
-            button.classList.toggle('bg-[#e8fbef]', !present);
-            button.classList.toggle('text-[#26a75c]', !present);
-            button.classList.toggle('bg-[#ffe9e9]', present);
-            button.classList.toggle('text-[#dc4d4d]', present);
+function openCourse(courseId) {
 
-            if (present) {
-                toggle.disabled = true;
-                toggle.dataset.enabled = 'false';
-                toggle.classList.remove('bg-[#2f6fdf]');
-                toggle.classList.add('bg-[#cdd5df]', 'cursor-not-allowed', 'opacity-65');
-                knob.classList.remove('left-[15px]');
-                knob.classList.add('left-0.5');
-                label.textContent = 'Feedback Disabled';
-                label.classList.remove('text-[#2f6fdf]');
-                label.classList.add('text-[#c2c7ce]');
-            } else {
-                toggle.disabled = false;
-                toggle.classList.remove('cursor-not-allowed', 'opacity-65');
-            }
+    selectedCourseId =
+        courseId;
+
+
+    const course =
+        getCourse(courseId);
+
+
+    document
+        .getElementById("coursePageCode")
+        .textContent =
+        course.code;
+
+
+    document
+        .getElementById("coursePageName")
+        .textContent =
+        course.name;
+
+
+    dashboardPage
+        .classList
+        .remove("active");
+
+
+    editorPage
+        .classList
+        .remove("active");
+
+
+    coursePage
+        .classList
+        .add("active");
+
+
+    renderCoursePage();
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* ============================================================= */
+/* COURSE PAGE */
+/* ============================================================= */
+
+function renderCoursePage() {
+
+    const stats =
+        getCourseStats(
+            selectedCourseId
+        );
+
+
+    document
+        .getElementById("coursePercentage")
+        .textContent =
+        `${stats.percentage}%`;
+
+
+    setDonut(
+        document.getElementById(
+            "courseDonut"
+        ),
+        stats.percentage
+    );
+
+
+    document
+        .getElementById(
+            "courseAttendanceLabel"
+        )
+        .textContent =
+        `${stats.present} present records out of ${stats.possible}`;
+
+
+    renderLectureGraph();
+
+    renderCourseLectures();
+
+}
+
+
+/* ============================================================= */
+/* LECTURE GRAPH */
+/* ============================================================= */
+
+function renderLectureGraph() {
+
+    const container =
+        document.getElementById(
+            "lectureGraph"
+        );
+
+
+    const courseLectures =
+        getCourseLectures(
+            selectedCourseId
+        );
+
+
+    if (!courseLectures.length) {
+
+        container.innerHTML = `
+            <p class="text-sm text-slate-400">
+                No lectures recorded yet.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        courseLectures
+            .slice(0,8)
+            .map(
+                lecture => {
+
+                    const stats =
+                        getLectureStats(
+                            lecture
+                        );
+
+
+                    return `
+
+                        <div>
+
+                            <div
+                                class="mb-2 flex
+                                       justify-between
+                                       gap-3 text-xs"
+                            >
+
+                                <div
+                                    class="min-w-0"
+                                >
+
+                                    <span
+                                        class="font-semibold"
+                                    >
+                                        L${lecture.number}
+                                    </span>
+
+                                    <span
+                                        class="ml-2
+                                               truncate
+                                               text-slate-400"
+                                    >
+                                        ${lecture.name}
+                                    </span>
+
+                                </div>
+
+
+                                <span
+                                    class="shrink-0
+                                           font-bold"
+                                >
+                                    ${stats.percentage}%
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="h-2.5
+                                       overflow-hidden
+                                       rounded-full
+                                       bg-slate-100"
+                            >
+
+                                <div
+                                    class="h-full
+                                           rounded-full
+                                           ${
+                                               stats.percentage >= 75
+                                               ? "bg-emerald-500"
+                                               : "bg-red-400"
+                                           }"
+                                    style="
+                                        width:
+                                        ${stats.percentage}%
+                                    "
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+
+/* ============================================================= */
+/* COURSE LECTURES TABLE */
+/* ============================================================= */
+
+function renderCourseLectures() {
+
+    const desktop =
+        document.getElementById(
+            "courseLectureTable"
+        );
+
+    const mobile =
+        document.getElementById(
+            "courseLectureMobile"
+        );
+
+
+    const courseLectures =
+        getCourseLectures(
+            selectedCourseId
+        );
+
+
+    desktop.innerHTML = `
+        <table class="w-full">
+
+            <thead>
+
+                <tr
+                    class="border-b border-slate-100
+                           bg-slate-50
+                           text-left
+                           text-[10px]
+                           uppercase
+                           tracking-wider
+                           text-slate-400"
+                >
+
+                    <th class="px-6 py-4">
+                        Lecture
+                    </th>
+
+                    <th class="px-6 py-4">
+                        Topic
+                    </th>
+
+                    <th class="px-6 py-4">
+                        Date
+                    </th>
+
+                    <th class="px-6 py-4">
+                        Attendance
+                    </th>
+
+                    <th class="px-6 py-4 text-right">
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody
+                class="divide-y
+                       divide-slate-100"
+            >
+
+                ${
+                    courseLectures.map(
+                        lecture => {
+
+                            const stats =
+                                getLectureStats(
+                                    lecture
+                                );
+
+
+                            return `
+
+                                <tr
+                                    class="hover:bg-slate-50"
+                                >
+
+                                    <td
+                                        class="px-6 py-5"
+                                    >
+
+                                        <span
+                                            class="rounded-lg
+                                                   bg-slate-100
+                                                   px-3 py-1
+                                                   text-xs
+                                                   font-bold"
+                                        >
+                                            Lecture
+                                            ${lecture.number}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td
+                                        class="px-6 py-5
+                                               text-sm
+                                               font-semibold"
+                                    >
+                                        ${lecture.name}
+                                    </td>
+
+
+                                    <td
+                                        class="px-6 py-5
+                                               text-sm
+                                               text-slate-500"
+                                    >
+                                        ${lecture.date}
+                                    </td>
+
+
+                                    <td
+                                        class="px-6 py-5"
+                                    >
+
+                                        <div
+                                            class="flex
+                                                   items-center
+                                                   gap-3"
+                                        >
+
+                                            <div
+                                                class="h-2 w-20
+                                                       overflow-hidden
+                                                       rounded-full
+                                                       bg-slate-100"
+                                            >
+
+                                                <div
+                                                    class="h-full
+                                                           rounded-full
+                                                           ${
+                                                               stats.percentage >= 75
+                                                               ? "bg-emerald-500"
+                                                               : "bg-red-400"
+                                                           }"
+                                                    style="
+                                                        width:
+                                                        ${stats.percentage}%
+                                                    "
+                                                ></div>
+
+                                            </div>
+
+                                            <span
+                                                class="text-xs
+                                                       font-bold"
+                                            >
+                                                ${stats.percentage}%
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <td
+                                        class="px-6 py-5
+                                               text-right"
+                                    >
+
+                                        <button
+                                            data-edit="${lecture.id}"
+                                            class="editCourseLecture
+                                                   rounded-lg
+                                                   border
+                                                   border-slate-200
+                                                   px-4 py-2
+                                                   text-xs
+                                                   font-bold
+                                                   hover:border-[#8f1d2c]
+                                                   hover:text-[#8f1d2c]"
+                                        >
+                                            Edit
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            `;
+
+                        }
+                    ).join("")
+                }
+
+            </tbody>
+
+        </table>
+    `;
+
+
+    mobile.innerHTML =
+        courseLectures
+            .map(
+                lecture => {
+
+                    const stats =
+                        getLectureStats(
+                            lecture
+                        );
+
+
+                    return `
+
+                        <div class="p-5">
+
+                            <div
+                                class="flex
+                                       items-start
+                                       justify-between
+                                       gap-3"
+                            >
+
+                                <div>
+
+                                    <p
+                                        class="text-[10px]
+                                               font-bold
+                                               text-[#8f1d2c]"
+                                    >
+                                        Lecture
+                                        ${lecture.number}
+                                    </p>
+
+                                    <h3
+                                        class="mt-1
+                                               text-sm
+                                               font-bold"
+                                    >
+                                        ${lecture.name}
+                                    </h3>
+
+                                    <p
+                                        class="mt-1
+                                               text-xs
+                                               text-slate-400"
+                                    >
+                                        ${lecture.date}
+                                    </p>
+
+                                </div>
+
+
+                                <button
+                                    data-edit="${lecture.id}"
+                                    class="editCourseLecture
+                                           shrink-0
+                                           rounded-lg
+                                           border
+                                           border-slate-200
+                                           px-3 py-2
+                                           text-xs
+                                           font-bold"
+                                >
+                                    Edit
+                                </button>
+
+                            </div>
+
+
+                            <div class="mt-4">
+
+                                <div
+                                    class="mb-2 flex
+                                           justify-between
+                                           text-xs"
+                                >
+
+                                    <span
+                                        class="text-slate-400"
+                                    >
+                                        Attendance
+                                    </span>
+
+                                    <span
+                                        class="font-bold"
+                                    >
+                                        ${stats.present}/
+                                        ${stats.total}
+                                        ·
+                                        ${stats.percentage}%
+                                    </span>
+
+                                </div>
+
+
+                                <div
+                                    class="h-2 overflow-hidden
+                                           rounded-full
+                                           bg-slate-100"
+                                >
+
+                                    <div
+                                        class="h-full
+                                               rounded-full
+                                               ${
+                                                   stats.percentage >= 75
+                                                   ? "bg-emerald-500"
+                                                   : "bg-red-400"
+                                               }"
+                                        style="
+                                            width:
+                                            ${stats.percentage}%
+                                        "
+                                    ></div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    document
+        .querySelectorAll(
+            ".editCourseLecture"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openEdit(
+                        Number(
+                            button.dataset.edit
+                        )
+                    );
+
+                }
+            );
+
         });
-    });
 
-    document.querySelectorAll('.feedback-toggle').forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            if (toggle.disabled) return;
+}
 
-            const knob = toggle.querySelector('.toggle-knob');
-            const label = toggle.closest('.student-row').querySelector('.feedback-label');
-            const enabled = toggle.dataset.enabled === 'true';
 
-            toggle.dataset.enabled = String(!enabled);
-            toggle.classList.toggle('bg-[#2f6fdf]', !enabled);
-            toggle.classList.toggle('bg-[#cdd5df]', enabled);
-            knob.classList.toggle('left-[15px]', !enabled);
-            knob.classList.toggle('left-0.5', enabled);
-            label.classList.toggle('text-[#2f6fdf]', !enabled);
-            label.classList.toggle('text-[#c2c7ce]', enabled);
-            label.textContent = !enabled ? 'Enabled' : 'Disabled';
-        });
-    });
+/* ============================================================= */
+/* EDITOR ELEMENTS */
+/* ============================================================= */
 
-    document.getElementById('markPresentBtn')?.addEventListener('click', () => {
-        document.querySelectorAll('.student-row').forEach(row => {
-            const button = row.querySelector('.attendance-status');
-            const toggle = row.querySelector('.feedback-toggle');
+const courseSelect =
+    document.getElementById(
+        "courseSelect"
+    );
 
-            button.dataset.present = 'true';
-            button.textContent = 'Present';
-            button.classList.remove('bg-[#ffe9e9]', 'text-[#dc4d4d]');
-            button.classList.add('bg-[#e8fbef]', 'text-[#26a75c]');
+const lectureNumber =
+    document.getElementById(
+        "lectureNumber"
+    );
 
-            toggle.disabled = false;
-            toggle.classList.remove('cursor-not-allowed', 'opacity-65');
-        });
-        showToast('All students marked present');
-    });
+const lectureName =
+    document.getElementById(
+        "lectureName"
+    );
 
-    document.getElementById('enableFeedbackBtn')?.addEventListener('click', () => {
-        document.querySelectorAll('.student-row').forEach(row => {
-            const attendance = row.querySelector('.attendance-status');
-            const toggle = row.querySelector('.feedback-toggle');
-            const knob = toggle.querySelector('.toggle-knob');
-            const label = row.querySelector('.feedback-label');
+const lectureDate =
+    document.getElementById(
+        "lectureDate"
+    );
 
-            if (attendance.dataset.present === 'true') {
-                toggle.disabled = false;
-                toggle.dataset.enabled = 'true';
-                toggle.classList.remove('bg-[#cdd5df]', 'cursor-not-allowed', 'opacity-65');
-                toggle.classList.add('bg-[#2f6fdf]');
-                knob.classList.remove('left-0.5');
-                knob.classList.add('left-[15px]');
-                label.textContent = 'Enabled';
-                label.classList.remove('text-[#c2c7ce]');
-                label.classList.add('text-[#2f6fdf]');
-            }
-        });
-        showToast('Feedback enabled for all present students');
-    });
+const studentSearch =
+    document.getElementById(
+        "studentSearch"
+    );
 
-    document.getElementById('saveAttendanceBtn')?.addEventListener('click', () => {
-        const students = [...document.querySelectorAll('.student-row')].map(row => ({
-            roll: row.dataset.roll,
-            present: row.querySelector('.attendance-status').dataset.present === 'true',
-            feedbackEnabled: row.querySelector('.feedback-toggle').dataset.enabled === 'true'
-        }));
+const studentContainer =
+    document.getElementById(
+        "studentContainer"
+    );
 
-        console.log({
-            course: document.getElementById('courseSelect').value,
-            topic: document.getElementById('topicSelect').value,
-            date: document.getElementById('attendanceDate').value,
-            lecture: document.getElementById('lectureSelect').value,
-            students
-        });
 
-        showToast('Attendance saved successfully');
-    });
+/* ============================================================= */
+/* COURSE SELECT OPTIONS */
+/* ============================================================= */
+
+courses.forEach(course => {
+
+    const option =
+        document.createElement(
+            "option"
+        );
+
+    option.value =
+        course.id;
+
+    option.textContent =
+        `${course.code} — ${course.name}`;
+
+    courseSelect.appendChild(
+        option
+    );
+
 });
+
+
+/* ============================================================= */
+/* OPEN ADD */
+/* ============================================================= */
+
+function openAdd(courseId) {
+
+    editing = false;
+
+    editingLectureId = null;
+
+    selectedCourseId =
+        courseId;
+
+
+    const course =
+        getCourse(courseId);
+
+
+    const nextLecture =
+        getCourseLectures(
+            courseId
+        ).length + 1;
+
+
+    attendance = {};
+
+
+    course.students.forEach(
+        student => {
+
+            attendance[
+                student.id
+            ] = true;
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "editorTitle"
+        )
+        .textContent =
+        "Add Attendance";
+
+
+    document
+        .getElementById(
+            "editorCourseBadge"
+        )
+        .textContent =
+        course.code;
+
+
+    courseSelect.value =
+        courseId;
+
+
+    courseSelect.disabled =
+        true;
+
+
+    lectureNumber.value =
+        nextLecture;
+
+
+    lectureNumber.disabled =
+        true;
+
+
+    lectureName.value =
+        "";
+
+
+    lectureDate.value =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
+
+    studentSearch.value = "";
+
+
+    coursePage
+        .classList
+        .remove("active");
+
+
+    editorPage
+        .classList
+        .add("active");
+
+
+    renderStudents();
+
+    updateCounters();
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* ============================================================= */
+/* OPEN EDIT */
+/* ============================================================= */
+
+function openEdit(lectureId) {
+
+    const lecture =
+        lectures.find(
+            l =>
+                l.id === lectureId
+        );
+
+
+    if (!lecture) return;
+
+
+    editing = true;
+
+    editingLectureId =
+        lectureId;
+
+    selectedCourseId =
+        lecture.courseId;
+
+
+    const course =
+        getCourse(
+            lecture.courseId
+        );
+
+
+    attendance =
+        JSON.parse(
+            JSON.stringify(
+                lecture.attendance
+            )
+        );
+
+
+    document
+        .getElementById(
+            "editorTitle"
+        )
+        .textContent =
+        "Edit Attendance";
+
+
+    document
+        .getElementById(
+            "editorCourseBadge"
+        )
+        .textContent =
+        course.code;
+
+
+    courseSelect.value =
+        course.id;
+
+
+    courseSelect.disabled =
+        true;
+
+
+    lectureNumber.value =
+        lecture.number;
+
+
+    lectureNumber.disabled =
+        true;
+
+
+    lectureName.value =
+        lecture.name;
+
+
+    lectureDate.value =
+        convertDate(
+            lecture.date
+        );
+
+
+    studentSearch.value = "";
+
+
+    coursePage
+        .classList
+        .remove("active");
+
+
+    editorPage
+        .classList
+        .add("active");
+
+
+    renderStudents();
+
+    updateCounters();
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+/* ============================================================= */
+/* STUDENTS */
+/* ============================================================= */
+
+function renderStudents() {
+
+    const course =
+        getCourse(
+            selectedCourseId
+        );
+
+
+    const search =
+        studentSearch.value
+            .toLowerCase()
+            .trim();
+
+
+    const students =
+        course.students.filter(
+            student =>
+
+                student.name
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                student.roll
+                    .includes(search)
+        );
+
+
+    document
+        .getElementById(
+            "studentCount"
+        )
+        .textContent =
+        course.students.length;
+
+
+    studentContainer.innerHTML =
+        students.map(
+            student => {
+
+                const present =
+                    !!attendance[
+                        student.id
+                    ];
+
+
+                return `
+
+                    <button
+                        data-student="${student.id}"
+                        class="studentRow grid
+                               w-full
+                               grid-cols-[1fr_auto]
+                               items-center
+                               gap-3 px-4 py-4
+                               text-left
+                               hover:bg-slate-50
+                               sm:grid-cols-[100px_1fr_150px]
+                               sm:px-6"
+                    >
+
+                        <div
+                            class="hidden
+                                   text-xs
+                                   font-semibold
+                                   text-slate-500
+                                   sm:block"
+                        >
+                            ${student.roll}
+                        </div>
+
+
+                        <div
+                            class="flex
+                                   min-w-0
+                                   items-center
+                                   gap-3"
+                        >
+
+                            <div
+                                class="
+                                flex h-10 w-10
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-full
+                                text-xs font-bold
+                                ${
+                                    present
+                                    ? "bg-slate-100 text-slate-600"
+                                    : "bg-red-50 text-red-600"
+                                }
+                                "
+                            >
+                                ${student.name[0]}
+                            </div>
+
+
+                            <div class="min-w-0">
+
+                                <p
+                                    class="truncate
+                                           text-sm
+                                           font-semibold"
+                                >
+                                    ${student.name}
+                                </p>
+
+                                <p
+                                    class="text-[11px]
+                                           text-slate-400"
+                                >
+                                    ${student.roll}
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="flex
+                                   items-center
+                                   justify-end
+                                   gap-3"
+                        >
+
+                            <span
+                                class="hidden
+                                       text-xs
+                                       font-bold
+                                       sm:block
+                                       ${
+                                           present
+                                           ? "text-emerald-600"
+                                           : "text-red-600"
+                                       }"
+                            >
+                                ${
+                                    present
+                                    ? "Present"
+                                    : "Absent"
+                                }
+                            </span>
+
+
+                            <div
+                                class="
+                                flex h-9 w-9
+                                items-center
+                                justify-center
+                                rounded-full
+                                ${
+                                    present
+                                    ? "bg-emerald-100 text-emerald-600"
+                                    : "bg-red-100 text-red-600"
+                                }
+                                "
+                            >
+
+                                <span
+                                    class="font-bold"
+                                >
+                                    ${
+                                        present
+                                        ? "✓"
+                                        : "×"
+                                    }
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </button>
+
+                `;
+
+            }
+        )
+        .join("");
+
+
+    document
+        .querySelectorAll(
+            ".studentRow"
+        )
+        .forEach(row => {
+
+            row.addEventListener(
+                "click",
+                () => {
+
+                    const id =
+                        Number(
+                            row.dataset.student
+                        );
+
+
+                    attendance[id] =
+                        !attendance[id];
+
+
+                    renderStudents();
+
+                    updateCounters();
+
+                }
+            );
+
+        });
+
+}
+
+
+/* ============================================================= */
+/* COUNTERS */
+/* ============================================================= */
+
+function updateCounters() {
+
+    const course =
+        getCourse(
+            selectedCourseId
+        );
+
+
+    const present =
+        course.students.filter(
+            student =>
+                attendance[
+                    student.id
+                ]
+        ).length;
+
+
+    const absent =
+        course.students.length -
+        present;
+
+
+    document
+        .getElementById(
+            "presentCounter"
+        )
+        .textContent =
+        present;
+
+
+    document
+        .getElementById(
+            "absentCounter"
+        )
+        .textContent =
+        absent;
+
+}
+
+
+/* ============================================================= */
+/* SAVE */
+/* ============================================================= */
+
+document
+    .getElementById(
+        "saveButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            if (!lectureName.value.trim()) {
+
+                alert(
+                    "Please enter the lecture topic."
+                );
+
+                return;
+
+            }
+
+
+            const courseId =
+                Number(
+                    courseSelect.value
+                );
+
+
+            const course =
+                getCourse(courseId);
+
+
+            if (editing) {
+
+                const lecture =
+                    lectures.find(
+                        l =>
+                            l.id ===
+                            editingLectureId
+                    );
+
+
+                lecture.name =
+                    lectureName.value.trim();
+
+                lecture.date =
+                    lectureDate.value;
+
+                lecture.attendance =
+                    JSON.parse(
+                        JSON.stringify(
+                            attendance
+                        )
+                    );
+
+            } else {
+
+                lectures.push({
+
+                    id:
+                        Date.now(),
+
+                    courseId,
+
+                    courseCode:
+                        course.code,
+
+                    number:
+                        Number(
+                            lectureNumber.value
+                        ),
+
+                    name:
+                        lectureName.value.trim(),
+
+                    date:
+                        lectureDate.value,
+
+                    attendance:
+                        JSON.parse(
+                            JSON.stringify(
+                                attendance
+                            )
+                        )
+
+                });
+
+            }
+
+
+            persist();
+
+
+            alert(
+                editing
+                    ? "Attendance updated successfully."
+                    : "Attendance saved successfully."
+            );
+
+
+            openCourse(
+                courseId
+            );
+
+        }
+    );
+
+
+/* ============================================================= */
+/* SEARCH */
+/* ============================================================= */
+
+studentSearch.addEventListener(
+    "input",
+    renderStudents
+);
+
+
+/* ============================================================= */
+/* BACK BUTTONS */
+/* ============================================================= */
+
+document
+    .getElementById(
+        "courseBackButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            coursePage
+                .classList
+                .remove("active");
+
+            dashboardPage
+                .classList
+                .add("active");
+
+
+            renderDashboard();
+
+
+            window.scrollTo({
+                top:0,
+                behavior:"smooth"
+            });
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "editorBackButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            editorPage
+                .classList
+                .remove("active");
+
+            coursePage
+                .classList
+                .add("active");
+
+
+            renderCoursePage();
+
+
+            window.scrollTo({
+                top:0,
+                behavior:"smooth"
+            });
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "cancelButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            editorPage
+                .classList
+                .remove("active");
+
+            coursePage
+                .classList
+                .add("active");
+
+
+            renderCoursePage();
+
+        }
+    );
+
+
+/* ============================================================= */
+/* ADD ATTENDANCE FROM COURSE PAGE */
+/* ============================================================= */
+
+document
+    .getElementById(
+        "courseAddButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            openAdd(
+                selectedCourseId
+            );
+
+        }
+    );
+
+
+/* ============================================================= */
+/* MOBILE MENU */
+/* ============================================================= */
+
+document
+    .getElementById(
+        "mobileMenuButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            document
+                .getElementById(
+                    "mobileMenu"
+                )
+                .classList
+                .toggle("hidden");
+
+        }
+    );
+
+
+/* ============================================================= */
+/* DATE */
+/* ============================================================= */
+
+function convertDate(date) {
+
+    const d =
+        new Date(date);
+
+
+    if (isNaN(d)) {
+
+        return new Date()
+            .toISOString()
+            .split("T")[0];
+
+    }
+
+
+    return d
+        .toISOString()
+        .split("T")[0];
+
+}
+
+
+/* ============================================================= */
+/* INITIALIZE */
+/* ============================================================= */
+
+renderDashboard();
+
 </script>
+
 </body>
 </html>
