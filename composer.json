@@ -3,6 +3,19 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "platform-check": false,
+        "platform": {
+            "php": "8.4.1"
+        },
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
     "keywords": [
         "laravel",
         "framework"
@@ -12,18 +25,20 @@
         "php": "^8.3",
         "laravel/framework": "^13.8",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.16",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.2",
+        "laravel/breeze": "*",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "pestphp/pest": "^5.0",
-        "pestphp/pest-plugin-laravel": "^5.0"
+        "pestphp/pest": "*",
+        "pestphp/pest-plugin-laravel": "*"
     },
     "autoload": {
         "psr-4": {
@@ -77,15 +92,6 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        }
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "php-http/discovery": true
         }
     },
     "minimum-stability": "stable",

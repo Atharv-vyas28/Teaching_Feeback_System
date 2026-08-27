@@ -1,0 +1,162 @@
+# Make Teaching Feedback System Working with Figma Theme
+
+## Background
+
+The Laravel app has controllers, models, routes, and middleware in place, but is **missing many Blade view files** referenced by controllers, has **incomplete database migrations** (the existing migrations are very basic and don't match the sophisticated model/controller code), and uses a mix of DaisyUI + Tailwind CDN + inline styles inconsistently. The Figma design shows a clean, light-blue themed UI with a professional sidebar dashboard layout.
+
+## Key Issues Identified
+
+### 1. Missing Database Tables
+The existing migrations only create basic `users`, `courses`, `course_student`, `feedback_forms`, `feedback_claims`, `feedback_responses`, and `sessions` tables. But the controllers/models reference **many more tables** that don't exist:
+- `departments`, `programs`, `academic_years`, `semesters`
+- `class_sections`, `class_sessions`, `attendance`
+- `course_enrollments`, `faculty_courses`, `staff_courses`
+- `feedback_questions`, `feedback_sessions`, `feedback_answers`, `feedback_eligibility`, `rating_results`
+
+The `users` table also lacks columns the model expects (`department_id`, `program_id`, `roll_number`, `employee_id`, `current_semester`, `phone`, `avatar`, `is_active`).
+
+### 2. Missing Blade Views (~25+ files)
+Controllers reference views that don't exist:
+- `faculty/dashboard.blade.php`
+- `faculty/attendance/sessions.blade.php`, `create-session.blade.php`, `take.blade.php`
+- `faculty/feedback/index.blade.php`, `create.blade.php`, `analytics.blade.php`, `my-ratings.blade.php`
+- `student/dashboard.blade.php`
+- `student/feedback/index.blade.php`, `show.blade.php`, `confirmation.blade.php`
+- `student/attendance.blade.php`
+- `staff/dashboard.blade.php`
+- `staff/attendance/sessions.blade.php`, `create-session.blade.php`, `take.blade.php`
+- `admin/reports/attendance.blade.php`, `ratings.blade.php`
+
+### 3. Login Page Needs Redesign
+Current login uses Breeze's `x-guest-layout`. The Figma shows a **tabbed login** (Student / Faculty / Admin) with the "Smart Feedback System" branding, light-blue gradient background, and a centered card with icons.
+
+### 4. Theme Mismatch
+Current code mixes DaisyUI classes and custom inline styles. The Figma theme is:
+- **Primary color**: Blue (#3B82F6 / #2563EB)
+- **Background**: Light blue gradient (#EBF5FF → #DBEAFE)
+- **Cards**: White with subtle border, rounded-2xl
+- **Sidebar**: White with blue active states, branded as "SmartPulse / CLASSROOM OS"
+- **Typography**: Inter font family
+
+### 5. Middleware Registration
+The `bootstrap/app.php` uses Laravel 11+ style but the `RoleMiddleware` is registered in `Kernel.php` (Laravel 10 style). Since this is Laravel 13, the `Kernel.php` is likely not used — the `role` middleware alias needs to be registered in `bootstrap/app.php`.
+
+### 6. Database Seeder
+The seeder only creates a generic test user. We need proper seed data with admin, faculty, staff, and student users to actually test the app.
+
+---
+
+## Proposed Changes
+
+### Phase 1: Database Foundation
+
+#### [NEW] `database/migrations/2026_08_26_060000_create_full_schema.php`
+Create a comprehensive migration that builds all required tables:
+- `departments`, `programs`, `academic_years`, `semesters`
+- Add missing columns to `users` table
+- `class_sections`, `class_sessions`, `attendance`
+- `course_enrollments`, `faculty_courses`, `staff_courses`
+- `feedback_questions`, `feedback_sessions`, `feedback_responses`, `feedback_answers`
+- `feedback_eligibility`, `rating_results`
+
+#### [MODIFY] [DatabaseSeeder.php](file:///c:/Users/abhis/Web%20Dev/Teaching_Feeback_System/database/seeders/DatabaseSeeder.php)
+Create comprehensive seed data with admin, faculty, staff, student users, departments, courses, semesters, etc.
+
+---
+
+### Phase 2: Fix Middleware & Bootstrap
+
+#### [MODIFY] [app.php](file:///c:/Users/abhis/Web%20Dev/Teaching_Feeback_System/bootstrap/app.php)
+Register `role` middleware alias for Laravel 13 compatibility.
+
+---
+
+### Phase 3: Redesign Login Page (Figma Theme)
+
+#### [MODIFY] [login.blade.php](file:///c:/Users/abhis/Web%20Dev/Teaching_Feeback_System/resources/views/auth/login.blade.php) (or create new standalone)
+Complete redesign matching the Figma:
+- Light-blue gradient background
+- Centered card with "Smart Feedback System" branding
+- Tabbed interface (Student / Faculty / Admin)
+- Institute Email input with icon
+- Password field with "Forgot Password?" link
+- "Login to Dashboard" blue button
+- Uses Inter font from Google Fonts
+
+---
+
+### Phase 4: Redesign Dashboard Layout (Figma Theme)
+
+#### [MODIFY] [dashboard.blade.php](file:///c:/Users/abhis/Web%20Dev/Teaching_Feeback_System/resources/views/layouts/dashboard.blade.php)
+Update to match Figma's admin dashboard design:
+- White sidebar with "SmartPulse / CLASSROOM OS" branding
+- Blue active state on nav items
+- Top breadcrumb bar with search terminal and user avatar
+- Clean stat cards row
+- Inter font throughout
+
+---
+
+### Phase 5: Create All Missing Views
+
+#### Admin Views
+- [NEW] `resources/views/admin/reports/attendance.blade.php`
+- [NEW] `resources/views/admin/reports/ratings.blade.php`
+
+#### Faculty Views
+- [NEW] `resources/views/faculty/dashboard.blade.php`
+- [NEW] `resources/views/faculty/attendance/sessions.blade.php`
+- [NEW] `resources/views/faculty/attendance/create-session.blade.php`
+- [NEW] `resources/views/faculty/attendance/take.blade.php`
+- [NEW] `resources/views/faculty/feedback/index.blade.php`
+- [NEW] `resources/views/faculty/feedback/create.blade.php`
+- [NEW] `resources/views/faculty/feedback/analytics.blade.php`
+- [NEW] `resources/views/faculty/feedback/my-ratings.blade.php`
+
+#### Student Views
+- [NEW] `resources/views/student/dashboard.blade.php`
+- [NEW] `resources/views/student/feedback/index.blade.php`
+- [NEW] `resources/views/student/feedback/show.blade.php`
+- [NEW] `resources/views/student/feedback/confirmation.blade.php`
+- [NEW] `resources/views/student/attendance.blade.php`
+
+#### Staff Views
+- [NEW] `resources/views/staff/dashboard.blade.php`
+- [NEW] `resources/views/staff/attendance/sessions.blade.php`
+- [NEW] `resources/views/staff/attendance/create-session.blade.php`
+- [NEW] `resources/views/staff/attendance/take.blade.php`
+
+All views will use the updated dashboard layout and Figma theme.
+
+---
+
+### Phase 6: Fix Model References
+
+#### [MODIFY] Various models
+Fix any `Attendance` → `Attendence` (typo in filename) and ensure model-table mappings are correct for all 18 models.
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **MySQL vs SQLite**: Your `.env` is set to MySQL (`DB_CONNECTION=mysql`). Do you have MySQL running with the `teaching_feedback_system` database created? Or should I switch to SQLite for easier local development?
+
+> [!IMPORTANT]
+> **Composer installed?**: Do you have PHP and Composer available in your terminal? I'll need to run `php artisan migrate` and `php artisan db:seed` to set up the database.
+
+> [!NOTE]
+> **Staff role**: The Figma only shows Student, Faculty, and Admin tabs on login. Staff role exists in the code — should I keep it or remove it?
+
+## Verification Plan
+
+### Automated Tests
+- Run `php artisan migrate:fresh --seed` to verify migrations and seeding
+- Run `php artisan route:list` to verify all routes resolve
+- Run `composer dev` to start the dev server and test login flow
+
+### Manual Verification
+- Test login as admin → verify dashboard renders
+- Test login as faculty → verify dashboard + attendance + feedback flows
+- Test login as student → verify dashboard + feedback submission
+- Verify all sidebar navigation works without errors
