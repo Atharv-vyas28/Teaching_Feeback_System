@@ -47,6 +47,7 @@ class LoginController extends Controller
 
     private function redirectByRole(string $role)
     {
+        $role = strtolower($role);
         return match ($role) {
             'admin'   => redirect()->route('admin.dashboard'),
             'faculty' => redirect()->route('faculty.dashboard'),

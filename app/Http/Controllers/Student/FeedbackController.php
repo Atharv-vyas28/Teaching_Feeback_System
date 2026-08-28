@@ -145,8 +145,13 @@ class FeedbackController extends Controller
             }
         });
 
+        // Recalculate ratings after every submission so the report stays live.
+        // This is lightweight: it runs a few AVG() queries on the session's answers.
+        $this->ratingService->calculateForSession($feedbackSession);
+
         return redirect()->route('student.feedback.confirmation', $feedbackSession)
             ->with('success', 'Feedback submitted anonymously. Thank you!');
+
     }
 
     public function confirmation(FeedbackSession $feedbackSession)
