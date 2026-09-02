@@ -9,11 +9,20 @@ use Illuminate\Http\Request;
 
 class SemesterController extends Controller
 {
-    public function index()
-    {
-        $academicYears = AcademicYear::with('semesters')->orderByDesc('start_date')->get();
-        return view('admin.semesters.index', compact('academicYears'));
-    }
+   public function index()
+{
+    $academicYears = \App\Models\AcademicYear::with('semesters')
+        ->orderByDesc('start_date')
+        ->get();
+
+    $semesters = \App\Models\Semester::orderByDesc('start_date')
+        ->get();
+
+    return view(
+        'admin.semesters.index',
+        compact('academicYears', 'semesters')
+    );
+}
 
     public function storeAcademicYear(Request $request)
     {

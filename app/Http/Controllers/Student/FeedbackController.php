@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use App\Models\FeedbackSession;
-use App\Models\FeedbackQuestion;
-use App\Models\FeedbackResponse;
+use App\Models\Attendance;
 use App\Models\FeedbackAnswer;
 use App\Models\FeedbackEligibility;
+use App\Models\FeedbackQuestion;
+use App\Models\FeedbackResponse;
+use App\Models\FeedbackSession;
 use App\Services\FeedbackEligibilityService;
-use App\Services\FeedbackRatingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -17,37 +17,46 @@ use Illuminate\Support\Str;
 class FeedbackController extends Controller
 {
     public function __construct(
-        private FeedbackEligibilityService $eligibilityService,
-        private FeedbackRatingService $ratingService
-    ) {}
+        private FeedbackEligibilityService $eligibilityService
+    ) {
+    }
 
     public function index()
     {
-        // Use authenticated user — NEVER trust any student-supplied ID
         $student = auth()->user();
 
-        // Get sections student is enrolled in
         $enrolledSectionIds = DB::table('course_enrollments')
             ->where('user_id', $student->id)
             ->where('status', 'active')
             ->pluck('class_section_id');
 
-        // Get all feedback sessions for those sections
         $feedbackSessions = FeedbackSession::with([
-                'classSession.section.course',
-                'classSession.section.faculty',
-            ])
-            ->whereHas('classSession', fn($q) => $q->whereIn('class_section_id', $enrolledSectionIds))
+            'classSession.section.course',
+            'classSession.section.faculty',
+        ])
+            ->whereHas(
+                'classSession',
+                fn ($query) => $query->whereIn(
+                    'class_section_id',
+                    $enrolledSectionIds
+                )
+            )
             ->get();
 
-        // For each, check eligibility
-        $available  = [];
-        $completed  = [];
+        $available = [];
+        $completed = [];
         $ineligible = [];
 
         foreach ($feedbackSessions as $session) {
-            $eligibility = $this->eligibilityService->checkEligibility($student, $session);
-            $eligibilityRecord = FeedbackEligibility::where('feedback_session_id', $session->id)
+            $eligibility = $this->eligibilityService->checkEligibility(
+                $student,
+                $session
+            );
+
+            $eligibilityRecord = FeedbackEligibility::where(
+                'feedback_session_id',
+                $session->id
+            )
                 ->where('student_id', $student->id)
                 ->first();
 
@@ -56,116 +65,195 @@ class FeedbackController extends Controller
             } elseif ($eligibility['eligible']) {
                 $available[] = $session;
             } else {
-                // Only show ineligible if they have an attendance record (they were in the class)
-                $hasAttendance = \App\Models\Attendance::where('class_session_id', $session->class_session_id)
-                    ->where('student_id', $student->id)->exists();
+                $hasAttendance = Attendance::where(
+                    'class_session_id',
+                    $session->class_session_id
+                )
+                    ->where('student_id', $student->id)
+                    ->exists();
+
                 if ($hasAttendance) {
-                    $ineligible[] = ['session' => $session, 'reason' => $eligibility['reason']];
+                    $ineligible[] = [
+                        'session' => $session,
+                        'reason' => $eligibility['reason'],
+                    ];
                 }
             }
         }
 
-        return view('student.feedback.index', compact('available', 'completed', 'ineligible'));
+        return view(
+            'student.feedback.index',
+            compact('available', 'completed', 'ineligible')
+        );
     }
 
     public function show(FeedbackSession $feedbackSession)
     {
         $student = auth()->user();
 
-        // Server-side eligibility check — must pass all 6 criteria
-        $eligibility = $this->eligibilityService->checkEligibility($student, $feedbackSession);
+        $eligibility = $this->eligibilityService->checkEligibility(
+            $student,
+            $feedbackSession
+        );
 
-        if (!$eligibility['eligible']) {
-            return redirect()->route('student.feedback.index')
+        if (! $eligibility['eligible']) {
+            return redirect()
+                ->route('student.feedback.index')
                 ->with('error', $eligibility['reason']);
         }
 
-        $questions = FeedbackQuestion::active()->ordered()->get();
-        $classSession = $feedbackSession->classSession;
-        $faculty = $classSession->section->faculty->first();
+        $questions = FeedbackQuestion::active()
+            ->ordered()
+            ->get();
 
-        return view('student.feedback.show', compact('feedbackSession', 'questions', 'classSession', 'faculty'));
+        $classSession = $feedbackSession->classSession;
+
+        $faculty = $classSession->section
+            ->faculty
+            ->first();
+
+        return view(
+            'student.feedback.show',
+            compact(
+                'feedbackSession',
+                'questions',
+                'classSession',
+                'faculty'
+            )
+        );
     }
 
-    public function submit(Request $request, FeedbackSession $feedbackSession)
-    {
+    public function submit(
+        Request $request,
+        FeedbackSession $feedbackSession
+    ) {
         $student = auth()->user();
 
-        // Re-check eligibility server-side on submit — defend against any bypass
-        $eligibility = $this->eligibilityService->checkEligibility($student, $feedbackSession);
+        // Re-check eligibility on the server to prevent URL bypass.
+        $eligibility = $this->eligibilityService->checkEligibility(
+            $student,
+            $feedbackSession
+        );
 
-        if (!$eligibility['eligible']) {
-            return redirect()->route('student.feedback.index')
+        if (! $eligibility['eligible']) {
+            return redirect()
+                ->route('student.feedback.index')
                 ->with('error', $eligibility['reason']);
         }
 
-        $questions = FeedbackQuestion::active()->ordered()->get();
+        $questions = FeedbackQuestion::active()
+            ->ordered()
+            ->get();
 
-        // Validate answers
-        $rules = ['answers' => 'required|array'];
-        foreach ($questions as $q) {
-            if ($q->type === 'rating') {
-                $rules["answers.{$q->id}.rating"] = $q->is_required ? 'required|numeric|min:1|max:5' : 'nullable|numeric|min:1|max:5';
-            } elseif ($q->type === 'text') {
-                $rules["answers.{$q->id}.text"] = $q->is_required ? 'required|string|max:1000' : 'nullable|string|max:1000';
+        $rules = [
+            'answers' => 'required|array',
+        ];
+
+        foreach ($questions as $question) {
+            if ($question->type === 'rating') {
+                $rules["answers.{$question->id}.rating"] =
+                    $question->is_required
+                        ? 'required|numeric|min:1|max:5'
+                        : 'nullable|numeric|min:1|max:5';
+            }
+
+            if ($question->type === 'text') {
+                $rules["answers.{$question->id}.text"] =
+                    $question->is_required
+                        ? 'required|string|max:1000'
+                        : 'nullable|string|max:1000';
             }
         }
+
         $request->validate($rules);
 
-        DB::transaction(function () use ($request, $feedbackSession, $student, $questions, $eligibility) {
-            // Create anonymous response — NO student_id stored here
+        DB::transaction(function () use (
+            $request,
+            $feedbackSession,
+            $student,
+            $questions,
+            $eligibility
+        ) {
+            /*
+             * Anonymous response:
+             * No student_id is stored in feedback_responses.
+             */
             $response = FeedbackResponse::create([
                 'feedback_session_id' => $feedbackSession->id,
-                'anonymous_token'     => Str::random(64),
-                'submitted_at'        => now(),
+                'anonymous_token' => Str::random(64),
+                'submitted_at' => now(),
             ]);
 
-            // Store answers
             foreach ($questions as $question) {
-                $answerData = $request->input("answers.{$question->id}", []);
+                $answerData = $request->input(
+                    "answers.{$question->id}",
+                    []
+                );
+
                 FeedbackAnswer::create([
-                    'feedback_response_id'  => $response->id,
-                    'feedback_question_id'  => $question->id,
-                    'rating_value'          => $answerData['rating'] ?? null,
-                    'text_answer'           => $answerData['text'] ?? null,
+                    'feedback_response_id' => $response->id,
+                    'feedback_question_id' => $question->id,
+                    'rating_value' => $answerData['rating'] ?? null,
+                    'text_answer' => $answerData['text'] ?? null,
                 ]);
             }
 
-            // Mark student as having submitted (eligibility table only — no link to answer content)
+            /*
+             * Eligibility prevents duplicate submission.
+             * It is deliberately not linked to the anonymous response.
+             */
             $eligibilityRecord = $eligibility['eligibility_record'];
+
             if ($eligibilityRecord) {
-                $eligibilityRecord->update(['has_submitted' => true, 'submitted_at' => now()]);
+                $eligibilityRecord->update([
+                    'has_submitted' => true,
+                    'submitted_at' => now(),
+                ]);
             } else {
                 FeedbackEligibility::create([
                     'feedback_session_id' => $feedbackSession->id,
-                    'student_id'          => $student->id,
-                    'has_submitted'       => true,
-                    'submitted_at'        => now(),
+                    'student_id' => $student->id,
+                    'has_submitted' => true,
+                    'submitted_at' => now(),
                 ]);
             }
         });
 
-        // Recalculate ratings after every submission so the report stays live.
-        // This is lightweight: it runs a few AVG() queries on the session's answers.
-        $this->ratingService->calculateForSession($feedbackSession);
+        /*
+         * Do NOT calculate faculty ratings here.
+         * Ratings are calculated only when the admin releases feedback.
+         */
 
-        return redirect()->route('student.feedback.confirmation', $feedbackSession)
-            ->with('success', 'Feedback submitted anonymously. Thank you!');
-
+        return redirect()
+            ->route(
+                'student.feedback.confirmation',
+                $feedbackSession
+            )
+            ->with(
+                'success',
+                'Feedback submitted anonymously. Thank you!'
+            );
     }
 
     public function confirmation(FeedbackSession $feedbackSession)
     {
         $student = auth()->user();
-        $submitted = FeedbackEligibility::where('feedback_session_id', $feedbackSession->id)
+
+        $submitted = FeedbackEligibility::where(
+            'feedback_session_id',
+            $feedbackSession->id
+        )
             ->where('student_id', $student->id)
             ->where('has_submitted', true)
             ->exists();
 
-        if (!$submitted) {
+        if (! $submitted) {
             return redirect()->route('student.feedback.index');
         }
 
-        return view('student.feedback.confirmation', compact('feedbackSession'));
+        return view(
+            'student.feedback.confirmation',
+            compact('feedbackSession')
+        );
     }
 }

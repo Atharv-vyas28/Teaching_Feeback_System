@@ -1,41 +1,262 @@
-<div class="nav-section">Main</div>
-<a href="<?php echo e(route('admin.dashboard')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-    Dashboard
+<style>
+    .admin-sidebar-pro {
+        padding: 10px 10px 22px;
+        color: #52617b;
+    }
+
+    .admin-sidebar-pro .sidebar-user {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 12px;
+        margin: 3px 0 18px;
+        border: 1px solid #e7eaf2;
+        background: linear-gradient(135deg, #fafbff, #f4f6ff);
+        border-radius: 14px;
+    }
+
+    .admin-sidebar-pro .avatar {
+        width: 39px;
+        height: 39px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        background: linear-gradient(135deg, #6c55e8, #3576f6);
+        border-radius: 12px;
+        font-size: .85rem;
+        font-weight: 800;
+        box-shadow: 0 7px 15px rgba(92, 72, 215, .25);
+    }
+
+    .admin-sidebar-pro .user-name {
+        color: #17213a;
+        font-size: .82rem;
+        font-weight: 800;
+    }
+
+    .admin-sidebar-pro .user-role {
+        margin-top: 2px;
+        color: #7b88a3;
+        font-size: .7rem;
+    }
+
+    .admin-sidebar-pro .nav-title {
+        margin: 20px 10px 7px;
+        color: #a1aabe;
+        font-size: .64rem;
+        letter-spacing: .1em;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .admin-sidebar-pro .admin-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 11px;
+        margin: 3px 0;
+        border-radius: 10px;
+        color: #62708a;
+        text-decoration: none;
+        font-size: .81rem;
+        font-weight: 650;
+        transition: .18s ease;
+    }
+
+    .admin-sidebar-pro .admin-nav-link:hover {
+        color: #5b48d7;
+        background: #f1efff;
+    }
+
+    .admin-sidebar-pro .admin-nav-link.active {
+        color: #fff;
+        background: linear-gradient(100deg, #6c55e8, #4d7cf0);
+        box-shadow: 0 8px 16px rgba(92, 72, 215, .24);
+    }
+
+    .admin-sidebar-pro .admin-nav-link svg {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+        stroke-width: 2;
+    }
+
+    .admin-sidebar-pro .logout-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 11px;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: #dc5263;
+        cursor: pointer;
+        font-size: .81rem;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .admin-sidebar-pro .logout-btn:hover {
+        background: #fff0f2;
+    }
+</style>
+
+<?php
+    $user = auth()->user();
+    $initial = strtoupper(substr($user?->name ?? 'A', 0, 1));
+?>
+
+<div class="admin-sidebar-pro">
+
+    <!-- <div class="sidebar-user">
+        <div class="avatar"><?php echo e($initial); ?></div>
+
+        <div>
+            <div class="user-name"><?php echo e($user?->name ?? 'Admin'); ?></div>
+            <div class="user-role">Admin Controller</div>
+        </div>
+    </div> -->
+
+    <div class="nav-title">Overview</div>
+
+    <a
+        href="<?php echo e(route('admin.dashboard')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.dashboard') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2 7-7 7 7 2 2M5 10v10h14V10M9 20v-6h6v6"/>
+        </svg>
+        Dashboard
+    </a>
+
+    <div class="nav-title">People</div>
+
+    <a
+        href="<?php echo e(route('admin.users.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.users.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Users
+    </a>
+
+    <div class="nav-title">Academic Management</div>
+
+    <a
+        href="<?php echo e(route('admin.departments.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.departments.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V5l7-3 7 3v16M9 21v-4h6v4M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01"/>
+        </svg>
+        Departments
+    </a>
+
+    <a
+        href="<?php echo e(route('admin.courses.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.courses.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        Courses
+    </a>
+
+    <a
+        href="<?php echo e(route('admin.semesters.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.semesters.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="3" y="5" width="18" height="16" rx="2"/>
+            <path stroke-linecap="round" d="M16 3v4M8 3v4M3 10h18"/>
+        </svg>
+        Semesters
+    </a>
+
+    <a
+    href="<?php echo e(route('admin.students.directory')); ?>"
+    class="admin-nav-link <?php echo e(request()->routeIs('admin.students.*') ? 'active' : ''); ?>"
+>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87"/>
+    </svg>
+    Student Directory
 </a>
-<div class="nav-section">People</div>
-<a href="<?php echo e(route('admin.users.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.users*') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-    Users
-</a>
-<div class="nav-section">Academic</div>
-<a href="<?php echo e(route('admin.departments.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.departments*') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-    Departments
-</a>
-<a href="<?php echo e(route('admin.courses.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.courses*') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-    Courses
-</a>
-<a href="<?php echo e(route('admin.semesters.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.semesters*') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-    Semesters
-</a>
-<a href="<?php echo e(route('admin.enrollments.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.enrollments*') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-    Enrollments
-</a>
-<div class="nav-section">Feedback</div>
-<a href="<?php echo e(route('admin.feedback-questions.index')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.feedback-questions*') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    Feedback Questions
-</a>
-<div class="nav-section">Reports</div>
-<a href="<?php echo e(route('admin.reports.attendance')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.reports.attendance') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-    Attendance Report
-</a>
-<a href="<?php echo e(route('admin.reports.ratings')); ?>" class="nav-link <?php echo e(request()->routeIs('admin.reports.ratings') ? 'active' : ''); ?>">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-    Ratings Report
-</a><?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/admin/partials/sidebar.blade.php ENDPATH**/ ?>
+
+    <a
+        href="<?php echo e(route('admin.enrollments.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.enrollments.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect x="5" y="4" width="14" height="17" rx="2"/>
+            <path stroke-linecap="round" d="M9 4V2M15 4V2M8 10h8M8 14h8M8 18h5"/>
+        </svg>
+        Enrollments
+    </a>
+
+    <div class="nav-title">Feedback</div>
+
+    <a
+        href="<?php echo e(route('admin.feedback-questions.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.feedback-questions.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"/>
+            <path stroke-linecap="round" d="M9.1 9a3 3 0 1 1 5.4 1.8c-.9 1.2-2.5 1.5-2.5 3.2M12 17h.01"/>
+        </svg>
+        Feedback Questions
+    </a>
+
+    <a
+        href="<?php echo e(route('admin.feedback-sessions.index')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.feedback-sessions.*') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.8 9.8 0 0 1-4.8-1.3L3 20l1.4-4A8.6 8.6 0 0 1 3 11.5a8.5 8.5 0 0 1 9-8.5 8.5 8.5 0 0 1 9 8.5z"/>
+            <path stroke-linecap="round" d="M8 12h.01M12 12h.01M16 12h.01"/>
+        </svg>
+        Feedback Sessions
+    </a>
+
+    <div class="nav-title">Reports</div>
+
+    <a
+        href="<?php echo e(route('admin.reports.attendance')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.reports.attendance') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+        </svg>
+        Attendance Report
+    </a>
+
+    <a
+        href="<?php echo e(route('admin.reports.ratings')); ?>"
+        class="admin-nav-link <?php echo e(request()->routeIs('admin.reports.ratings') ? 'active' : ''); ?>"
+    >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3z"/>
+        </svg>
+        Ratings Report
+    </a>
+
+    <div class="nav-title">Account</div>
+
+    <form method="POST" action="<?php echo e(route('logout')); ?>">
+        <?php echo csrf_field(); ?>
+
+        <button
+            type="submit"
+            class="logout-btn"
+            onclick="return confirm('Do you want to sign out?')"
+        >
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-6"/>
+            </svg>
+            Logout
+        </button>
+    </form>
+</div><?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/admin/partials/sidebar.blade.php ENDPATH**/ ?>

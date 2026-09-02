@@ -23,28 +23,28 @@
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);color:#1D4ED8;">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#eeeaff,#ddd6fe);color:#6c55e8;">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
         </div>
         <div class="stat-label">Enrolled Courses</div>
         <div class="stat-value"><?php echo e(count($enrollments)); ?></div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,<?php echo e($attendancePct >= 75 ? '#DCFCE7,#BBF7D0' : '#FEE2E2,#FECACA'); ?>);color:<?php echo e($attendancePct >= 75 ? '#15803D' : '#B91C1C'); ?>;">
+        <div class="stat-icon" style="background:<?php echo e($attendancePct >= 75 ? 'linear-gradient(135deg,#e3faf2,#c3f4de)' : 'linear-gradient(135deg,#ffe4e4,#fecaca)'); ?>;color:<?php echo e($attendancePct >= 75 ? '#10976b' : '#b91c1c'); ?>;">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
         <div class="stat-label">Attendance</div>
         <div class="stat-value"><?php echo e($attendancePct); ?>%</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#FEF9C3,#FDE68A);color:#92400E;">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#fff3dc,#ffe3a0);color:#dd8509;">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
         </div>
         <div class="stat-label">Pending Feedback</div>
         <div class="stat-value"><?php echo e(count($availableFeedback)); ?></div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0);color:#15803D;">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#e6efff,#c7daff);color:#3576f6;">
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
         </div>
         <div class="stat-label">Submitted</div>
@@ -58,15 +58,15 @@
         <div class="card-header"><h3>Enrolled Courses</h3></div>
         <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
             <?php $__empty_1 = true; $__currentLoopData = $enrollments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $enrollment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#FAFBFF;border-radius:10px;border:1px solid #EFF6FF;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#f6f5ff;border-radius:10px;border:1px solid #e8e4ff;">
                 <div>
-                    <div style="font-weight:600;color:#0F172A;font-size:0.87rem;"><?php echo e($enrollment->section->course->name ?? 'N/A'); ?></div>
-                    <div style="font-size:0.75rem;color:#94A3B8;"><?php echo e($enrollment->section->course->code ?? ''); ?> · Sec <?php echo e($enrollment->section->section_name ?? ''); ?></div>
+                    <div style="font-weight:700;color:#17213a;font-size:0.87rem;"><?php echo e($enrollment->section->course->name ?? 'N/A'); ?></div>
+                    <div style="font-size:0.75rem;color:#75809a;"><?php echo e($enrollment->section->course->code ?? ''); ?> · Sec <?php echo e($enrollment->section->section_name ?? ''); ?></div>
                 </div>
-                <span class="badge badge-blue"><?php echo e($enrollment->status); ?></span>
+                <span class="badge badge-purple"><?php echo e($enrollment->status); ?></span>
             </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-            <div style="text-align:center;padding:20px;color:#94A3B8;">No courses enrolled.</div>
+            <div style="text-align:center;padding:20px;color:#75809a;">No courses enrolled.</div>
             <?php endif; ?>
         </div>
     </div>
@@ -75,19 +75,19 @@
     <div class="card">
         <div class="card-header">
             <h3>Pending Feedback</h3>
-            <a href="<?php echo e(route('student.feedback.index')); ?>" style="font-size:0.78rem;color:#3B82F6;text-decoration:none;">View all →</a>
+            <a href="<?php echo e(route('student.feedback.index')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
         </div>
         <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
             <?php $__empty_1 = true; $__currentLoopData = $availableFeedback; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fb): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#F0FDF4;border-radius:10px;border:1px solid #BBF7D0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#e3faf2;border-radius:10px;border:1px solid #b4ecd5;">
                 <div>
-                    <div style="font-weight:600;color:#0F172A;font-size:0.87rem;"><?php echo e($fb->classSession->section->course->name ?? 'N/A'); ?></div>
-                    <div style="font-size:0.75rem;color:#94A3B8;"><?php echo e($fb->classSession->session_date->format('M d, Y') ?? ''); ?></div>
+                    <div style="font-weight:700;color:#17213a;font-size:0.87rem;"><?php echo e($fb->classSession->section->course->name ?? 'N/A'); ?></div>
+                    <div style="font-size:0.75rem;color:#75809a;"><?php echo e($fb->classSession->session_date->format('M d, Y') ?? ''); ?></div>
                 </div>
                 <a href="<?php echo e(route('student.feedback.show', $fb)); ?>" class="btn-primary btn-sm">Submit →</a>
             </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-            <div style="text-align:center;padding:20px;color:#94A3B8;">No pending feedback.</div>
+            <div style="text-align:center;padding:20px;color:#75809a;">No pending feedback.</div>
             <?php endif; ?>
         </div>
     </div>

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Application routes (AI-owned)
 |--------------------------------------------------------------------------
-| This file belongs to the generated application: LaraCopilot re-emits it
+| This file belongs to the generated application: re-emits it
 | as a COMPLETE file to add the app's OWN routes — custom (non-CRUD)
 | controller endpoints and public-facing pages (search, browse, detail,
 | booking/order flow, etc).

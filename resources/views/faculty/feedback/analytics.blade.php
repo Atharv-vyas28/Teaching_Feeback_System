@@ -25,70 +25,345 @@
 @endsection
 
 @section('content')
-{{-- Summary cards --}}
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
+
+@php
+    $overallRating = (float) ($ratingResult->overall_weighted_rating ?? 0);
+
+    $performancePercentage = $overallRating > 0
+        ? round(($overallRating / 5) * 100, 2)
+        : 0;
+
+    $responseRate = $eligibleCount > 0
+        ? round(($responseCount / $eligibleCount) * 100, 2)
+        : 0;
+
+    $pendingResponses = max(0, $eligibleCount - $responseCount);
+
+    /*
+     * `weight` is used as maximum marks for each question.
+     * Marks earned = (average rating / 5) × maximum marks.
+     */
+    $ratingRows = collect($questionStats)
+        ->filter(fn ($stat) => ($stat['type'] ?? '') === 'rating')
+        ->map(function ($stat) {
+            $average = (float) ($stat['average'] ?? 0);
+            $maximumMarks = (float) ($stat['weight'] ?? 0);
+            $marksEarned = $maximumMarks > 0
+                ? round(($average / 5) * $maximumMarks, 2)
+                : 0;
+
+            return [
+                'question' => $stat['question'] ?? 'Question',
+                'label' => \Illuminate\Support\Str::limit(
+                    $stat['question'] ?? 'Question',
+                    28
+                ),
+                'average' => $average,
+                'maximum_marks' => $maximumMarks,
+                'marks_earned' => $marksEarned,
+                'response_count' => count($stat['values'] ?? []),
+            ];
+        })
+        ->values();
+
+    $totalMaximumMarks = $ratingRows->sum('maximum_marks');
+    $totalMarksEarned = $ratingRows->sum('marks_earned');
+@endphp
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
+
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);color:#1D4ED8;">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
-        </div>
-        <div class="stat-label">Eligible</div>
+        <div class="stat-label">Eligible Students</div>
         <div class="stat-value">{{ $eligibleCount }}</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#DCFCE7,#BBF7D0);color:#15803D;">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </div>
-        <div class="stat-label">Responses</div>
+        <div class="stat-label">Submitted Feedback</div>
         <div class="stat-value">{{ $responseCount }}</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#FEF9C3,#FDE68A);color:#92400E;">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-        </div>
-        <div class="stat-label">Overall Rating</div>
-        <div class="stat-value">{{ $ratingResult ? number_format($ratingResult->overall_weighted_rating, 1) : '—' }}</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#6D28D9;">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        </div>
         <div class="stat-label">Response Rate</div>
-        <div class="stat-value">{{ $eligibleCount > 0 ? round(($responseCount/$eligibleCount)*100) : 0 }}%</div>
+        <div class="stat-value">{{ number_format($responseRate, 1) }}%</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Overall Rating</div>
+        <div class="stat-value">
+            {{ $overallRating > 0 ? number_format($overallRating, 2) . ' / 5' : '—' }}
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Teacher Performance</div>
+        <div class="stat-value">{{ number_format($performancePercentage, 1) }}%</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Marks Earned</div>
+        <div class="stat-value">
+            {{ number_format($totalMarksEarned, 2) }}
+            <span style="font-size:0.8rem;color:#64748B;">
+                / {{ number_format($totalMaximumMarks, 2) }}
+            </span>
+        </div>
     </div>
 </div>
 
-{{-- Question Analytics --}}
-<div class="card">
-    <div class="card-header"><h3>Question-wise Analytics</h3><span style="font-size:0.78rem;color:#94A3B8;">Individual responses are never shown — anonymity is preserved</span></div>
-    <div class="card-body">
-        @if(count($questionStats) === 0)
-        <div style="text-align:center;padding:40px;color:#94A3B8;">No responses collected yet.</div>
-        @else
-        @foreach($questionStats as $stat)
-        <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid #F1F5F9;">
-            <div style="font-size:0.88rem;font-weight:600;color:#0F172A;margin-bottom:10px;">{{ $stat['question'] }}</div>
-            @if($stat['type'] === 'rating' && $stat['average'] !== null)
-            <div style="display:flex;align-items:center;gap:12px;">
-                <div style="font-size:1.4rem;font-weight:800;color:{{ $stat['average'] >= 4 ? '#1D4ED8' : ($stat['average'] >= 3 ? '#D97706' : '#DC2626') }};">
-                    {{ number_format($stat['average'], 1) }}<span style="font-size:0.75rem;color:#94A3B8;">/5</span>
-                </div>
-                <div style="flex:1;background:#F1F5F9;border-radius:100px;height:8px;overflow:hidden;">
-                    <div style="height:100%;width:{{ ($stat['average']/5)*100 }}%;background:linear-gradient(135deg,#3B82F6,#2563EB);border-radius:100px;transition:width 0.6s ease;"></div>
-                </div>
-                <span style="font-size:0.78rem;color:#94A3B8;">{{ count($stat['values']) }} responses</span>
-            </div>
-            @elseif($stat['type'] === 'text' && count($stat['texts']) > 0)
-            <div style="background:#F8FAFC;border-radius:10px;padding:12px;">
-                @foreach($stat['texts'] as $text)
-                <div style="font-size:0.85rem;color:#374151;padding:6px 0;border-bottom:1px solid #F1F5F9;">"{{ $text }}"</div>
-                @endforeach
-            </div>
-            @else
-            <div style="color:#94A3B8;font-size:0.82rem;">No data</div>
-            @endif
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;margin-bottom:24px;">
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Feedback Participation</h3>
         </div>
-        @endforeach
-        @endif
+
+        <div class="card-body" style="height:300px;position:relative;">
+            <canvas id="participationChart"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Teacher Performance</h3>
+        </div>
+
+        <div class="card-body" style="text-align:center;padding-top:35px;">
+            <div style="font-size:3.2rem;font-weight:800;color:#2563EB;">
+                {{ number_format($performancePercentage, 1) }}%
+            </div>
+
+            <p style="color:#64748B;font-size:0.85rem;">
+                Calculated from question marks and anonymous student ratings.
+            </p>
+
+            <div style="height:12px;background:#E2E8F0;border-radius:999px;overflow:hidden;margin-top:20px;">
+                <div
+                    style="
+                        height:100%;
+                        width:{{ min(100, max(0, $performancePercentage)) }}%;
+                        background:linear-gradient(90deg,#2563EB,#60A5FA);
+                        border-radius:999px;
+                    "
+                ></div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#64748B;margin-top:8px;">
+                <span>0%</span>
+                <span>Target: 80%</span>
+                <span>100%</span>
+            </div>
+        </div>
     </div>
 </div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+        <h3>Question-wise Average Rating</h3>
+    </div>
+
+    <div class="card-body" style="height:370px;position:relative;">
+        <canvas id="ratingChart"></canvas>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+        <h3>Marks Earned by Question</h3>
+    </div>
+
+    <div class="card-body" style="height:370px;position:relative;">
+        <canvas id="marksChart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Detailed Performance Analysis</h3>
+
+        <span style="font-size:0.78rem;color:#64748B;">
+            Student identity is protected.
+        </span>
+    </div>
+
+    <div class="card-body">
+        @forelse($ratingRows as $row)
+            <div style="padding:16px 0;border-bottom:1px solid #E2E8F0;">
+                <div style="font-weight:700;color:#0F172A;margin-bottom:12px;">
+                    {{ $row['question'] }}
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;">
+                    <div>
+                        <div style="font-size:0.75rem;color:#64748B;">Average Rating</div>
+                        <div style="font-size:1.1rem;font-weight:700;">
+                            {{ number_format($row['average'], 2) }} / 5
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.75rem;color:#64748B;">Maximum Marks</div>
+                        <div style="font-size:1.1rem;font-weight:700;">
+                            {{ number_format($row['maximum_marks'], 2) }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.75rem;color:#64748B;">Marks Earned</div>
+                        <div style="font-size:1.1rem;font-weight:700;color:#16A34A;">
+                            {{ number_format($row['marks_earned'], 2) }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="font-size:0.75rem;color:#64748B;">Responses</div>
+                        <div style="font-size:1.1rem;font-weight:700;">
+                            {{ $row['response_count'] }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <div style="text-align:center;padding:35px;color:#94A3B8;">
+                No released rating feedback is available.
+            </div>
+        @endforelse
+    </div>
+</div>
+
+@foreach($questionStats as $stat)
+    @if(($stat['type'] ?? '') === 'text' && !empty($stat['texts']))
+        <div class="card" style="margin-top:24px;">
+            <div class="card-header">
+                <h3>Anonymous Comments</h3>
+            </div>
+
+            <div class="card-body">
+                <div style="font-weight:700;margin-bottom:12px;">
+                    {{ $stat['question'] }}
+                </div>
+
+                @foreach($stat['texts'] as $text)
+                    <div style="background:#F8FAFC;border-left:4px solid #60A5FA;padding:12px 14px;margin-bottom:10px;border-radius:6px;color:#334155;">
+                        “{{ $text }}”
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+@endforeach
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const ratingRows = @json($ratingRows);
+
+    const labels = ratingRows.map(item => item.label);
+    const ratings = ratingRows.map(item => item.average);
+    const earnedMarks = ratingRows.map(item => item.marks_earned);
+    const maximumMarks = ratingRows.map(item => item.maximum_marks);
+
+    const submittedCount = {{ (int) $responseCount }};
+    const pendingCount = {{ (int) $pendingResponses }};
+
+    if (window.Chart) {
+        new Chart(document.getElementById('participationChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Feedback Submitted', 'No Feedback'],
+                datasets: [{
+                    data: [submittedCount, pendingCount],
+                    backgroundColor: ['#2563EB', '#E2E8F0'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('ratingChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Average Rating / 5',
+                    data: ratings,
+                    backgroundColor: '#2563EB',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        title: {
+                            display: true,
+                            text: 'Rating out of 5'
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('marksChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Marks Earned',
+                        data: earnedMarks,
+                        backgroundColor: '#16A34A',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Maximum Marks',
+                        data: maximumMarks,
+                        backgroundColor: '#BFDBFE',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Marks'
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
 @endsection

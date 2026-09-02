@@ -79,10 +79,10 @@ class FeedbackRatingService
             ],
             [
                 'overall_weighted_rating' => $overallWeighted,
-                'course_rating'           => $overallWeighted, // same scale for course
+                // 'course_rating'           => $overallWeighted, // same scale for course
                 'response_count'          => $responseCount,
-                'eligible_count'          => $eligibleCount,
-                'response_rate'           => $responseRate,
+                // 'eligible_count'          => $eligibleCount,
+                // 'response_rate'           => $responseRate,
                 'question_averages'       => $questionAverages,
                 'calculated_at'           => now(),
             ]

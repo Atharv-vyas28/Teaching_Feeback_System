@@ -168,7 +168,7 @@ return [
     |
     | Your custom Generator class MUST implement the 'Blueprint\Contracts\Generator' interface.
     |
-    | LaraCopilot note (laravel-blade): the default `view` generator is intentionally
+    | note (laravel-blade): the default `view` generator is intentionally
     | OMITTED. Blueprint still generates controllers that return `view(...)` via the
     | `controller` generator from each method's `view:` statement, but it must NOT
     | write the Blade view files — those are owned by the agent, which hand-crafts

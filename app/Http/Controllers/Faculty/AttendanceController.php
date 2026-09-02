@@ -14,8 +14,86 @@ use Illuminate\Support\Facades\DB;
 use App\Models\FeedbackSession;
 use App\Services\FeedbackEligibilityService;
 
+
 class AttendanceController extends Controller
 {
+    public function analytics(ClassSession $classSession)
+{
+    $isAssigned = FacultyCourse::where('user_id', auth()->id())
+        ->where('class_section_id', $classSession->class_section_id)
+        ->where('is_active', true)
+        ->exists();
+
+    abort_unless($isAssigned, 403);
+
+    $classSession->load([
+        'section.course',
+        'attendanceRecords.student',
+    ]);
+
+    $records = $classSession->attendanceRecords
+        ->sortBy(fn ($attendance) => $attendance->student?->name)
+        ->values();
+
+    $presentStudents = $records
+        ->filter(fn ($attendance) => in_array(
+            $attendance->status,
+            ['present', 'late']
+        ))
+        ->values();
+
+    $absentStudents = $records
+        ->filter(fn ($attendance) => $attendance->status === 'absent')
+        ->values();
+
+    $feedbackEnabledStudents = $presentStudents
+        ->filter(fn ($attendance) => $attendance->feedback_enabled)
+        ->values();
+
+    $feedbackDisabledStudents = $presentStudents
+        ->filter(fn ($attendance) => ! $attendance->feedback_enabled)
+        ->values();
+
+    $stats = [
+        'total' => $records->count(),
+        'present' => $presentStudents->count(),
+        'absent' => $absentStudents->count(),
+        'late' => $records->where('status', 'late')->count(),
+        'feedback_enabled' => $feedbackEnabledStudents->count(),
+        'feedback_disabled' => $feedbackDisabledStudents->count(),
+    ];
+
+    $stats['attendance_percentage'] = $stats['total'] > 0
+        ? round(($stats['present'] / $stats['total']) * 100, 2)
+        : 0;
+
+    $lineChartData = $records->map(function ($attendance) {
+        return [
+            'student' => $attendance->student?->roll_number
+                ?? $attendance->student?->name
+                ?? 'Student',
+
+            'value' => in_array($attendance->status, ['present', 'late'])
+                ? 1
+                : 0,
+        ];
+    })->values();
+
+    return view(
+        'faculty.attendance.analytics',
+        compact(
+            'classSession',
+            'records',
+            'presentStudents',
+            'absentStudents',
+            'feedbackEnabledStudents',
+            'feedbackDisabledStudents',
+            'stats',
+            'lineChartData'
+        )
+    );
+}
+
     public function __construct(
         private FeedbackEligibilityService $eligibilityService
     ) {}

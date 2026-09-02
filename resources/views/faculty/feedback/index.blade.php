@@ -55,7 +55,9 @@
                             {{ ucfirst($fb->status) }}
                         </span>
                     </td>
-                    <td>{{ $fb->responses->count() }}</td>
+                    <td>
+                        {{ $fb->isReleased() ? $fb->responses_count : '—' }}
+                    </td>
                     <td>{{ $fb->eligibility->count() }}</td>
                     <td>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -70,8 +72,12 @@
                                 <button type="submit" class="btn-warning btn-sm">Close</button>
                             </form>
                             @endif
-                            @if($fb->status !== 'draft')
-                            <a href="{{ route('faculty.feedback.analytics', $fb) }}" class="btn-secondary btn-sm">Analytics</a>
+                             @if($fb->isReleased())
+                            <a href="{{ route('faculty.feedback.analytics', $fb) }}" class="btn-secondary btn-sm">
+                                    Analytics
+                            </a>
+                            @elseif($fb->status === 'closed')
+                                <span class="badge badge-yellow">Awaiting admin release</span>
                             @endif
                         </div>
                     </td>

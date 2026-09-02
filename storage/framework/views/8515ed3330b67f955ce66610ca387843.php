@@ -1,35 +1,64 @@
 <?php $__env->startSection('title', 'My Sessions'); ?>
-<?php $header = 'Class Sessions'; $subheader = 'All class sessions you have conducted.'; ?>
+
+<?php
+    $header = 'Class Sessions';
+    $subheader = 'All class sessions you have conducted.';
+?>
 
 <?php $__env->startSection('sidebar-nav'); ?>
 <div class="nav-section-label">Main</div>
+
 <a href="<?php echo e(route('faculty.dashboard')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 12l2-2 7-7 7 7 2 2M5 10v10h14V10M9 20v-6h6v6"/>
+    </svg>
     Dashboard
 </a>
+
 <div class="nav-section-label">Attendance</div>
+
 <a href="<?php echo e(route('faculty.attendance.sessions')); ?>" class="nav-link active">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 00-2-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+    </svg>
     My Sessions
 </a>
+
 <a href="<?php echo e(route('faculty.attendance.create')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 4v16m8-8H4"/>
+    </svg>
     New Session
 </a>
+
 <div class="nav-section-label">Feedback</div>
+
 <a href="<?php echo e(route('faculty.feedback.index')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+    </svg>
     Feedback Sessions
 </a>
+
 <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+    </svg>
     My Ratings
 </a>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('page-actions'); ?>
 <a href="<?php echo e(route('faculty.attendance.create')); ?>" class="btn-primary">
-    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 4v16m8-8H4"/>
+    </svg>
     New Session
 </a>
 <?php $__env->stopSection(); ?>
@@ -44,60 +73,167 @@
                     <th>Topic</th>
                     <th>Date</th>
                     <th>Time</th>
-                    <th>Students</th>
+                    <th>Attendance</th>
                     <th>Status</th>
                     <th>Feedback</th>
                     <th>Actions</th>
                 </tr>
             </thead>
+
             <tbody>
                 <?php $__empty_1 = true; $__currentLoopData = $sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                <tr>
-                    <td>
-                        <div style="font-weight:600;color:#0F172A;"><?php echo e($session->section->course->name ?? 'N/A'); ?></div>
-                        <div style="font-size:0.75rem;color:#94A3B8;">Section <?php echo e($session->section->section_name ?? ''); ?></div>
-                    </td>
-                    <td><?php echo e($session->topic ?? '—'); ?></td>
-                    <td><?php echo e($session->session_date->format('M d, Y')); ?></td>
-                    <td style="font-size:0.8rem;color:#64748B;"><?php echo e($session->start_time); ?> – <?php echo e($session->end_time); ?></td>
-                    <td>
-                        <span class="badge badge-blue"><?php echo e($session->attendanceRecords->count()); ?> present</span>
-                    </td>
-                    <td><span class="badge <?php echo e(['completed'=>'badge-green','ongoing'=>'badge-blue','scheduled'=>'badge-yellow','cancelled'=>'badge-red'][$session->status] ?? 'badge-gray'); ?>"><?php echo e(ucfirst($session->status)); ?></span></td>
-                    <td>
-                        <?php if($session->feedbackSession): ?>
-                            <span class="badge badge-<?php echo e(['draft'=>'gray','active'=>'green','closed'=>'blue'][$session->feedbackSession->status] ?? 'gray'); ?>"><?php echo e(ucfirst($session->feedbackSession->status)); ?></span>
-                        <?php else: ?>
-                            <a href="<?php echo e(route('faculty.feedback.create', $session)); ?>" style="font-size:0.78rem;color:#3B82F6;text-decoration:none;">Create →</a>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <div style="display:flex;gap:6px;">
-                            <?php if($session->status === 'ongoing'): ?>
-                            <a href="<?php echo e(route('faculty.attendance.take', $session)); ?>" class="btn-primary btn-sm">Take Attendance</a>
-                            <?php elseif($session->status === 'completed'): ?>
-                            <a href="<?php echo e(route('faculty.attendance.take', $session)); ?>" class="btn-secondary btn-sm">View</a>
+                    <?php
+                        $presentCount = $session->attendanceRecords
+                            ->whereIn('status', ['present', 'late'])
+                            ->count();
+
+                        $totalAttendance = $session->attendanceRecords->count();
+                    ?>
+
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;color:#0F172A;">
+                                <?php echo e($session->section?->course?->name ?? 'N/A'); ?>
+
+                            </div>
+
+                            <div style="font-size:0.75rem;color:#94A3B8;">
+                                Section <?php echo e($session->section?->section_name ?? ''); ?>
+
+                            </div>
+                        </td>
+
+                        <td><?php echo e($session->topic ?? '—'); ?></td>
+
+                        <td>
+                            <?php echo e($session->session_date?->format('M d, Y') ?? 'N/A'); ?>
+
+                        </td>
+
+                        <td style="font-size:0.8rem;color:#64748B;">
+                            <?php echo e($session->start_time ?? ''); ?>
+
+                            –
+                            <?php echo e($session->end_time ?? ''); ?>
+
+                        </td>
+
+                        <td>
+                            <?php if($totalAttendance > 0): ?>
+                                <span class="badge badge-blue">
+                                    <?php echo e($presentCount); ?> present
+                                </span>
+
+                                <div style="font-size:0.7rem;color:#94A3B8;margin-top:3px;">
+                                    <?php echo e($totalAttendance); ?> marked
+                                </div>
+                            <?php else: ?>
+                                <span class="badge badge-gray">
+                                    Not marked
+                                </span>
                             <?php endif; ?>
-                            <?php if($session->feedbackSession && $session->feedbackSession->status !== 'draft'): ?>
-                            <a href="<?php echo e(route('faculty.feedback.analytics', $session->feedbackSession)); ?>" class="btn-secondary btn-sm">Analytics</a>
+                        </td>
+
+                        <td>
+                            <span class="badge <?php echo e([
+                                    'completed' => 'badge-green',
+                                    'ongoing' => 'badge-blue',
+                                    'scheduled' => 'badge-yellow',
+                                    'cancelled' => 'badge-red'
+                                ][$session->status] ?? 'badge-gray'); ?>">
+                                <?php echo e(ucfirst($session->status)); ?>
+
+                            </span>
+                        </td>
+
+                        <td>
+                            <?php if($session->feedbackSession): ?>
+                                <span class="badge badge-<?php echo e([
+                                        'draft' => 'gray',
+                                        'active' => 'green',
+                                        'closed' => 'blue'
+                                    ][$session->feedbackSession->status] ?? 'gray'); ?>">
+                                    <?php echo e(ucfirst($session->feedbackSession->status)); ?>
+
+                                </span>
+                            <?php else: ?>
+                                <a
+                                    href="<?php echo e(route('faculty.feedback.create', $session)); ?>"
+                                    style="font-size:0.78rem;color:#3B82F6;text-decoration:none;"
+                                >
+                                    Create →
+                                </a>
                             <?php endif; ?>
-                        </div>
-                    </td>
-                </tr>
+                        </td>
+
+                        <td>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+
+                                <?php if($session->status === 'ongoing'): ?>
+                                    <a
+                                        href="<?php echo e(route('faculty.attendance.take', $session)); ?>"
+                                        class="btn-primary btn-sm"
+                                    >
+                                        Take Attendance
+                                    </a>
+                                <?php elseif($session->status === 'completed'): ?>
+                                    <a
+                                        href="<?php echo e(route('faculty.attendance.take', $session)); ?>"
+                                        class="btn-secondary btn-sm"
+                                    >
+                                        View Attendance
+                                    </a>
+                                <?php endif; ?>
+
+                                
+                                <?php if($totalAttendance > 0): ?>
+                                    <a
+                                        href="<?php echo e(route('faculty.attendance.analytics', $session)); ?>"
+                                        class="btn-secondary btn-sm"
+                                    >
+                                        Attendance Analytics
+                                    </a>
+                                <?php endif; ?>
+
+                                
+                                <?php if(
+                                    $session->feedbackSession &&
+                                    $session->feedbackSession->status !== 'draft'
+                                ): ?>
+                                    <a
+                                        href="<?php echo e(route('faculty.feedback.analytics', $session->feedbackSession)); ?>"
+                                        class="btn-secondary btn-sm"
+                                    >
+                                        Feedback Analytics
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <tr>
-                    <td colspan="8" style="text-align:center;padding:40px;color:#94A3B8;">
-                        No sessions yet. <a href="<?php echo e(route('faculty.attendance.create')); ?>" style="color:#3B82F6;">Create your first session →</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td colspan="8" style="text-align:center;padding:40px;color:#94A3B8;">
+                            No sessions yet.
+
+                            <a
+                                href="<?php echo e(route('faculty.attendance.create')); ?>"
+                                style="color:#3B82F6;"
+                            >
+                                Create your first session →
+                            </a>
+                        </td>
+                    </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
+
     <?php if($sessions->hasPages()): ?>
-    <div style="padding:16px 20px;"><?php echo e($sessions->links()); ?></div>
+        <div style="padding:16px 20px;">
+            <?php echo e($sessions->links()); ?>
+
+        </div>
     <?php endif; ?>
 </div>
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/faculty/attendance/sessions.blade.php ENDPATH**/ ?>

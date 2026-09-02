@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Semester extends Model
 {
-    protected $fillable = ['academic_year_id', 'name', 'number', 'start_date', 'end_date', 'is_current'];
+    protected $fillable = ['academic_year_id', 'program_id','name', 'number', 'start_date', 'end_date', 'is_current'];
 
     protected function casts(): array
     {
@@ -20,4 +20,5 @@ class Semester extends Model
     public function academicYear()   { return $this->belongsTo(AcademicYear::class); }
     public function classSections()  { return $this->hasMany(ClassSection::class); }
     public function enrollments()    { return $this->hasMany(CourseEnrollment::class); }
+    public function program()        { return $this->belongsTo(Program::class);}
 }

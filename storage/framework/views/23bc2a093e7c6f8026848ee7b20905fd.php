@@ -55,7 +55,10 @@
 
                         </span>
                     </td>
-                    <td><?php echo e($fb->responses->count()); ?></td>
+                    <td>
+                        <?php echo e($fb->isReleased() ? $fb->responses_count : '—'); ?>
+
+                    </td>
                     <td><?php echo e($fb->eligibility->count()); ?></td>
                     <td>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -70,8 +73,12 @@
                                 <button type="submit" class="btn-warning btn-sm">Close</button>
                             </form>
                             <?php endif; ?>
-                            <?php if($fb->status !== 'draft'): ?>
-                            <a href="<?php echo e(route('faculty.feedback.analytics', $fb)); ?>" class="btn-secondary btn-sm">Analytics</a>
+                             <?php if($fb->isReleased()): ?>
+                            <a href="<?php echo e(route('faculty.feedback.analytics', $fb)); ?>" class="btn-secondary btn-sm">
+                                    Analytics
+                            </a>
+                            <?php elseif($fb->status === 'closed'): ?>
+                                <span class="badge badge-yellow">Awaiting admin release</span>
                             <?php endif; ?>
                         </div>
                     </td>

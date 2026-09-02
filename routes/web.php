@@ -29,6 +29,15 @@ Route::get('/', fn() => redirect()->route('login'));
 // ─── Admin ────────────────────────────────────────────────────────────────────
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
+    Route::get(
+    '/students-directory',
+    [UserController::class, 'studentDirectory']
+)->name('students.directory');
+
+Route::get(
+    '/students-directory/{student}',
+    [UserController::class, 'studentDetails']
+)->name('students.details');
 
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -97,6 +106,7 @@ Route::prefix('faculty')->name('faculty.')->middleware(['auth', 'role:faculty'])
     Route::get('/attendance/{classSession}/take', [FacultyAttendance::class, 'take'])->name('attendance.take');
     Route::post('/attendance/{classSession}/save', [FacultyAttendance::class, 'save'])->name('attendance.save');
     Route::post('/attendance/{classSession}/enable-feedback', [FacultyAttendance::class, 'enableFeedback'])->name('attendance.enable-feedback');
+    Route::get('/attendance/{classSession}/analytics', [FacultyAttendance::class, 'analytics'])->name('attendance.analytics');
 
     // Feedback sessions
     Route::get('/feedback', [FeedbackSessionController::class, 'index'])->name('feedback.index');

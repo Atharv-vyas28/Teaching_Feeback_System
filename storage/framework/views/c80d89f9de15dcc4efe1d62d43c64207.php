@@ -1,23 +1,23 @@
-@extends('layouts.dashboard')
+<?php $__env->startSection('title', 'Feedback Review'); ?>
 
-@section('title', 'Feedback Review')
-
-@php
+<?php
     $header = 'Feedback Review';
     $subheader = 'Anonymous feedback analysis for this class session.';
-@endphp
+?>
 
-@section('sidebar-nav')
-    @include('admin.partials.sidebar')
-@endsection
+<?php $__env->startSection('sidebar-nav'); ?>
+    <?php echo $__env->make('admin.partials.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="card" style="margin-bottom:20px;">
     <div class="card-header">
         <div>
             <h3>
-                {{ $session->classSession?->section?->course?->name ?? 'Course' }}
-                — {{ $session->classSession?->topic ?? 'Feedback Session' }}
+                <?php echo e($session->classSession?->section?->course?->name ?? 'Course'); ?>
+
+                — <?php echo e($session->classSession?->topic ?? 'Feedback Session'); ?>
+
             </h3>
 
             <p style="margin:5px 0 0;color:#64748B;font-size:.82rem;">
@@ -31,20 +31,22 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;">
             <div class="stat-card">
                 <div class="stat-label">Anonymous Responses</div>
-                <div class="stat-value">{{ $responses->count() }}</div>
+                <div class="stat-value"><?php echo e($responses->count()); ?></div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-label">Session Status</div>
                 <div class="stat-value" style="font-size:1.1rem;">
-                    {{ ucfirst($session->status) }}
+                    <?php echo e(ucfirst($session->status)); ?>
+
                 </div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-label">Release Status</div>
                 <div class="stat-value" style="font-size:1.1rem;">
-                    {{ $session->isReleased() ? 'Released' : 'Under Review' }}
+                    <?php echo e($session->isReleased() ? 'Released' : 'Under Review'); ?>
+
                 </div>
             </div>
         </div>
@@ -90,12 +92,14 @@
     </div>
 
     <div class="card-body">
-        @forelse($responses as $response)
+        <?php $__empty_1 = true; $__currentLoopData = $responses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $response): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="stat-card" style="margin-bottom:18px;">
                 <div style="font-size:.8rem;color:#64748B;margin-bottom:10px;">
-                    Anonymous Response #{{ $loop->iteration }}
+                    Anonymous Response #<?php echo e($loop->iteration); ?>
+
                     · Submitted:
-                    {{ $response->submitted_at?->format('M d, Y H:i') ?? 'N/A' }}
+                    <?php echo e($response->submitted_at?->format('M d, Y H:i') ?? 'N/A'); ?>
+
                 </div>
 
                 <table class="data-table">
@@ -107,52 +111,54 @@
                     </thead>
 
                     <tbody>
-                        @foreach($response->answers as $answer)
+                        <?php $__currentLoopData = $response->answers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $answer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
                                 <td>
-                                    {{ $answer->question?->question_text ?? 'Question unavailable' }}
+                                    <?php echo e($answer->question?->question_text ?? 'Question unavailable'); ?>
+
                                 </td>
 
                                 <td>
-                                    @if($answer->question?->type === 'rating')
+                                    <?php if($answer->question?->type === 'rating'): ?>
                                         <strong>
-                                            {{ $answer->rating_value ?? '—' }} / 5
+                                            <?php echo e($answer->rating_value ?? '—'); ?> / 5
                                         </strong>
-                                    @else
-                                        {{ $answer->text_answer ?? '—' }}
-                                    @endif
+                                    <?php else: ?>
+                                        <?php echo e($answer->text_answer ?? '—'); ?>
+
+                                    <?php endif; ?>
                                 </td>
                             </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div style="text-align:center;padding:38px;color:#94A3B8;">
                 No feedback has been submitted for this session yet.
             </div>
-        @endforelse
+        <?php endif; ?>
 
-        @if($responses->isNotEmpty())
-            @if($session->isReleased())
+        <?php if($responses->isNotEmpty()): ?>
+            <?php if($session->isReleased()): ?>
                 <div style="background:#DCFCE7;color:#166534;padding:12px 16px;border-radius:8px;">
                     Feedback has been released to the assigned faculty.
                 </div>
-            @else
+            <?php else: ?>
                 <form
                     method="POST"
-                    action="{{ route('admin.feedback-sessions.release', $session) }}"
+                    action="<?php echo e(route('admin.feedback-sessions.release', $session)); ?>"
                     style="margin-top:20px;"
                     onsubmit="return confirm('Release all anonymous feedback analysis and ratings to the assigned faculty?');"
                 >
-                    @csrf
+                    <?php echo csrf_field(); ?>
 
                     <button type="submit" class="btn-primary">
                         Release Anonymous Feedback to Faculty
                     </button>
                 </form>
-            @endif
-        @endif
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -164,9 +170,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    const timeline = @json($responseTimeline);
-    const questionAnalysis = @json($questionAnalysis);
-    const distribution = @json($ratingDistribution);
+    const timeline = <?php echo json_encode($responseTimeline, 15, 512) ?>;
+    const questionAnalysis = <?php echo json_encode($questionAnalysis, 15, 512) ?>;
+    const distribution = <?php echo json_encode($ratingDistribution, 15, 512) ?>;
 
     new Chart(document.getElementById('responseTimelineChart'), {
         type: 'line',
@@ -287,4 +293,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/admin/feedback-sessions/responses.blade.php ENDPATH**/ ?>

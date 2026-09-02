@@ -33,10 +33,10 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
     @php
     $statItems = [
-        ['label'=>'My Sections',     'value'=>$stats['sections'],        'color'=>'background:linear-gradient(135deg,#DBEAFE,#BFDBFE);color:#1D4ED8', 'icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-        ['label'=>'Total Sessions',  'value'=>$stats['total_sessions'],  'color'=>'background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#6D28D9', 'icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-        ['label'=>'Active Feedback', 'value'=>$stats['active_feedback'], 'color'=>'background:linear-gradient(135deg,#DCFCE7,#BBF7D0);color:#15803D', 'icon'=>'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
-        ['label'=>'Avg Rating',      'value'=>$stats['overall_rating'] ? number_format($stats['overall_rating'],1).'/5' : 'N/A', 'color'=>'background:linear-gradient(135deg,#FEF9C3,#FDE68A);color:#92400E', 'icon'=>'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'],
+        ['label'=>'My Sections',     'value'=>$stats['sections'],        'color'=>'background:linear-gradient(135deg,#eeeaff,#ddd6fe);color:#6c55e8', 'icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
+        ['label'=>'Total Sessions',  'value'=>$stats['total_sessions'],  'color'=>'background:linear-gradient(135deg,#e6efff,#c7daff);color:#3576f6', 'icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+        ['label'=>'Active Feedback', 'value'=>$stats['active_feedback'], 'color'=>'background:linear-gradient(135deg,#e3faf2,#c3f4de);color:#10976b', 'icon'=>'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
+        ['label'=>'Avg Rating',      'value'=>$stats['overall_rating'] ? number_format($stats['overall_rating'],1).'/5' : 'N/A', 'color'=>'background:linear-gradient(135deg,#fff3dc,#ffe3a0);color:#dd8509', 'icon'=>'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z'],
     ];
     @endphp
     @foreach($statItems as $s)
@@ -55,7 +55,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Class Sessions</h3>
-            <a href="{{ route('faculty.attendance.sessions') }}" style="font-size:0.78rem;color:#3B82F6;text-decoration:none;">View all →</a>
+            <a href="{{ route('faculty.attendance.sessions') }}" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">
@@ -89,7 +89,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Feedback Ratings</h3>
-            <a href="{{ route('faculty.feedback.my-ratings') }}" style="font-size:0.78rem;color:#3B82F6;text-decoration:none;">View all →</a>
+            <a href="{{ route('faculty.feedback.my-ratings') }}" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">
@@ -99,10 +99,10 @@
                     <tr>
                         <td style="font-weight:600;">{{ $r->section->course->name ?? 'N/A' }}</td>
                         <td>
-                            <span style="font-weight:800;font-size:1rem;color:{{ ($r->overall_weighted_rating ?? 0) >= 4 ? '#1D4ED8' : '#D97706' }};">
+                            <span style="font-weight:800;font-size:1rem;color:{{ ($r->overall_weighted_rating ?? 0) >= 4 ? '#6c55e8' : '#dd8509' }};">
                                 {{ $r->overall_weighted_rating ? number_format($r->overall_weighted_rating,1) : '—' }}
                             </span>
-                            @if($r->overall_weighted_rating)<span style="color:#94A3B8;font-size:0.75rem;">/5</span>@endif
+                            @if($r->overall_weighted_rating)<span style="color:#75809a;font-size:0.75rem;">/5</span>@endif
                         </td>
                         <td>{{ $r->response_count }}</td>
                     </tr>

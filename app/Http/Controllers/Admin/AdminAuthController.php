@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 /**
- * Standard LaraCopilot admin session auth (blade stack). Pre-baked in the
+ * Standard admin session auth (blade stack). Pre-baked in the
  * boilerplate so generated apps always have a working login without the AI
  * having to create it. The demo credentials below are displayed on
  * resources/views/admin/login.blade.php — they must stay byte-identical in

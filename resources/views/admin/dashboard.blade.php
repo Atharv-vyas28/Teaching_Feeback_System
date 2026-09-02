@@ -1,172 +1,835 @@
 @extends('layouts.dashboard')
 
 @section('title', 'Admin Dashboard')
-@php $header = 'Admin Dashboard'; $subheader = 'Institute-wide overview'; @endphp
+
+@php
+    $header = 'Admin Dashboard';
+    $subheader = 'Institution-wide academic performance and feedback intelligence.';
+@endphp
 
 @section('sidebar-nav')
-<div class="nav-section">Main</div>
-<a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-    Dashboard
-</a>
-<div class="nav-section">People</div>
-<a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-    Users
-</a>
-<div class="nav-section">Academic</div>
-<a href="{{ route('admin.departments.index') }}" class="nav-link {{ request()->routeIs('admin.departments*') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-    Departments
-</a>
-<a href="{{ route('admin.courses.index') }}" class="nav-link {{ request()->routeIs('admin.courses*') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-    Courses
-</a>
-<a href="{{ route('admin.semesters.index') }}" class="nav-link {{ request()->routeIs('admin.semesters*') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-    Semesters
-</a>
-<a href="{{ route('admin.enrollments.index') }}" class="nav-link {{ request()->routeIs('admin.enrollments*') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-    Enrollments
-</a>
-<div class="nav-section">Feedback</div>
-<a href="{{ route('admin.feedback-questions.index') }}" class="nav-link {{ request()->routeIs('admin.feedback-questions*') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-    Feedback Questions
-</a>
-<div class="nav-section">Reports</div>
-<a href="{{ route('admin.reports.attendance') }}" class="nav-link {{ request()->routeIs('admin.reports.attendance') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-    Attendance Report
-</a>
-<a href="{{ route('admin.reports.ratings') }}" class="nav-link {{ request()->routeIs('admin.reports.ratings') ? 'active' : '' }}">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-    Ratings Report
-</a>
+    @include('admin.partials.sidebar')
 @endsection
 
 @section('content')
-<div class="space-y-6">
-    <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        @php
-        $statItems = [
-            ['label'=>'Students',  'value'=>$stats['total_students'],  'color'=>'bg-blue-100 text-blue-600',   'icon'=>'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-            ['label'=>'Faculty',   'value'=>$stats['total_faculty'],   'color'=>'bg-purple-100 text-purple-600','icon'=>'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
-            ['label'=>'Staff',     'value'=>$stats['total_staff'],     'color'=>'bg-green-100 text-green-600',  'icon'=>'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0'],
-            ['label'=>'Courses',   'value'=>$stats['total_courses'],   'color'=>'bg-yellow-100 text-yellow-600','icon'=>'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
-            ['label'=>'Depts',     'value'=>$stats['total_depts'],     'color'=>'bg-red-100 text-red-600',     'icon'=>'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-            ['label'=>'Active FB', 'value'=>$stats['active_sessions'], 'color'=>'bg-orange-100 text-orange-600','icon'=>'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-        ];
-        @endphp
-        @foreach($statItems as $stat)
-        <div class="stat-card">
-            <div class="stat-icon {{ $stat['color'] }} mb-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $stat['icon'] }}"/></svg>
+<style>
+    .analytics-dashboard {
+        --primary: #6c55e8;
+        --primary-dark: #4f3cc9;
+        --blue: #3576f6;
+        --green: #16a772;
+        --orange: #f59e0b;
+        --red: #ef5b69;
+        --ink: #17213a;
+        --muted: #75809a;
+        --line: #e9ecf4;
+        --surface: #ffffff;
+    }
+
+    .analytics-dashboard .filter-card,
+    .analytics-dashboard .panel,
+    .analytics-dashboard .kpi-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(45, 55, 90, .05);
+    }
+
+    .analytics-dashboard .filter-card {
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+
+    .analytics-dashboard .filters {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(130px, 1fr));
+        gap: 12px;
+        align-items: end;
+    }
+
+    .analytics-dashboard label {
+        display: block;
+        color: var(--muted);
+        font-size: .72rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .analytics-dashboard select,
+    .analytics-dashboard input {
+        width: 100%;
+        border: 1px solid #dfe4ee;
+        border-radius: 9px;
+        background: #fbfcff;
+        color: var(--ink);
+        padding: 9px 10px;
+        outline: none;
+    }
+
+    .analytics-dashboard .filter-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .analytics-dashboard .apply-btn,
+    .analytics-dashboard .reset-btn {
+        padding: 10px 13px;
+        border-radius: 9px;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: 0;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .analytics-dashboard .apply-btn {
+        background: var(--primary);
+        color: white;
+    }
+
+    .analytics-dashboard .reset-btn {
+        background: #f0effb;
+        color: var(--primary-dark);
+    }
+
+    .analytics-dashboard .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(170px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .analytics-dashboard .kpi-card {
+        padding: 17px;
+    }
+
+    .analytics-dashboard .kpi-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .analytics-dashboard .kpi-label {
+        color: var(--muted);
+        font-size: .75rem;
+        font-weight: 700;
+    }
+
+    .analytics-dashboard .kpi-icon {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+
+    .analytics-dashboard .kpi-value {
+        color: var(--ink);
+        font-size: 1.65rem;
+        font-weight: 800;
+        margin-top: 12px;
+    }
+
+    .analytics-dashboard .kpi-note {
+        color: #94a0b7;
+        margin-top: 3px;
+        font-size: .72rem;
+    }
+
+    .analytics-dashboard .chart-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .analytics-dashboard .two-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .analytics-dashboard .panel {
+        padding: 19px;
+    }
+
+    .analytics-dashboard .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .analytics-dashboard .panel h3 {
+        margin: 0;
+        font-size: .98rem;
+        color: var(--ink);
+    }
+
+    .analytics-dashboard .panel-subtitle {
+        color: var(--muted);
+        font-size: .75rem;
+    }
+
+    .analytics-dashboard .chart-box {
+        height: 270px;
+        position: relative;
+    }
+
+    .analytics-dashboard .table-wrap {
+        overflow-x: auto;
+    }
+
+    .analytics-dashboard table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .analytics-dashboard th {
+        color: #93a0b9;
+        font-size: .68rem;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        padding: 11px 9px;
+        white-space: nowrap;
+    }
+
+    .analytics-dashboard td {
+        color: #34415c;
+        font-size: .82rem;
+        padding: 13px 9px;
+        border-top: 1px solid #eff1f6;
+    }
+
+    .analytics-dashboard .rank {
+        color: var(--primary);
+        font-weight: 800;
+    }
+
+    .analytics-dashboard .score {
+        font-weight: 800;
+        color: var(--ink);
+    }
+
+    .analytics-dashboard .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: .68rem;
+        font-weight: 700;
+    }
+
+    .analytics-dashboard .excellent {
+        color: #087d57;
+        background: #ddfaee;
+    }
+
+    .analytics-dashboard .good {
+        color: #2563d9;
+        background: #e5efff;
+    }
+
+    .analytics-dashboard .attention {
+        color: #ba6700;
+        background: #fff3d5;
+    }
+
+    .analytics-dashboard .alert-row {
+        display: flex;
+        gap: 10px;
+        padding: 12px 0;
+        border-bottom: 1px solid #eff1f6;
+    }
+
+    .analytics-dashboard .alert-row:last-child {
+        border-bottom: 0;
+    }
+
+    .analytics-dashboard .alert-icon {
+        background: #fff1d4;
+        color: #d97706;
+        min-width: 29px;
+        height: 29px;
+        display: grid;
+        place-items: center;
+        border-radius: 8px;
+    }
+
+    .analytics-dashboard .alert-title {
+        font-size: .76rem;
+        color: #9a5e09;
+        font-weight: 800;
+    }
+
+    .analytics-dashboard .alert-text {
+        font-size: .78rem;
+        color: #64718a;
+        margin-top: 2px;
+    }
+
+    .analytics-dashboard .review-row {
+        padding: 12px 0;
+        border-bottom: 1px solid #eff1f6;
+    }
+
+    .analytics-dashboard .review-row:last-child {
+        border-bottom: 0;
+    }
+
+    .analytics-dashboard .review-title {
+        color: var(--ink);
+        font-weight: 700;
+        font-size: .82rem;
+    }
+
+    .analytics-dashboard .review-meta {
+        color: var(--muted);
+        font-size: .72rem;
+        margin-top: 3px;
+    }
+
+    .analytics-dashboard .review-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-size: .74rem;
+        font-weight: 800;
+    }
+
+    @media (max-width: 1180px) {
+        .analytics-dashboard .filters {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .analytics-dashboard .kpi-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 850px) {
+        .analytics-dashboard .chart-grid,
+        .analytics-dashboard .two-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .analytics-dashboard .kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 560px) {
+        .analytics-dashboard .filters,
+        .analytics-dashboard .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="analytics-dashboard">
+
+    <form method="GET" action="{{ route('admin.dashboard') }}" class="filter-card">
+        <div class="filters">
+            <div>
+                <label>Department</label>
+                <select name="department_id">
+                    <option value="">All departments</option>
+                    @foreach($departments as $department)
+                        <option
+                            value="{{ $department->id }}"
+                            @selected($filters['department_id'] == $department->id)
+                        >
+                            {{ $department->name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
-            <div class="text-2xl font-bold text-slate-800">{{ $stat['value'] }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ $stat['label'] }}</div>
+
+            <div>
+                <label>Semester</label>
+                <select name="semester_id">
+                    <option value="">All semesters</option>
+                    @foreach(\App\Models\Semester::orderBy('name')->get() as $semester)
+                        <option
+                            value="{{ $semester->id }}"
+                            @selected($filters['semester_id'] == $semester->id)
+                        >
+                            {{ $semester->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label>Course</label>
+                <select name="course_id">
+                    <option value="">All courses</option>
+                    @foreach(\App\Models\Course::where('is_active', true)->orderBy('name')->get() as $course)
+                        <option
+                            value="{{ $course->id }}"
+                            @selected($filters['course_id'] == $course->id)
+                        >
+                            {{ $course->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label>Faculty</label>
+                <select name="faculty_id">
+                    <option value="">All faculty</option>
+                    @foreach(\App\Models\User::where('role', 'faculty')->where('is_active', true)->orderBy('name')->get() as $faculty)
+                        <option
+                            value="{{ $faculty->id }}"
+                            @selected($filters['faculty_id'] == $faculty->id)
+                        >
+                            {{ $faculty->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label>From date</label>
+                <input type="date" name="from_date" value="{{ $filters['from_date'] }}">
+            </div>
+
+            <div>
+                <label>To date</label>
+                <input type="date" name="to_date" value="{{ $filters['to_date'] }}">
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="apply-btn">Apply Filters</button>
+                <a href="{{ route('admin.dashboard') }}" class="reset-btn">Reset</a>
+            </div>
         </div>
+    </form>
+
+    <div class="kpi-grid">
+        @php
+            $kpis = [
+                ['Departments', $stats['total_depts'], '◈', '#eeeaff', '#6248e9', 'Institute structure'],
+                ['Courses', $stats['total_courses'], '▤', '#e6efff', '#3576f6', 'Active academic courses'],
+                ['Faculty', $stats['total_faculty'], '♙', '#e3faf2', '#10976b', 'Active teaching faculty'],
+                ['Students', $stats['total_students'], '◉', '#fff0df', '#e37b22', 'Active student records'],
+                ['Active Feedback', $stats['active_feedback'], '◌', '#eaf0ff', '#3f69dc', 'Currently collecting responses'],
+                ['Pending Review', $stats['pending_review'], '!', '#fff3dc', '#dd8509', 'Admin release required'],
+                ['Institute Rating', number_format($stats['average_rating'], 2) . ' / 5', '★', '#f5edff', '#8955d9', 'Released anonymous feedback'],
+                ['Average Attendance', number_format($stats['average_attendance'], 1) . '%', '◷', '#e4faf3', '#16a772', 'Present attendance records'],
+            ];
+        @endphp
+
+        @foreach($kpis as [$label, $value, $icon, $bg, $color, $note])
+            <div class="kpi-card">
+                <div class="kpi-top">
+                    <span class="kpi-label">{{ $label }}</span>
+                    <span class="kpi-icon" style="background:{{ $bg }};color:{{ $color }};">
+                        {{ $icon }}
+                    </span>
+                </div>
+                <div class="kpi-value">{{ $value }}</div>
+                <div class="kpi-note">{{ $note }}</div>
+            </div>
         @endforeach
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Recent Sessions -->
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="font-semibold text-slate-800">Recent Class Sessions</h3>
-                <a href="{{ route('admin.reports.attendance') }}" class="text-xs text-blue-600 hover:underline">View all</a>
+    <div class="chart-grid">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h3>Institute Rating Trend</h3>
+                    <div class="panel-subtitle">Released feedback performance by semester</div>
+                </div>
+                <span class="badge good">Rating / 5</span>
             </div>
-            <div class="overflow-auto">
-                <table class="data-table">
-                    <thead><tr><th>Course</th><th>Conducted By</th><th>Date</th><th>Status</th></tr></thead>
-                    <tbody>
-                        @forelse($recentSessions as $session)
+            <div class="chart-box">
+                <canvas id="ratingTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h3>Feedback Participation</h3>
+                    <div class="panel-subtitle">Eligible students versus responses</div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <canvas id="responseRateChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="two-grid">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h3>Department Performance</h3>
+                    <div class="panel-subtitle">Average rating comparison</div>
+                </div>
+            </div>
+            <div class="chart-box">
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h3>Attention Required</h3>
+                    <div class="panel-subtitle">Automatically detected academic concerns</div>
+                </div>
+            </div>
+
+            @forelse($attentionAlerts as $alert)
+                <div class="alert-row">
+                    <div class="alert-icon">!</div>
+                    <div>
+                        <div class="alert-title">{{ $alert['type'] }}</div>
+                        <div class="alert-text">{{ $alert['message'] }}</div>
+                    </div>
+                </div>
+            @empty
+                <div style="text-align:center;color:#8591a7;padding:48px 8px;">
+                    ✓ No performance alerts for the selected filters.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-head">
+            <div>
+                <h3>Department Performance Table</h3>
+                <div class="panel-subtitle">Drill down from institute to department-level performance.</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Faculty</th>
+                        <th>Courses</th>
+                        <th>Students</th>
+                        <th>Rating</th>
+                        <th>Attendance</th>
+                        <th>Response Rate</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($departmentPerformance as $index => $department)
+                        @php
+                            $status = $department['rating'] >= 4.5
+                                ? ['Excellent', 'excellent']
+                                : ($department['rating'] >= 3.5
+                                    ? ['Good', 'good']
+                                    : ['Needs Attention', 'attention']);
+                        @endphp
                         <tr>
                             <td>
-                                <div class="font-medium text-slate-700">{{ $session->section->course->name ?? 'N/A' }}</div>
-                                <div class="text-xs text-slate-400">{{ $session->topic ?? 'No topic' }}</div>
+                                <span class="rank">#{{ $index + 1 }}</span>
+                                &nbsp;
+                                <strong>{{ $department['name'] }}</strong>
+                                <div style="font-size:.7rem;color:#99a3b7;">
+                                    {{ $department['code'] }}
+                                </div>
                             </td>
-                            <td>{{ $session->conductor->name ?? 'N/A' }}</td>
-                            <td>{{ $session->session_date->format('M d, Y') }}</td>
-                            <td>
-                                @php $sc = ['completed'=>'badge-green','ongoing'=>'badge-blue','scheduled'=>'badge-yellow','cancelled'=>'badge-red'][$session->status] ?? 'badge-gray'; @endphp
-                                <span class="badge {{ $sc }}">{{ ucfirst($session->status) }}</span>
+                            <td>{{ $department['faculty_count'] }}</td>
+                            <td>{{ $department['course_count'] }}</td>
+                            <td>{{ $department['student_count'] }}</td>
+                            <td class="score">
+                                {{ $department['rating'] > 0 ? number_format($department['rating'], 2) . ' / 5' : '—' }}
+                            </td>
+                            <td>{{ number_format($department['attendance'], 1) }}%</td>
+                            <td>{{ number_format($department['response_rate'], 1) }}%</td>
+                            <td><span class="badge {{ $status[1] }}">{{ $status[0] }}</span></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:26px;color:#8792a8;">
+                                No department analytics are available for the selected filters.
                             </td>
                         </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="two-grid">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h3>Top Faculty Performance</h3>
+                    <div class="panel-subtitle">Based on released anonymous feedback only</div>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Faculty</th>
+                            <th>Department</th>
+                            <th>Courses</th>
+                            <th>Rating</th>
+                            <th>Responses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($facultyPerformance as $faculty)
+                            <tr>
+                                <td><strong>{{ $faculty['name'] }}</strong></td>
+                                <td>{{ $faculty['department'] }}</td>
+                                <td>{{ $faculty['course_count'] }}</td>
+                                <td class="score">
+                                    {{ $faculty['rating'] > 0 ? number_format($faculty['rating'], 2) . ' / 5' : '—' }}
+                                </td>
+                                <td>{{ $faculty['response_count'] }}</td>
+                            </tr>
                         @empty
-                        <tr><td colspan="4" class="text-center text-slate-400 py-6">No sessions yet.</td></tr>
+                            <tr>
+                                <td colspan="5" style="text-align:center;padding:25px;color:#8792a8;">
+                                    No faculty performance data is available.
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Recent Users -->
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="font-semibold text-slate-800">Recently Added Users</h3>
-                <a href="{{ route('admin.users.index') }}" class="text-xs text-blue-600 hover:underline">Manage users</a>
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h3>Feedback Awaiting Review</h3>
+                    <div class="panel-subtitle">Closed sessions that are not released to faculty</div>
+                </div>
+                <span class="badge attention">{{ $stats['pending_review'] }} Pending</span>
             </div>
-            <div class="overflow-auto">
-                <table class="data-table">
-                    <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr></thead>
-                    <tbody>
-                        @foreach($recentUsers as $u)
-                        <tr>
-                            <td><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-bold">{{ strtoupper(substr($u->name,0,1)) }}</div> {{ $u->name }}</div></td>
-                            <td><span class="badge {{ ['admin'=>'badge-purple','faculty'=>'badge-blue','staff'=>'badge-green','student'=>'badge-yellow'][$u->role] ?? 'badge-gray' }}">{{ ucfirst($u->role) }}</span></td>
-                            <td class="text-slate-400 text-xs">{{ $u->email }}</td>
-                            <td><span class="badge {{ $u->is_active ? 'badge-green' : 'badge-red' }}">{{ $u->is_active ? 'Active' : 'Inactive' }}</span></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+
+            @forelse($pendingFeedback as $feedback)
+                <div class="review-row">
+                    <div style="display:flex;justify-content:space-between;gap:12px;">
+                        <div>
+                            <div class="review-title">
+                                {{ $feedback->classSession?->section?->course?->name ?? 'Course' }}
+                            </div>
+                            <div class="review-meta">
+                                {{ $feedback->classSession?->topic ?? 'Feedback session' }}
+                                · {{ $feedback->responses_count }} response(s)
+                            </div>
+                        </div>
+
+                        <a
+                            class="review-link"
+                            href="{{ route('admin.feedback-sessions.responses', $feedback) }}"
+                        >
+                            Review
+                        </a>
+                    </div>
+                </div>
+            @empty
+                <div style="text-align:center;color:#8591a7;padding:48px 8px;">
+                    No feedback is waiting for review.
+                </div>
+            @endforelse
         </div>
     </div>
 
-    <!-- Quick actions -->
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <h3 class="font-semibold text-slate-800 mb-4">Quick Actions</h3>
-        <div class="flex flex-wrap gap-3">
-            <a href="{{ route('admin.users.create') }}" class="btn-primary">Add User</a>
-            <a href="{{ route('admin.courses.create') }}" class="btn-secondary">Add Course</a>
-            <a href="{{ route('admin.departments.index') }}" class="btn-secondary">Departments</a>
-            <a href="{{ route('admin.feedback-questions.index') }}" class="btn-secondary">Manage Questions</a>
-            <a href="{{ route('admin.reports.ratings') }}" class="btn-secondary">View Ratings</a>
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <h3>Recent Class Sessions</h3>
+                <div class="panel-subtitle">Latest institute academic activity</div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Topic</th>
+                        <th>Conducted By</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentSessions as $session)
+                        <tr>
+                            <td>
+                                <strong>{{ $session->section?->course?->name ?? 'Course' }}</strong>
+                            </td>
+                            <td>{{ $session->topic ?? 'No topic' }}</td>
+                            <td>{{ $session->conductor?->name ?? 'Unknown' }}</td>
+                            <td>{{ $session->session_date?->format('M d, Y') ?? 'N/A' }}</td>
+                            <td>
+                                <span class="badge good">
+                                    {{ ucfirst($session->status) }}
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align:center;padding:25px;color:#8792a8;">
+                                No class sessions match the selected filters.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
-@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const driver = window.driver.js.driver;
-    const tour = driver({
-        showProgress: true,
-        animate: true,
-        steps: [
-            { element: '.sidebar-brand', popover: { title: 'Welcome to SmartPulse!', description: 'This is your admin dashboard. Let us show you around.', side: 'right', align: 'start' } },
-            { element: 'a[href="{{ route("admin.users.index") }}"]', popover: { title: 'Manage Users', description: 'Here you can add or manage students, faculty, and staff.', side: 'right', align: 'start' } },
-            { element: 'a[href="{{ route("admin.courses.index") }}"]', popover: { title: 'Academic Setup', description: 'Manage departments, courses, and sections.', side: 'right', align: 'start' } },
-            { element: 'a[href="{{ route("admin.reports.ratings") }}"]', popover: { title: 'Reports', description: 'View institute-wide attendance and feedback analytics.', side: 'right', align: 'start' } },
-            { element: '.grid.grid-cols-2', popover: { title: 'Quick Stats', description: 'Get a bird\'s eye view of your institute\'s current status.', side: 'bottom', align: 'start' } },
-        ]
+document.addEventListener('DOMContentLoaded', function () {
+    if (!window.Chart) {
+        return;
+    }
+
+    const trendData = @json($ratingTrend);
+    const departmentData = @json($departmentPerformance);
+
+    const chartDefaults = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    boxWidth: 10,
+                    color: '#69758e',
+                    font: { size: 11 }
+                }
+            }
+        }
+    };
+
+    new Chart(document.getElementById('ratingTrendChart'), {
+        type: 'line',
+        data: {
+            labels: trendData.map(item => item.label),
+            datasets: [{
+                label: 'Institute Rating',
+                data: trendData.map(item => item.rating),
+                borderColor: '#6c55e8',
+                backgroundColor: 'rgba(108,85,232,.12)',
+                borderWidth: 3,
+                fill: true,
+                tension: .35,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#6c55e8',
+                pointBorderWidth: 3,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    grid: { color: '#eef0f6' },
+                    ticks: { stepSize: 1, color: '#8b96ab' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#8b96ab' }
+                }
+            }
+        }
     });
 
-    const startBtn = document.getElementById('start-tour-btn');
-    if (startBtn) {
-        startBtn.addEventListener('click', () => tour.drive());
-    }
+    new Chart(document.getElementById('responseRateChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Submitted', 'Pending / No response'],
+            datasets: [{
+                data: [
+                    {{ (int) $stats['total_responses'] }},
+                    {{ max(0, (int) $stats['eligible_students'] - (int) $stats['total_responses']) }}
+                ],
+                backgroundColor: ['#6c55e8', '#e9e8f6'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            cutout: '72%',
+            plugins: {
+                ...chartDefaults.plugins,
+                title: {
+                    display: true,
+                    text: '{{ number_format($stats['response_rate'], 1) }}%',
+                    position: 'bottom',
+                    color: '#17213a',
+                    font: { size: 19, weight: '700' }
+                }
+            }
+        }
+    });
 
-    if (!localStorage.getItem('tourCompleted_admin')) {
-        setTimeout(() => tour.drive(), 500);
-        localStorage.setItem('tourCompleted_admin', 'true');
-    }
+    new Chart(document.getElementById('departmentChart'), {
+        type: 'bar',
+        data: {
+            labels: departmentData.map(item => item.name),
+            datasets: [{
+                label: 'Average Rating / 5',
+                data: departmentData.map(item => item.rating),
+                backgroundColor: [
+                    '#6c55e8', '#7d69f0', '#5b91f5', '#57b5d8',
+                    '#9b77dc', '#7aa1f2', '#51a987', '#e58a56'
+                ],
+                borderRadius: 7,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            ...chartDefaults,
+            plugins: {
+                ...chartDefaults.plugins,
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5,
+                    grid: { color: '#eef0f6' },
+                    ticks: { stepSize: 1, color: '#8b96ab' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: '#8b96ab',
+                        maxRotation: 30,
+                        minRotation: 0
+                    }
+                }
+            }
+        }
+    });
 });
 </script>
-@endpush
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    setInterval(function () {
+        window.location.reload();
+    }, 30000);
+});
+</script>
 @endsection
