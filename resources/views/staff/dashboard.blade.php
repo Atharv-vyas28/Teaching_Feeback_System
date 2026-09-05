@@ -13,9 +13,18 @@
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
     My Sessions
 </a>
+<a href="{{ route('staff.attendance.history') }}" class="nav-link">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Attendance History
+</a>
 <a href="{{ route('staff.attendance.create') }}" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
     New Session
+</a>
+<div class="nav-section-label">Feedback</div>
+<a href="{{ route('staff.feedback.index') }}" class="nav-link">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+    Assigned Feedback
 </a>
 @endsection
 
@@ -28,6 +37,8 @@
         ['label'=>'Total Sessions',    'value'=>$stats['total_sessions'],  'color'=>'background:linear-gradient(135deg,#EDE9FE,#DDD6FE);color:#6D28D9',  'icon'=>'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
         ['label'=>"Today's Sessions",  'value'=>$stats['today_sessions'],  'color'=>'background:linear-gradient(135deg,#FEF9C3,#FDE68A);color:#92400E',  'icon'=>'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
         ['label'=>'Active Feedback',   'value'=>$stats['active_feedback'], 'color'=>'background:linear-gradient(135deg,#DCFCE7,#BBF7D0);color:#15803D',  'icon'=>'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'],
+        ['label'=>'Closed Feedback',   'value'=>$stats['closed_feedback'], 'color'=>'background:linear-gradient(135deg,#F1F5F9,#E2E8F0);color:#475569',  'icon'=>'M5 13l4 4L19 7'],
+        ['label'=>'Expired Feedback',  'value'=>$stats['expired_feedback'], 'color'=>'background:linear-gradient(135deg,#FEE2E2,#FECACA);color:#DC2626',  'icon'=>'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
     ];
     @endphp
     @foreach($statItems as $s)
@@ -84,6 +95,55 @@
         </table>
     </div>
 </div>
+
+{{-- Active Feedback Sessions --}}
+@if($activeFeedbackSessions->count() > 0)
+<div class="card" style="margin-top: 24px;">
+    <div class="card-header">
+        <h3>Active Feedback Sessions</h3>
+        <a href="{{ route('staff.feedback.index') }}" class="btn-secondary btn-sm">View All</a>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th>Release Time</th>
+                    <th>Deadline</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($activeFeedbackSessions as $fs)
+                @php
+                    $isExpired = $fs->deadline_at && $fs->deadline_at < now();
+                @endphp
+                <tr>
+                    <td>
+                        <div style="font-weight:600;color:#0F172A;">{{ $fs->classSession->section->course->name ?? 'N/A' }}</div>
+                        <div style="font-size:0.75rem;color:#94A3B8;">Section {{ $fs->classSession->section->section_name ?? '—' }}</div>
+                    </td>
+                    <td>{{ $fs->release_at?->format('M d, h:i A') ?? '—' }}</td>
+                    <td>
+                        @if($isExpired)
+                            <span style="color:#DC2626;font-weight:600;">{{ $fs->deadline_at->format('M d, h:i A') }} (Expired)</span>
+                        @else
+                            {{ $fs->deadline_at?->format('M d, h:i A') ?? '—' }}
+                        @endif
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ route('staff.feedback.close', $fs) }}" onsubmit="return confirm('Close this feedback session?')">
+                            @csrf
+                            <button type="submit" class="btn-secondary btn-sm">Close Feedback</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endif
 
 @if($currentSemester)
 <div style="margin-top:16px;padding:14px 18px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;font-size:0.83rem;color:#1E40AF;">

@@ -8,11 +8,12 @@ use App\Models\ClassSection;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Models\FacultyCourse;
+use App\Models\Course;
+use App\Models\Department;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\FeedbackSession;
-use App\Services\FeedbackEligibilityService;
 
 
 class AttendanceController extends Controller
@@ -94,9 +95,7 @@ class AttendanceController extends Controller
     );
 }
 
-    public function __construct(
-        private FeedbackEligibilityService $eligibilityService
-    ) {}
+    public function __construct() {}
 
     protected function authorizeSection(ClassSection $section): void
     {
@@ -219,8 +218,8 @@ class AttendanceController extends Controller
                     [
                         'marked_by'        => auth()->id(),
                         'status'           => $status,
-                        // Automatically enable feedback for present students based on requirements
-                        'feedback_enabled' => $isPresent,
+                        'source'           => 'regular',
+                        'feedback_enabled' => false,
                         'marked_at'        => now(),
                         'remarks'          => $data['remarks'] ?? null,
                     ]
@@ -251,21 +250,128 @@ class AttendanceController extends Controller
         return redirect()->route('faculty.attendance.sessions')->with('success', 'Attendance saved successfully.');
     }
 
-    public function enableFeedback(Request $request, ClassSession $classSession)
+    /**
+     * Per-student attendance summary across all faculty courses.
+     * Supports filters: course (class_section_id), date_from, date_to, student search.
+     */
+    public function summary(Request $request)
     {
-        $this->authorizeSection($classSession->section);
+        $user = auth()->user();
 
-        $request->validate([
-            'student_ids'   => 'required|array',
-            'student_ids.*' => 'exists:users,id',
-        ]);
+        $sectionIds = FacultyCourse::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->pluck('class_section_id');
 
-        // Only enable for present students
-        Attendance::where('class_session_id', $classSession->id)
-            ->whereIn('student_id', $request->student_ids)
-            ->whereIn('status', ['present', 'late'])
-            ->update(['feedback_enabled' => true]);
+        // Validate the requested section belongs to this faculty
+        $filteredSectionId = $request->filled('section_id')
+            ? (int) $request->section_id
+            : null;
 
-        return back()->with('success', 'Feedback enabled for selected students.');
+        if ($filteredSectionId && ! $sectionIds->contains($filteredSectionId)) {
+            abort(403, 'You are not assigned to that course section.');
+        }
+
+        $activeSectionIds = $filteredSectionId
+            ? collect([$filteredSectionId])
+            : $sectionIds;
+
+        // Session IDs matching date range
+        $sessionQuery = ClassSession::whereIn('class_section_id', $activeSectionIds);
+
+        if ($request->filled('date_from')) {
+            $sessionQuery->whereDate('session_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $sessionQuery->whereDate('session_date', '<=', $request->date_to);
+        }
+
+        $sessionIds = $sessionQuery->pluck('id');
+
+        // Per-student summary
+        $summaryQuery = DB::table('attendance')
+            ->join('users', 'attendance.student_id', '=', 'users.id')
+            ->join('class_sessions', 'attendance.class_session_id', '=', 'class_sessions.id')
+            ->join('class_sections', 'class_sessions.class_section_id', '=', 'class_sections.id')
+            ->join('courses', 'class_sections.course_id', '=', 'courses.id')
+            ->whereIn('attendance.class_session_id', $sessionIds)
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->where(function ($sub) use ($request) {
+                    $sub->where('users.name', 'like', '%' . $request->search . '%')
+                        ->orWhere('users.roll_number', 'like', '%' . $request->search . '%');
+                });
+            })
+            ->selectRaw("
+                attendance.student_id,
+                users.name as student_name,
+                users.roll_number,
+                courses.name as course_name,
+                courses.code as course_code,
+                class_sections.id as section_id,
+                COUNT(attendance.id) as total_classes,
+                SUM(CASE WHEN attendance.status IN ('present','late') THEN 1 ELSE 0 END) as present_count,
+                SUM(CASE WHEN attendance.status = 'absent' THEN 1 ELSE 0 END) as absent_count
+            ")
+            ->groupBy(
+                'attendance.student_id',
+                'users.name',
+                'users.roll_number',
+                'courses.name',
+                'courses.code',
+                'class_sections.id'
+            )
+            ->orderBy('courses.name')
+            ->orderBy('users.name');
+
+        $summary = $summaryQuery->paginate(30)->withQueryString();
+
+        // Sections for filter dropdown
+        $sections = FacultyCourse::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->with(['section.course'])
+            ->get()
+            ->pluck('section');
+
+        return view('faculty.attendance.summary', compact(
+            'summary', 'sections', 'filteredSectionId'
+        ));
+    }
+
+    /**
+     * Export faculty attendance as Excel (.xlsx).
+     * Respects the same filters as summary().
+     */
+    public function exportExcel(Request $request)
+    {
+        $user = auth()->user();
+
+        $sectionIds = FacultyCourse::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->pluck('class_section_id');
+
+        $filteredSectionId = $request->filled('section_id')
+            ? (int) $request->section_id
+            : null;
+
+        if ($filteredSectionId && ! $sectionIds->contains($filteredSectionId)) {
+            abort(403);
+        }
+
+        $activeSectionIds = $filteredSectionId
+            ? collect([$filteredSectionId])
+            : $sectionIds;
+
+        $sessionQuery = ClassSession::whereIn('class_section_id', $activeSectionIds);
+        if ($request->filled('date_from')) {
+            $sessionQuery->whereDate('session_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $sessionQuery->whereDate('session_date', '<=', $request->date_to);
+        }
+        $sessionIds = $sessionQuery->pluck('id');
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\AttendanceExport($sessionIds, $request->all()),
+            'attendance_' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 }

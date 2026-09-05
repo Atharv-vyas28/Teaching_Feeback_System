@@ -100,8 +100,6 @@ class FeedbackSessionController extends Controller
             'is_released' => false,
         ]);
 
-        $this->eligibilityService->createEligibilityRecords($feedbackSession);
-
         return back()->with(
             'success',
             'Feedback session opened. Eligible students can now submit feedback.'

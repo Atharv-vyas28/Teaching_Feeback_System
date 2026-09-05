@@ -68,10 +68,35 @@ class DashboardController extends Controller
     public function attendance()
     {
         $student = auth()->user();
+
         $records = Attendance::where('student_id', $student->id)
             ->with(['session.section.course'])
             ->orderByDesc('created_at')
-            ->paginate(20);
-        return view('student.attendance', compact('records'));
+            ->paginate(25);
+
+        // Per-course summary
+        $courseSummary = DB::table('attendance')
+            ->join('class_sessions', 'attendance.class_session_id', '=', 'class_sessions.id')
+            ->join('class_sections', 'class_sessions.class_section_id', '=', 'class_sections.id')
+            ->join('courses', 'class_sections.course_id', '=', 'courses.id')
+            ->where('attendance.student_id', $student->id)
+            ->selectRaw("
+                courses.name as course_name,
+                courses.code as course_code,
+                COUNT(attendance.id) as total_classes,
+                SUM(CASE WHEN attendance.status IN ('present','late') THEN 1 ELSE 0 END) as present_count,
+                SUM(CASE WHEN attendance.status = 'absent' THEN 1 ELSE 0 END) as absent_count
+            ")
+            ->groupBy('courses.name', 'courses.code')
+            ->orderBy('courses.name')
+            ->get()
+            ->map(function ($row) {
+                $row->attendance_pct = $row->total_classes > 0
+                    ? round(($row->present_count / $row->total_classes) * 100, 1)
+                    : 0;
+                return $row;
+            });
+
+        return view('student.attendance', compact('records', 'courseSummary'));
     }
 }

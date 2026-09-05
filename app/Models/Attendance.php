@@ -13,6 +13,7 @@ class Attendance extends Model
         'student_id',
         'marked_by',
         'status',
+        'source',
         'feedback_enabled',
         'marked_at',
         'remarks',
@@ -67,8 +68,4 @@ class Attendance extends Model
         return in_array($this->status, ['present', 'late']);
     }
 
-    public function canSubmitFeedback(): bool
-    {
-        return $this->isPresent() && $this->feedback_enabled;
-    }
 }

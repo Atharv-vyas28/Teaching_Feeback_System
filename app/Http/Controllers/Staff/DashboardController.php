@@ -8,6 +8,7 @@ use App\Models\ClassSession;
 use App\Models\Attendance;
 use App\Models\FeedbackSession;
 use App\Models\Semester;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -20,13 +21,28 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->pluck('class_section_id');
 
+        $assignedFeedback = FeedbackSession::where('assigned_staff_id', $user->id)->count();
+        $activeFeedback   = FeedbackSession::where('assigned_staff_id', $user->id)
+                                ->where('status', 'active')->count();
+        $closedFeedback   = FeedbackSession::where('assigned_staff_id', $user->id)
+                                ->whereIn('status', ['closed'])->count();
+
+        // Expired = active but past deadline
+        $expiredFeedback  = FeedbackSession::where('assigned_staff_id', $user->id)
+                                ->where('status', 'active')
+                                ->whereNotNull('deadline_at')
+                                ->where('deadline_at', '<', now())
+                                ->count();
+
         $stats = [
-            'sections'        => $sectionIds->count(),
-            'total_sessions'  => ClassSession::whereIn('class_section_id', $sectionIds)->count(),
-            'today_sessions'  => ClassSession::whereIn('class_section_id', $sectionIds)
-                                    ->whereDate('session_date', today())->count(),
-            'active_feedback' => FeedbackSession::whereHas('classSession', fn($q) => $q->whereIn('class_section_id', $sectionIds))
-                                    ->where('status', 'active')->count(),
+            'sections'          => $sectionIds->count(),
+            'total_sessions'    => ClassSession::whereIn('class_section_id', $sectionIds)->count(),
+            'today_sessions'    => ClassSession::whereIn('class_section_id', $sectionIds)
+                                        ->whereDate('session_date', today())->count(),
+            'active_feedback'   => $activeFeedback,
+            'assigned_feedback' => $assignedFeedback,
+            'closed_feedback'   => $closedFeedback,
+            'expired_feedback'  => $expiredFeedback,
         ];
 
         $recentSessions = ClassSession::with(['section.course', 'attendanceRecords'])
@@ -35,6 +51,17 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
-        return view('staff.dashboard', compact('stats', 'recentSessions', 'currentSemester'));
+        $activeFeedbackSessions = FeedbackSession::with([
+                'classSession.section.course',
+            ])
+            ->where('assigned_staff_id', $user->id)
+            ->where('status', 'active')
+            ->orderByDesc('release_at')
+            ->take(5)
+            ->get();
+
+        return view('staff.dashboard', compact(
+            'stats', 'recentSessions', 'currentSemester', 'activeFeedbackSessions'
+        ));
     }
 }

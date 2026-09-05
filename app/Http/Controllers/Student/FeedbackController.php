@@ -34,13 +34,10 @@ class FeedbackController extends Controller
             'classSession.section.course',
             'classSession.section.faculty',
         ])
-            ->whereHas(
-                'classSession',
-                fn ($query) => $query->whereIn(
-                    'class_section_id',
-                    $enrolledSectionIds
-                )
-            )
+            ->whereHas('classSession', function ($query) use ($enrolledSectionIds) {
+                $query->whereIn('class_section_id', $enrolledSectionIds);
+            })
+            ->orderByDesc('created_at')
             ->get();
 
         $available = [];
@@ -53,31 +50,23 @@ class FeedbackController extends Controller
                 $session
             );
 
-            $eligibilityRecord = FeedbackEligibility::where(
+            $submitted = FeedbackEligibility::where(
                 'feedback_session_id',
                 $session->id
             )
                 ->where('student_id', $student->id)
-                ->first();
+                ->where('has_submitted', true)
+                ->exists();
 
-            if ($eligibilityRecord && $eligibilityRecord->has_submitted) {
+            if ($submitted) {
                 $completed[] = $session;
             } elseif ($eligibility['eligible']) {
                 $available[] = $session;
             } else {
-                $hasAttendance = Attendance::where(
-                    'class_session_id',
-                    $session->class_session_id
-                )
-                    ->where('student_id', $student->id)
-                    ->exists();
-
-                if ($hasAttendance) {
-                    $ineligible[] = [
-                        'session' => $session,
-                        'reason' => $eligibility['reason'],
-                    ];
-                }
+                $ineligible[] = [
+                    'session' => $session,
+                    'reason' => $eligibility['reason'],
+                ];
             }
         }
 
@@ -106,6 +95,12 @@ class FeedbackController extends Controller
             ->ordered()
             ->get();
 
+        if ($questions->isEmpty()) {
+            return redirect()
+                ->route('student.feedback.index')
+                ->with('error', 'Feedback cannot be submitted because no questions are configured.');
+        }
+
         $classSession = $feedbackSession->classSession;
 
         $faculty = $classSession->section
@@ -129,7 +124,7 @@ class FeedbackController extends Controller
     ) {
         $student = auth()->user();
 
-        // Re-check eligibility on the server to prevent URL bypass.
+        // Re-check every security condition on the server.
         $eligibility = $this->eligibilityService->checkEligibility(
             $student,
             $feedbackSession
@@ -144,6 +139,12 @@ class FeedbackController extends Controller
         $questions = FeedbackQuestion::active()
             ->ordered()
             ->get();
+
+        if ($questions->isEmpty()) {
+            return redirect()
+                ->route('student.feedback.index')
+                ->with('error', 'Feedback cannot be submitted because no questions are configured.');
+        }
 
         $rules = [
             'answers' => 'required|array',
@@ -171,12 +172,27 @@ class FeedbackController extends Controller
             $request,
             $feedbackSession,
             $student,
-            $questions,
-            $eligibility
+            $questions
         ) {
             /*
+             * Lock this student's record during submission.
+             * This prevents duplicate feedback from repeated clicks/requests.
+             */
+            $eligibilityRecord = FeedbackEligibility::where(
+                'feedback_session_id',
+                $feedbackSession->id
+            )
+                ->where('student_id', $student->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($eligibilityRecord?->has_submitted) {
+                abort(422, 'You have already submitted feedback for this session.');
+            }
+
+            /*
              * Anonymous response:
-             * No student_id is stored in feedback_responses.
+             * The response table does NOT contain student_id.
              */
             $response = FeedbackResponse::create([
                 'feedback_session_id' => $feedbackSession->id,
@@ -199,11 +215,9 @@ class FeedbackController extends Controller
             }
 
             /*
-             * Eligibility prevents duplicate submission.
-             * It is deliberately not linked to the anonymous response.
+             * This table only records whether the authenticated student submitted.
+             * It is not connected to the anonymous feedback response.
              */
-            $eligibilityRecord = $eligibility['eligibility_record'];
-
             if ($eligibilityRecord) {
                 $eligibilityRecord->update([
                     'has_submitted' => true,
@@ -217,12 +231,29 @@ class FeedbackController extends Controller
                     'submitted_at' => now(),
                 ]);
             }
-        });
 
-        /*
-         * Do NOT calculate faculty ratings here.
-         * Ratings are calculated only when the admin releases feedback.
-         */
+            /*
+             * Automatic feedback-based attendance.
+             *
+             * If regular attendance already exists, it becomes Present.
+             * If no attendance exists, a new Present record is created.
+             */
+            Attendance::updateOrCreate(
+                [
+                    'class_session_id' => $feedbackSession->class_session_id,
+                    'student_id' => $student->id,
+                ],
+                [
+                    'marked_by' => $feedbackSession->assigned_staff_id
+                        ?? $feedbackSession->classSession->conducted_by,
+                    'status' => 'present',
+                    'source' => 'feedback',
+                    'feedback_enabled' => false,
+                    'marked_at' => now(),
+                    'remarks' => 'Marked present after valid feedback submission.',
+                ]
+            );
+        });
 
         return redirect()
             ->route(
@@ -231,7 +262,7 @@ class FeedbackController extends Controller
             )
             ->with(
                 'success',
-                'Feedback submitted anonymously. Thank you!'
+                'Feedback submitted anonymously. Your attendance has been marked present.'
             );
     }
 

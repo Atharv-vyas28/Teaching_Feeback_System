@@ -35,6 +35,7 @@
                 <tr>
                     <th>Course & Topic</th>
                     <th>Assigned Faculty</th>
+                    <th>Feedback Staff</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Release Status</th>
@@ -61,6 +62,22 @@
 
                         <td>
                             {{ $faculty?->name ?? 'Unassigned' }}
+                        </td>
+
+                        <td>
+                            <form method="POST" action="{{ route('admin.feedback-sessions.assign-staff', $session) }}" style="display:flex;gap:6px;align-items:center;">
+                                @csrf
+                                <select name="staff_id" class="form-select" style="min-width:145px;" required>
+                                    <option value="">Assign staff...</option>
+                                    @foreach($staffMembers as $staff)
+                                        <option value="{{ $staff->id }}" @selected($session->assigned_staff_id === $staff->id)>{{ $staff->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn-secondary btn-sm">Save</button>
+                            </form>
+                            @if($session->assignedStaff)
+                                <div style="font-size:.72rem;color:#059669;margin-top:5px;">Assigned: {{ $session->assignedStaff->name }}</div>
+                            @endif
                         </td>
 
                         <td>
@@ -114,7 +131,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align:center;padding:24px;">
+                        <td colspan="7" style="text-align:center;padding:24px;">
                             No feedback sessions found.
                         </td>
                     </tr>

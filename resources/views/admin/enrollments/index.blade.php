@@ -7,7 +7,7 @@
 @endsection
 
 @section('content')
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:20px;">
     {{-- Enroll Student --}}
     <div class="card">
         <div class="card-header"><h3>Enroll Student</h3></div>
@@ -80,6 +80,35 @@
                     </select>
                 </div>
                 <button type="submit" class="btn-primary">Assign Faculty</button>
+            </form>
+        </div>
+    </div>
+
+    {{-- Assign Staff --}}
+    <div class="card">
+        <div class="card-header"><h3>Assign Staff</h3></div>
+        <div class="card-body">
+            <form method="POST" action="{{ route('admin.staff.assign') }}">
+                @csrf
+                <div style="margin-bottom:12px;">
+                    <label class="form-label">Staff Member</label>
+                    <select name="user_id" class="form-select" required>
+                        <option value="">Select staff...</option>
+                        @foreach($staff as $member)
+                            <option value="{{ $member->id }}">{{ $member->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label class="form-label">Course Section</label>
+                    <select name="class_section_id" class="form-select" required>
+                        <option value="">Select section...</option>
+                        @foreach($sections as $s)
+                            <option value="{{ $s->id }}">{{ $s->course->name }} - Sec {{ $s->section_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Assign Staff</button>
             </form>
         </div>
     </div>
