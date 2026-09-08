@@ -114,12 +114,15 @@ class AttendanceController extends Controller
                 [
                     'class_session_id' => $classSession->id,
                     'student_id' => $studentId,
+                    'source' => 'feedback_day',
                 ],
                 [
                     'marked_by' => auth()->id(),
                     'status' => $data['status'],
-                    'source' => 'regular',
-                    'feedback_enabled' => false,
+                    'feedback_enabled' => in_array(
+                        $data['status'],
+                        ['present', 'late']
+                    ),
                     'marked_at' => now(),
                     'remarks' => $data['remarks'] ?? null,
                 ]

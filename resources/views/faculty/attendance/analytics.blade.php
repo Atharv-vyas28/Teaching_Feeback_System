@@ -4,33 +4,52 @@
 
 @php
     $header = 'Attendance Analysis';
-    $subheader = 'Attendance and feedback eligibility for this class session.';
 @endphp
 
 @section('sidebar-nav')
 <div class="nav-section-label">Main</div>
 
 <a href="{{ route('faculty.dashboard') }}" class="nav-link">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 12l2-2 7-7 7 7 2 2M5 10v10h14V10M9 20v-6h6v6"/>
+    </svg>
     Dashboard
 </a>
 
 <div class="nav-section-label">Attendance</div>
 
 <a href="{{ route('faculty.attendance.sessions') }}" class="nav-link active">
-    My Sessions
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 00-2-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+    </svg>
+    Courses
 </a>
 
 <a href="{{ route('faculty.attendance.create') }}" class="nav-link">
-    New Session
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 4v16m8-8H4"/>
+    </svg>
+    Add Lecture
 </a>
 
 <div class="nav-section-label">Feedback</div>
 
 <a href="{{ route('faculty.feedback.index') }}" class="nav-link">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+    </svg>
     Feedback Sessions
 </a>
 
 <a href="{{ route('faculty.feedback.my-ratings') }}" class="nav-link">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+    </svg>
     My Ratings
 </a>
 @endsection
@@ -97,8 +116,8 @@
 
                 <div style="font-size:.8rem;color:#64748B;margin-top:4px;">
                     {{ $classSession->session_date?->format('M d, Y') ?? 'N/A' }}
-                    · {{ $classSession->start_time ?? '' }}
-                    to {{ $classSession->end_time ?? '' }}
+                    · {{ substr($classSession->start_time, 0, -3) ?? '' }}
+                    to {{ substr($classSession->end_time, 0, -3) ?? '' }}
                 </div>
             </div>
 
@@ -133,18 +152,12 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Attendance Rate</div>
+            <div class="stat-label">Attendance</div>
             <div class="stat-value">
                 {{ number_format($stats['attendance_percentage'], 1) }}%
             </div>
         </div>
 
-        <div class="stat-card">
-            <div class="stat-label">Feedback Enabled</div>
-            <div class="stat-value" style="color:#2563EB;">
-                {{ $stats['feedback_enabled'] }}
-            </div>
-        </div>
     </div>
 
     <div class="chart-grid">
@@ -159,30 +172,6 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h3>Feedback Eligibility</h3>
-            </div>
-
-            <div class="card-body chart-box">
-                <canvas id="feedbackPieChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="card" style="margin-bottom:18px;">
-        <div class="card-header">
-            <div>
-                <h3>Attendance Snapshot by Student</h3>
-                <span style="font-size:.75rem;color:#64748B;">
-                    1 = Present / Late, 0 = Absent
-                </span>
-            </div>
-        </div>
-
-        <div class="card-body" style="height:280px;position:relative;">
-            <canvas id="attendanceLineChart"></canvas>
-        </div>
     </div>
 
     <div class="card">
@@ -208,13 +197,6 @@
                     Absent Students ({{ $stats['absent'] }})
                 </button>
 
-                <button
-                    type="button"
-                    class="student-tab"
-                    data-target="feedback-list"
-                >
-                    Feedback Enabled ({{ $stats['feedback_enabled'] }})
-                </button>
             </div>
 
             <div id="present-list" class="student-list active">
@@ -231,12 +213,6 @@
                 ])
             </div>
 
-            <div id="feedback-list" class="student-list">
-                @include('faculty.attendance.partials.student-list', [
-                    'students' => $feedbackEnabledStudents,
-                    'title' => 'Students Eligible for Feedback'
-                ])
-            </div>
         </div>
     </div>
 </div>
@@ -272,70 +248,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    new Chart(document.getElementById('feedbackPieChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Feedback Enabled', 'Feedback Not Enabled'],
-            datasets: [{
-                data: [
-                    {{ (int) $stats['feedback_enabled'] }},
-                    {{ (int) $stats['feedback_disabled'] }}
-                ],
-                backgroundColor: ['#2563EB', '#E2E8F0'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '65%',
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-
-    new Chart(document.getElementById('attendanceLineChart'), {
-        type: 'line',
-        data: {
-            labels: lineData.map(item => item.student),
-            datasets: [{
-                label: 'Attendance',
-                data: lineData.map(item => item.value),
-                borderColor: '#4F46E5',
-                backgroundColor: 'rgba(79,70,229,.10)',
-                fill: true,
-                borderWidth: 3,
-                tension: 0.25,
-                pointRadius: 4,
-                pointBackgroundColor: '#4F46E5'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    min: 0,
-                    max: 1,
-                    ticks: {
-                        stepSize: 1,
-                        callback: function (value) {
-                            return value === 1 ? 'Present' : 'Absent';
-                        }
-                    }
-                },
-                x: {
-                    ticks: {
-                        maxRotation: 35,
-                        minRotation: 0
-                    }
-                }
-            }
-        }
-    });
 
     document.querySelectorAll('.student-tab').forEach(function (button) {
         button.addEventListener('click', function () {

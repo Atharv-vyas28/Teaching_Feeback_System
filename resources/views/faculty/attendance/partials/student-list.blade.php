@@ -10,7 +10,6 @@
                     <th>Roll Number</th>
                     <th>Student Name</th>
                     <th>Attendance</th>
-                    <th>Feedback Status</th>
                 </tr>
             </thead>
 
@@ -31,17 +30,6 @@
                             </span>
                         </td>
 
-                        <td>
-                            @if($attendance->feedback_enabled)
-                                <span class="badge badge-blue">
-                                    Enabled
-                                </span>
-                            @else
-                                <span class="badge badge-gray">
-                                    Not Enabled
-                                </span>
-                            @endif
-                        </td>
                     </tr>
                 @endforeach
             </tbody>

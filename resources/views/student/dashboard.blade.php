@@ -105,7 +105,7 @@
                 @foreach($todaySessions as $session)
                 <tr>
                     <td style="font-weight:600;">{{ $session->section->course->name ?? 'N/A' }}</td>
-                    <td>{{ $session->start_time }} – {{ $session->end_time }}</td>
+                    <td>{{ substr($session->start_time, 0, -3) }} – {{ substr($session->end_time, 0, -3) }}</td>
                     <td><span class="badge {{ ['completed'=>'badge-green','ongoing'=>'badge-blue','scheduled'=>'badge-yellow'][$session->status] ?? 'badge-gray' }}">{{ ucfirst($session->status) }}</span></td>
                 </tr>
                 @endforeach

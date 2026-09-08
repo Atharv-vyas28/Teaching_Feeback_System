@@ -11,18 +11,18 @@
 <div class="nav-section-label">Attendance</div>
 <a href="{{ route('staff.attendance.sessions') }}" class="nav-link active">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-    My Sessions
+    Courses
 </a>
 <a href="{{ route('staff.attendance.create') }}" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-    New Session
+    Add Lecture
 </a>
 @endsection
 
 @section('page-actions')
 <a href="{{ route('staff.attendance.create') }}" class="btn-primary">
     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-    New Session
+    Add Lecture
 </a>
 @endsection
 
@@ -42,7 +42,7 @@
                     </td>
                     <td>{{ $session->topic ?? '—' }}</td>
                     <td>{{ $session->session_date->format('M d, Y') }}</td>
-                    <td style="font-size:0.8rem;color:#64748B;">{{ $session->start_time }} – {{ $session->end_time }}</td>
+                    <td style="font-size:0.8rem;color:#64748B;">{{ substr($session->start_time, 0, -3) }} – {{ substr($session->end_time, 0, -3) }}</td>
                     <td>
                         <span class="badge badge-blue">
                             {{ $session->attendanceRecords->whereIn('status',['present','late'])->count() }} / {{ $session->attendanceRecords->count() }}

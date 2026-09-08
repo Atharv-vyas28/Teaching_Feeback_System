@@ -3,257 +3,468 @@
 namespace App\Http\Controllers\Faculty;
 
 use App\Http\Controllers\Controller;
-use App\Models\ClassSession;
-use App\Models\ClassSection;
 use App\Models\Attendance;
-use App\Models\User;
+use App\Models\ClassSection;
+use App\Models\ClassSession;
 use App\Models\FacultyCourse;
-use App\Models\Course;
-use App\Models\Department;
-use App\Models\Semester;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\FeedbackSession;
-
 
 class AttendanceController extends Controller
 {
-    public function analytics(ClassSession $classSession)
-{
-    $isAssigned = FacultyCourse::where('user_id', auth()->id())
-        ->where('class_section_id', $classSession->class_section_id)
-        ->where('is_active', true)
-        ->exists();
-
-    abort_unless($isAssigned, 403);
-
-    $classSession->load([
-        'section.course',
-        'attendanceRecords.student',
-    ]);
-
-    $records = $classSession->attendanceRecords
-        ->sortBy(fn ($attendance) => $attendance->student?->name)
-        ->values();
-
-    $presentStudents = $records
-        ->filter(fn ($attendance) => in_array(
-            $attendance->status,
-            ['present', 'late']
-        ))
-        ->values();
-
-    $absentStudents = $records
-        ->filter(fn ($attendance) => $attendance->status === 'absent')
-        ->values();
-
-    $feedbackEnabledStudents = $presentStudents
-        ->filter(fn ($attendance) => $attendance->feedback_enabled)
-        ->values();
-
-    $feedbackDisabledStudents = $presentStudents
-        ->filter(fn ($attendance) => ! $attendance->feedback_enabled)
-        ->values();
-
-    $stats = [
-        'total' => $records->count(),
-        'present' => $presentStudents->count(),
-        'absent' => $absentStudents->count(),
-        'late' => $records->where('status', 'late')->count(),
-        'feedback_enabled' => $feedbackEnabledStudents->count(),
-        'feedback_disabled' => $feedbackDisabledStudents->count(),
-    ];
-
-    $stats['attendance_percentage'] = $stats['total'] > 0
-        ? round(($stats['present'] / $stats['total']) * 100, 2)
-        : 0;
-
-    $lineChartData = $records->map(function ($attendance) {
-        return [
-            'student' => $attendance->student?->roll_number
-                ?? $attendance->student?->name
-                ?? 'Student',
-
-            'value' => in_array($attendance->status, ['present', 'late'])
-                ? 1
-                : 0,
-        ];
-    })->values();
-
-    return view(
-        'faculty.attendance.analytics',
-        compact(
-            'classSession',
-            'records',
-            'presentStudents',
-            'absentStudents',
-            'feedbackEnabledStudents',
-            'feedbackDisabledStudents',
-            'stats',
-            'lineChartData'
-        )
-    );
-}
-
-    public function __construct() {}
-
     protected function authorizeSection(ClassSection $section): void
     {
+        $assigned = FacultyCourse::where('user_id', auth()->id())
+            ->where('class_section_id', $section->id)
+            ->where('is_active', true)
+            ->exists();
+
+        abort_unless(
+            $assigned,
+            403,
+            'You are not assigned to this section.'
+        );
+    }
+
+    protected function authorizeClassSession(ClassSession $classSession): void
+    {
+        $classSession->loadMissing('section');
+
+        $this->authorizeSection($classSession->section);
+
+        abort_unless(
+            (int) $classSession->conducted_by === (int) auth()->id(),
+            403,
+            'You can only access sessions conducted by you.'
+        );
+    }
+
+    public function sessions(Request $request)
+    {
         $user = auth()->user();
-        // Faculty: must be assigned; Admin: always allowed
-        if ($user->isFaculty()) {
-            $assigned = FacultyCourse::where('user_id', $user->id)
-                ->where('class_section_id', $section->id)
-                ->exists();
-            abort_unless($assigned, 403, 'Not assigned to this section.');
+
+        $sectionIds = FacultyCourse::where('user_id', $user->id)
+            ->where('is_active', true)
+            ->pluck('class_section_id');
+
+        $selectedSectionId = $request->filled('section_id')
+            ? (int) $request->section_id
+            : null;
+
+        if ($selectedSectionId && ! $sectionIds->contains($selectedSectionId)) {
+            abort(403, 'You are not assigned to this course section.');
         }
-    }
 
-    public function sessions()
-    {
-        $user = auth()->user();
-        $sections = $user->facultyCourses()
-            ->with(['section.course', 'section.semester'])
-            ->where('is_active', true)
-            ->get()
-            ->pluck('section');
-
-        $sessions = ClassSession::with(['section.course', 'attendanceRecords'])
-            ->whereIn('class_section_id', $sections->pluck('id'))
+        $sessionCounts = DB::table('class_sessions')
+            ->whereIn('class_section_id', $sectionIds)
             ->where('conducted_by', $user->id)
-            ->orderByDesc('session_date')
-            ->paginate(20);
+            ->selectRaw('class_section_id, COUNT(*) as total_sessions')
+            ->groupBy('class_section_id');
 
-        return view('faculty.attendance.sessions', compact('sessions'));
+        $attendanceStats = DB::table('class_sessions')
+            ->leftJoin('attendance', function ($join) {
+                $join->on(
+                    'class_sessions.id',
+                    '=',
+                    'attendance.class_session_id'
+                )->where('attendance.source', 'regular');
+            })
+            ->whereIn('class_sessions.class_section_id', $sectionIds)
+            ->where('class_sessions.conducted_by', $user->id)
+            ->selectRaw("
+                class_sessions.class_section_id,
+                COUNT(attendance.id) as total_marked,
+                SUM(
+                    CASE
+                        WHEN attendance.status IN ('present', 'late')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as present_count
+            ")
+            ->groupBy('class_sessions.class_section_id');
+
+        $courseSummaries = ClassSection::query()
+            ->with('course')
+            ->join(
+                'courses',
+                'class_sections.course_id',
+                '=',
+                'courses.id'
+            )
+            ->leftJoinSub(
+                $sessionCounts,
+                'session_counts',
+                'session_counts.class_section_id',
+                '=',
+                'class_sections.id'
+            )
+            ->leftJoinSub(
+                $attendanceStats,
+                'attendance_stats',
+                'attendance_stats.class_section_id',
+                '=',
+                'class_sections.id'
+            )
+            ->whereIn('class_sections.id', $sectionIds)
+            ->select(
+                'class_sections.*',
+                DB::raw(
+                    'COALESCE(session_counts.total_sessions, 0)
+                    as total_sessions'
+                ),
+                DB::raw(
+                    'COALESCE(attendance_stats.total_marked, 0)
+                    as total_marked'
+                ),
+                DB::raw(
+                    'COALESCE(attendance_stats.present_count, 0)
+                    as present_count'
+                )
+            )
+            ->orderBy('courses.name')
+            ->orderBy('class_sections.section_name')
+            ->get();
+
+        $trendSessions = ClassSession::with('section.course')
+            ->withCount([
+                'attendanceRecords as total_attendance' => function ($query) {
+                    $query->where('source', 'regular');
+                },
+
+                'attendanceRecords as present_attendance' => function ($query) {
+                    $query->where('source', 'regular')
+                        ->whereIn('status', ['present', 'late']);
+                },
+            ])
+            ->whereIn('class_section_id', $sectionIds)
+            ->where('conducted_by', $user->id)
+            ->when(
+                $selectedSectionId,
+                fn ($query) => $query->where(
+                    'class_section_id',
+                    $selectedSectionId
+                )
+            )
+            ->orderBy('session_date')
+            ->orderBy('start_time')
+            ->get();
+
+        $attendanceTrend = $trendSessions
+            ->values()
+            ->map(function ($session, $index) use ($selectedSectionId) {
+                $percentage = $session->total_attendance > 0
+                    ? round(
+                        ($session->present_attendance
+                            / $session->total_attendance) * 100,
+                        1
+                    )
+                    : 0;
+
+                $date = $session->session_date?->format('d M') ?? '';
+
+                return [
+                    'label' => $selectedSectionId
+                        ? 'Lecture ' . ($index + 1) . ' · ' . $date
+                        : ($session->section?->course?->code ?? 'Course')
+                            . ' · ' . $date,
+
+                    'percentage' => $percentage,
+                    'has_attendance' => $session->total_attendance > 0,
+                ];
+            })
+            ->values();
+
+        $sessions = ClassSession::with('section.course')
+            ->withCount([
+                'attendanceRecords as total_attendance' => function ($query) {
+                    $query->where('source', 'regular');
+                },
+
+                'attendanceRecords as present_attendance' => function ($query) {
+                    $query->where('source', 'regular')
+                        ->whereIn('status', ['present', 'late']);
+                },
+            ])
+            ->whereIn('class_section_id', $sectionIds)
+            ->where('conducted_by', $user->id)
+            ->when(
+                $selectedSectionId,
+                fn ($query) => $query->where(
+                    'class_section_id',
+                    $selectedSectionId
+                )
+            )
+            ->orderByDesc('session_date')
+            ->orderByDesc('start_time')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('faculty.attendance.sessions', compact(
+            'sessions',
+            'courseSummaries',
+            'selectedSectionId',
+            'attendanceTrend'
+        ));
     }
 
-    public function create(Request $request)
+    public function create()
     {
         $user = auth()->user();
+
         $sections = $user->facultyCourses()
-            ->with(['section.course', 'section.semester'])
+            ->with([
+                'section.course',
+                'section.semester',
+            ])
             ->where('is_active', true)
             ->get()
             ->pluck('section');
 
-        return view('faculty.attendance.create-session', compact('sections'));
+        return view(
+            'faculty.attendance.create-session',
+            compact('sections')
+        );
     }
 
     public function storeSession(Request $request)
     {
-        $request->validate([
-            'class_section_id' => 'required|exists:class_sections,id',
-            'session_date'     => 'required|date',
-            'start_time'       => 'required',
-            'end_time'         => 'required|after:start_time',
-            'topic'            => 'nullable|string|max:255',
+        $validated = $request->validate([
+            'class_section_id' => ['required', 'exists:class_sections,id'],
+            'session_date' => ['required', 'date'],
+            'start_time' => ['required'],
+            'end_time' => ['required', 'after:start_time'],
+            'topic' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $section = ClassSection::findOrFail($request->class_section_id);
+        $section = ClassSection::findOrFail(
+            $validated['class_section_id']
+        );
+
         $this->authorizeSection($section);
 
         $session = ClassSession::create([
-            'class_section_id' => $request->class_section_id,
-            'conducted_by'     => auth()->id(),
-            'session_date'     => $request->session_date,
-            'start_time'       => $request->start_time,
-            'end_time'         => $request->end_time,
-            'topic'            => $request->topic,
-            'status'           => 'ongoing',
+            'class_section_id' => $section->id,
+            'conducted_by' => auth()->id(),
+            'session_date' => $validated['session_date'],
+            'start_time' => $validated['start_time'],
+            'end_time' => $validated['end_time'],
+            'topic' => $validated['topic'] ?? null,
+            'status' => 'ongoing',
         ]);
 
-        return redirect()->route('faculty.attendance.take', $session)->with('success', 'Session created. Now take attendance.');
+        return redirect()
+            ->route('faculty.attendance.take', $session)
+            ->with(
+                'success',
+                'Session created. You can now mark attendance.'
+            );
     }
 
     public function take(ClassSession $classSession)
     {
-        $this->authorizeSection($classSession->section);
+        $classSession->load('section.course');
 
-        // Get enrolled students
-        $students = User::join('course_enrollments', 'users.id', '=', 'course_enrollments.user_id')
-            ->where('course_enrollments.class_section_id', $classSession->class_section_id)
+        $this->authorizeClassSession($classSession);
+
+        $students = User::query()
+            ->join(
+                'course_enrollments',
+                'users.id',
+                '=',
+                'course_enrollments.user_id'
+            )
+            ->where(
+                'course_enrollments.class_section_id',
+                $classSession->class_section_id
+            )
             ->where('course_enrollments.status', 'active')
             ->where('users.role', 'student')
             ->select('users.*')
             ->orderBy('users.roll_number')
             ->get();
 
-        $existingAttendance = Attendance::where('class_session_id', $classSession->id)
+        $existingAttendance = Attendance::where(
+            'class_session_id',
+            $classSession->id
+        )
+            ->where('source', 'regular')
             ->get()
             ->keyBy('student_id');
 
-        return view('faculty.attendance.take', compact('classSession', 'students', 'existingAttendance'));
+        $lectureNumber = ClassSession::where(
+            'class_section_id',
+            $classSession->class_section_id
+        )
+            ->where('conducted_by', auth()->id())
+            ->where(function ($query) use ($classSession) {
+                $query->where(
+                    'session_date',
+                    '<',
+                    $classSession->session_date
+                )->orWhere(function ($query) use ($classSession) {
+                    $query->where(
+                        'session_date',
+                        $classSession->session_date
+                    )
+                        ->where('id', '<=', $classSession->id);
+                });
+            })
+            ->count();
+
+        return view(
+            'faculty.attendance.take',
+            compact(
+                'classSession',
+                'students',
+                'existingAttendance',
+                'lectureNumber'
+            )
+        );
     }
 
-    public function save(Request $request, ClassSession $classSession)
-    {
-        $this->authorizeSection($classSession->section);
+    public function save(
+        Request $request,
+        ClassSession $classSession
+    ) {
+        $classSession->load('section');
 
-        $request->validate([
-            'attendance'                => 'required|array',
-            'attendance.*.status'       => 'required|in:present,absent,late,excused',
+        $this->authorizeClassSession($classSession);
+
+        $validated = $request->validate([
+            'attendance' => ['required', 'array'],
+            'attendance.*.status' => [
+                'required',
+                'in:present,absent',
+            ],
+            'attendance.*.remarks' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
         ]);
 
-        DB::transaction(function () use ($request, $classSession) {
-            $hasPresentStudent = false;
-            foreach ($request->attendance as $studentId => $data) {
-                // Verify student is actually enrolled in this section
-                $isEnrolled = DB::table('course_enrollments')
-                    ->where('user_id', $studentId)
-                    ->where('class_section_id', $classSession->class_section_id)
-                    ->where('status', 'active')
-                    ->exists();
+        DB::transaction(function () use ($validated, $classSession) {
+            $studentIds = collect(
+                array_keys($validated['attendance'])
+            );
 
-                if (!$isEnrolled) continue;
+            $enrolledStudentIds = DB::table('course_enrollments')
+                ->where(
+                    'class_section_id',
+                    $classSession->class_section_id
+                )
+                ->where('status', 'active')
+                ->whereIn('user_id', $studentIds)
+                ->pluck('user_id')
+                ->flip();
 
-                $status = $data['status'];
-                $isPresent = in_array($status, ['present', 'late']);
-                if ($isPresent) $hasPresentStudent = true;
+            foreach ($validated['attendance'] as $studentId => $data) {
+                if (! isset($enrolledStudentIds[$studentId])) {
+                    continue;
+                }
 
                 Attendance::updateOrCreate(
                     [
                         'class_session_id' => $classSession->id,
-                        'student_id'       => $studentId,
+                        'student_id' => $studentId,
+                        'source' => 'regular',
                     ],
                     [
-                        'marked_by'        => auth()->id(),
-                        'status'           => $status,
-                        'source'           => 'regular',
+                        'marked_by' => auth()->id(),
+                        'status' => $data['status'],
                         'feedback_enabled' => false,
-                        'marked_at'        => now(),
-                        'remarks'          => $data['remarks'] ?? null,
+                        'marked_at' => now(),
+                        'remarks' => $data['remarks'] ?? null,
                     ]
                 );
             }
 
-            $classSession->update(['status' => 'completed']);
-
-            // Auto-transition to active feedback state if any student was present
-            if ($hasPresentStudent) {
-                $feedbackSession = FeedbackSession::firstOrCreate(
-                    ['class_session_id' => $classSession->id],
-                    [
-                        'created_by' => auth()->id(),
-                        'status' => 'active',
-                        'opened_at' => now(),
-                    ]
-                );
-
-                if ($feedbackSession->status !== 'active') {
-                    $feedbackSession->update(['status' => 'active', 'opened_at' => now()]);
-                }
-
-                $this->eligibilityService->createEligibilityRecords($feedbackSession);
-            }
+            $classSession->update([
+                'status' => 'completed',
+            ]);
         });
 
-        return redirect()->route('faculty.attendance.sessions')->with('success', 'Attendance saved successfully.');
+        return redirect()
+            ->route('faculty.attendance.sessions')
+            ->with(
+                'success',
+                'Attendance saved successfully.'
+            );
     }
 
-    /**
-     * Per-student attendance summary across all faculty courses.
-     * Supports filters: course (class_section_id), date_from, date_to, student search.
-     */
+    public function analytics(ClassSession $classSession)
+    {
+        $classSession->load('section.course');
+
+        $this->authorizeClassSession($classSession);
+
+        $records = Attendance::with('student')
+            ->where('class_session_id', $classSession->id)
+            ->where('source', 'regular')
+            ->get()
+            ->sortBy(
+                fn ($attendance) => $attendance->student?->name
+            )
+            ->values();
+
+        $presentStudents = $records
+            ->filter(
+                fn ($attendance) => in_array(
+                    $attendance->status,
+                    ['present', 'late']
+                )
+            )
+            ->values();
+
+        $absentStudents = $records
+            ->filter(
+                fn ($attendance) => $attendance->status === 'absent'
+            )
+            ->values();
+
+        $stats = [
+            'total' => $records->count(),
+            'present' => $presentStudents->count(),
+            'absent' => $absentStudents->count(),
+        ];
+
+        $stats['attendance_percentage'] = $stats['total'] > 0
+            ? round(
+                ($stats['present'] / $stats['total']) * 100,
+                2
+            )
+            : 0;
+
+        $lineChartData = $records
+            ->map(function ($attendance) {
+                return [
+                    'student' => $attendance->student?->roll_number
+                        ?? $attendance->student?->name
+                        ?? 'Student',
+
+                    'value' => in_array(
+                        $attendance->status,
+                        ['present', 'late']
+                    ) ? 1 : 0,
+                ];
+            })
+            ->values();
+
+        return view(
+            'faculty.attendance.analytics',
+            compact(
+                'classSession',
+                'records',
+                'presentStudents',
+                'absentStudents',
+                'stats',
+                'lineChartData'
+            )
+        );
+    }
+
     public function summary(Request $request)
     {
         $user = auth()->user();
@@ -262,7 +473,6 @@ class AttendanceController extends Controller
             ->where('is_active', true)
             ->pluck('class_section_id');
 
-        // Validate the requested section belongs to this faculty
         $filteredSectionId = $request->filled('section_id')
             ? (int) $request->section_id
             : null;
@@ -275,31 +485,69 @@ class AttendanceController extends Controller
             ? collect([$filteredSectionId])
             : $sectionIds;
 
-        // Session IDs matching date range
-        $sessionQuery = ClassSession::whereIn('class_section_id', $activeSectionIds);
+        $sessionQuery = ClassSession::whereIn(
+            'class_section_id',
+            $activeSectionIds
+        )->where('conducted_by', $user->id);
 
         if ($request->filled('date_from')) {
-            $sessionQuery->whereDate('session_date', '>=', $request->date_from);
+            $sessionQuery->whereDate(
+                'session_date',
+                '>=',
+                $request->date_from
+            );
         }
+
         if ($request->filled('date_to')) {
-            $sessionQuery->whereDate('session_date', '<=', $request->date_to);
+            $sessionQuery->whereDate(
+                'session_date',
+                '<=',
+                $request->date_to
+            );
         }
 
         $sessionIds = $sessionQuery->pluck('id');
 
-        // Per-student summary
         $summaryQuery = DB::table('attendance')
             ->join('users', 'attendance.student_id', '=', 'users.id')
-            ->join('class_sessions', 'attendance.class_session_id', '=', 'class_sessions.id')
-            ->join('class_sections', 'class_sessions.class_section_id', '=', 'class_sections.id')
-            ->join('courses', 'class_sections.course_id', '=', 'courses.id')
+            ->join(
+                'class_sessions',
+                'attendance.class_session_id',
+                '=',
+                'class_sessions.id'
+            )
+            ->join(
+                'class_sections',
+                'class_sessions.class_section_id',
+                '=',
+                'class_sections.id'
+            )
+            ->join(
+                'courses',
+                'class_sections.course_id',
+                '=',
+                'courses.id'
+            )
             ->whereIn('attendance.class_session_id', $sessionIds)
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where(function ($sub) use ($request) {
-                    $sub->where('users.name', 'like', '%' . $request->search . '%')
-                        ->orWhere('users.roll_number', 'like', '%' . $request->search . '%');
-                });
-            })
+            ->where('attendance.source', 'regular')
+            ->when(
+                $request->filled('search'),
+                function ($query) use ($request) {
+                    $search = $request->search;
+
+                    $query->where(function ($subQuery) use ($search) {
+                        $subQuery->where(
+                            'users.name',
+                            'like',
+                            "%{$search}%"
+                        )->orWhere(
+                            'users.roll_number',
+                            'like',
+                            "%{$search}%"
+                        );
+                    });
+                }
+            )
             ->selectRaw("
                 attendance.student_id,
                 users.name as student_name,
@@ -308,8 +556,20 @@ class AttendanceController extends Controller
                 courses.code as course_code,
                 class_sections.id as section_id,
                 COUNT(attendance.id) as total_classes,
-                SUM(CASE WHEN attendance.status IN ('present','late') THEN 1 ELSE 0 END) as present_count,
-                SUM(CASE WHEN attendance.status = 'absent' THEN 1 ELSE 0 END) as absent_count
+                SUM(
+                    CASE
+                        WHEN attendance.status IN ('present', 'late')
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as present_count,
+                SUM(
+                    CASE
+                        WHEN attendance.status = 'absent'
+                        THEN 1
+                        ELSE 0
+                    END
+                ) as absent_count
             ")
             ->groupBy(
                 'attendance.student_id',
@@ -322,24 +582,26 @@ class AttendanceController extends Controller
             ->orderBy('courses.name')
             ->orderBy('users.name');
 
-        $summary = $summaryQuery->paginate(30)->withQueryString();
+        $summary = $summaryQuery
+            ->paginate(30)
+            ->withQueryString();
 
-        // Sections for filter dropdown
         $sections = FacultyCourse::where('user_id', $user->id)
             ->where('is_active', true)
-            ->with(['section.course'])
+            ->with('section.course')
             ->get()
             ->pluck('section');
 
-        return view('faculty.attendance.summary', compact(
-            'summary', 'sections', 'filteredSectionId'
-        ));
+        return view(
+            'faculty.attendance.summary',
+            compact(
+                'summary',
+                'sections',
+                'filteredSectionId'
+            )
+        );
     }
 
-    /**
-     * Export faculty attendance as Excel (.xlsx).
-     * Respects the same filters as summary().
-     */
     public function exportExcel(Request $request)
     {
         $user = auth()->user();
@@ -360,17 +622,37 @@ class AttendanceController extends Controller
             ? collect([$filteredSectionId])
             : $sectionIds;
 
-        $sessionQuery = ClassSession::whereIn('class_section_id', $activeSectionIds);
+        $sessionQuery = ClassSession::whereIn(
+            'class_section_id',
+            $activeSectionIds
+        )->where('conducted_by', $user->id);
+
         if ($request->filled('date_from')) {
-            $sessionQuery->whereDate('session_date', '>=', $request->date_from);
+            $sessionQuery->whereDate(
+                'session_date',
+                '>=',
+                $request->date_from
+            );
         }
+
         if ($request->filled('date_to')) {
-            $sessionQuery->whereDate('session_date', '<=', $request->date_to);
+            $sessionQuery->whereDate(
+                'session_date',
+                '<=',
+                $request->date_to
+            );
         }
+
         $sessionIds = $sessionQuery->pluck('id');
 
+        $filters = $request->all();
+        $filters['source'] = 'regular';
+
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\AttendanceExport($sessionIds, $request->all()),
+            new \App\Exports\AttendanceExport(
+                $sessionIds,
+                $filters
+            ),
             'attendance_' . now()->format('Y-m-d') . '.xlsx'
         );
     }

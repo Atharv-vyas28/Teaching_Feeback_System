@@ -25,7 +25,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 00-2-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
     </svg>
-    My Sessions
+    Courses
 </a>
 
 <a href="{{ route('faculty.attendance.create') }}" class="nav-link">
@@ -33,7 +33,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M12 4v16m8-8H4"/>
     </svg>
-    New Session
+    Add Lecture
 </a>
 
 <div class="nav-section-label">Feedback</div>
@@ -66,69 +66,162 @@
 @endsection
 
 @section('content')
+<div class="card" style="margin-bottom:24px;">
+    <div style="padding:20px 20px 8px;">
+        <div style="font-size:1rem;font-weight:700;color:#0F172A;">
+            My Courses
+        </div>
+        <div style="font-size:0.82rem;color:#64748B;margin-top:4px;">
+            Select a course to view its lectures and session-level attendance.
+        </div>
+    </div>
+
+    <div style="padding:12px 20px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;">
+        @forelse($courseSummaries as $section)
+            @php
+                $attendancePercentage = $section->total_marked > 0
+                    ? round(($section->present_count / $section->total_marked) * 100)
+                    : 0;
+
+                $isSelected = $selectedSectionId === $section->id;
+            @endphp
+
+            <a
+                href="{{ route('faculty.attendance.sessions', ['section_id' => $section->id]) }}"
+                style="
+                    display:block;
+                    text-decoration:none;
+                    border:1px solid {{ $isSelected ? '#3B82F6' : '#E2E8F0' }};
+                    background:{{ $isSelected ? '#EFF6FF' : '#FFFFFF' }};
+                    border-radius:10px;
+                    padding:16px;
+                    transition:0.2s ease;
+                "
+            >
+                <div style="display:flex;justify-content:space-between;gap:12px;">
+                    <div>
+                        <div style="font-size:0.72rem;font-weight:700;color:#3B82F6;text-transform:uppercase;">
+                            {{ $section->course?->code ?? 'Course' }}
+                        </div>
+
+                        <div style="font-weight:700;color:#0F172A;margin-top:4px;">
+                            {{ $section->course?->name ?? 'N/A' }}
+                        </div>
+
+                        <div style="font-size:0.78rem;color:#64748B;margin-top:3px;">
+                            Section {{ $section->section_name }}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;">
+                    <div style="background:#F8FAFC;border-radius:7px;padding:10px;">
+                        <div style="font-size:0.7rem;color:#64748B;">Lectures taken</div>
+                        <div style="font-size:1.05rem;font-weight:700;color:#0F172A;margin-top:3px;">
+                            {{ $section->total_sessions }}
+                        </div>
+                    </div>
+
+                    <div style="background:#F8FAFC;border-radius:7px;padding:10px;">
+                        <div style="font-size:0.7rem;color:#64748B;">Overall attendance</div>
+                        <div style="font-size:1.05rem;font-weight:700;color:#0F172A;margin-top:3px;">
+                            {{ $section->total_marked > 0 ? $attendancePercentage . '%' : '—' }}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        @empty
+            <div style="color:#94A3B8;padding:12px 0;">
+                No courses have been assigned to you yet.
+            </div>
+        @endforelse
+    </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+    <div class="card-header">
+        <div>
+            <h3>
+                {{ $selectedSectionId
+                    ? 'Attendance Trend for Selected Course'
+                    : 'Overall Attendance Trend' }}
+            </h3>
+
+            <div style="font-size:.8rem;color:#64748B;margin-top:4px;">
+                Percentage of students present in each lecture.
+            </div>
+        </div>
+    </div>
+
+    @if($attendanceTrend->isNotEmpty())
+        <div style="height:310px;padding:10px 18px 18px;position:relative;">
+            <canvas id="courseAttendanceTrendChart"></canvas>
+        </div>
+    @else
+        <div style="padding:35px 20px;text-align:center;color:#94A3B8;">
+            No attendance data is available yet.
+        </div>
+    @endif
+</div>
+
 <div class="card">
+    <div style="padding:20px 20px 12px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div>
+            <div style="font-size:1rem;font-weight:700;color:#0F172A;">
+                @if($selectedSectionId)
+                    Course Sessions
+                @else
+                    All Sessions
+                @endif
+            </div>
+
+            <div style="font-size:0.82rem;color:#64748B;margin-top:4px;">
+                @if($selectedSectionId)
+                    Showing lectures for the selected course section.
+                @else
+                    Select a course above to focus on its lectures.
+                @endif
+            </div>
+        </div>
+
+        @if($selectedSectionId)
+            <a href="{{ route('faculty.attendance.sessions') }}" class="btn-secondary btn-sm">
+                View All
+            </a>
+        @endif
+    </div>
+
     <div style="overflow-x:auto;">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Course / Section</th>
+                    <th>Course</th>
                     <th>Topic</th>
                     <th>Date</th>
                     <th>Time</th>
-                    <th>Attendance</th>
-                    <th>Status</th>
-                    <th>Feedback</th>
-                    <th>Actions</th>
+                    <th>Attendance</th> 
+                    <th></th> 
                 </tr>
             </thead>
 
             <tbody>
                 @forelse($sessions as $session)
-                    @php
-                        $presentCount = $session->attendanceRecords
-                            ->whereIn('status', ['present', 'late'])
-                            ->count();
-
-                        $totalAttendance = $session->attendanceRecords->count();
-                    @endphp
-
                     <tr>
                         <td>
                             <div style="font-weight:600;color:#0F172A;">
                                 {{ $session->section?->course?->name ?? 'N/A' }}
                             </div>
-
                             <div style="font-size:0.75rem;color:#94A3B8;">
                                 Section {{ $session->section?->section_name ?? '' }}
                             </div>
                         </td>
 
                         <td>{{ $session->topic ?? '—' }}</td>
-
-                        <td>
-                            {{ $session->session_date?->format('M d, Y') ?? 'N/A' }}
-                        </td>
+                        <td>{{ $session->session_date?->format('M d, Y') ?? 'N/A' }}</td>
 
                         <td style="font-size:0.8rem;color:#64748B;">
-                            {{ $session->start_time ?? '' }}
-                            –
-                            {{ $session->end_time ?? '' }}
-                        </td>
-
-                        <td>
-                            @if($totalAttendance > 0)
-                                <span class="badge badge-blue">
-                                    {{ $presentCount }} present
-                                </span>
-
-                                <div style="font-size:0.7rem;color:#94A3B8;margin-top:3px;">
-                                    {{ $totalAttendance }} marked
-                                </div>
-                            @else
-                                <span class="badge badge-gray">
-                                    Not marked
-                                </span>
-                            @endif
+                            {{ substr($session->start_time, 0, -3) ?? '' }} – {{ substr($session->end_time, 0, -3) ?? '' }}
                         </td>
 
                         <td>
@@ -144,81 +237,58 @@
                             </span>
                         </td>
 
+
                         <td>
-                            @if($session->feedbackSession)
-                                <span class="badge badge-{{
-                                    [
-                                        'draft' => 'gray',
-                                        'active' => 'green',
-                                        'closed' => 'blue'
-                                    ][$session->feedbackSession->status] ?? 'gray'
-                                }}">
-                                    {{ ucfirst($session->feedbackSession->status) }}
-                                </span>
-                            @else
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:215px;">
+
+                            @if($session->total_attendance === 0)
                                 <a
-                                    href="{{ route('faculty.feedback.create', $session) }}"
-                                    style="font-size:0.78rem;color:#3B82F6;text-decoration:none;"
+                                    href="{{ route('faculty.attendance.take', $session) }}"
+                                    class="btn-primary btn-sm"
+                                    style="display:inline-flex;align-items:center;gap:6px;"
                                 >
-                                    Create →
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Mark Attendance
                                 </a>
                             @endif
-                        </td>
 
-                        <td>
-                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            @if($session->total_attendance > 0)
+                                <a
+                                    href="{{ route('faculty.attendance.analytics', $session) }}"
+                                    class="btn-secondary btn-sm"
+                                    title="View attendance analytics"
+                                    style="
+                                        display:inline-flex;
+                                        align-items:center;
+                                        justify-content:center;
+                                        width:fit;
+                                        height:34px;
+                                        padding:0;
+                                        border-radius:8px;
+                                        background-color:rgba(195, 192, 15, 0.178);
+                                    "
+                                >
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 3v18h18M7 16v-4m5 4V8m5 8v-7"/>
+                                    </svg>
+                                    <span class="sr-only">Analysis</span>
+                                </a>
+                            @endif
 
-                                @if($session->status === 'ongoing')
-                                    <a
-                                        href="{{ route('faculty.attendance.take', $session) }}"
-                                        class="btn-primary btn-sm"
-                                    >
-                                        Take Attendance
-                                    </a>
-                                @elseif($session->status === 'completed')
-                                    <a
-                                        href="{{ route('faculty.attendance.take', $session) }}"
-                                        class="btn-secondary btn-sm"
-                                    >
-                                        View Attendance
-                                    </a>
-                                @endif
-
-                                {{-- Attendance graphs and Present/Absent student lists --}}
-                                @if($totalAttendance > 0)
-                                    <a
-                                        href="{{ route('faculty.attendance.analytics', $session) }}"
-                                        class="btn-secondary btn-sm"
-                                    >
-                                        Attendance Analytics
-                                    </a>
-                                @endif
-
-                                {{-- Feedback analytics only after session is not draft --}}
-                                @if(
-                                    $session->feedbackSession &&
-                                    $session->feedbackSession->status !== 'draft'
-                                )
-                                    <a
-                                        href="{{ route('faculty.feedback.analytics', $session->feedbackSession) }}"
-                                        class="btn-secondary btn-sm"
-                                    >
-                                        Feedback Analytics
-                                    </a>
-                                @endif
-                            </div>
-                        </td>
+                        </div>
+                    </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" style="text-align:center;padding:40px;color:#94A3B8;">
-                            No sessions yet.
+                        <td colspan="5" style="text-align:center;padding:40px;color:#94A3B8;">
+                            No sessions found for this course.
 
-                            <a
-                                href="{{ route('faculty.attendance.create') }}"
-                                style="color:#3B82F6;"
-                            >
-                                Create your first session →
+                            <a href="{{ route('faculty.attendance.create') }}" style="color:#3B82F6;">
+                                Create a session →
                             </a>
                         </td>
                     </tr>
@@ -234,3 +304,91 @@
     @endif
 </div>
 @endsection
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    let trendData = @json($attendanceTrend);
+    console.log(trendData);
+    
+    trendData = trendData.filter(data => data.percentage != -1);
+    console.log(trendData);
+
+    const chartElement = document.getElementById(
+        'courseAttendanceTrendChart'
+    );
+
+    if (!chartElement || trendData.length === 0) {
+        return;
+    }
+
+    new Chart(chartElement, {
+        type: 'line',
+        data: {
+            labels: trendData.map(item => item.label),
+            datasets: [{
+                label: 'Attendance Percentage',
+                data: trendData.map(item => item.percentage),
+                borderColor: '#4F46E5',
+                backgroundColor: 'rgba(79,70,229,.12)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.3,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#4F46E5',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            return ' Attendance: ' +
+                                context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20,
+                        callback: function (value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: '#E2E8F0'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 35,
+                        minRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
