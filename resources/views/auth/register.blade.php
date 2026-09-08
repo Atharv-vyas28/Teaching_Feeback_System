@@ -1,6 +1,68 @@
+<<<<<<< HEAD
 <x-guest-layout>
     <form method="POST" action="{{ route('register') }}">
         @csrf
+=======
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Register | Student Portal</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+</head>
+
+
+<body class="min-h-screen bg-slate-100">
+
+<div class="min-h-screen flex flex-col">
+
+
+    {{-- ================= HEADER ================= --}}
+    <header class="bg-white border-b border-slate-200">
+
+        <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+            <div class="h-20 flex items-center justify-between">
+
+                <div class="flex items-center gap-4">
+
+                    <div
+                        class="w-12 h-12 rounded-full"
+                    >
+                        <img src="https://upload.wikimedia.org/wikipedia/en/1/14/IITI_Logo.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="IITI">
+                    </div>
+
+                    <div>
+
+                        <h1
+                            class="text-lg md:text-xl
+                                   font-bold
+                                   text-[#0b2a4a]
+                                   tracking-wide"
+                        >
+                            IIT Indore
+                        </h1>
+
+                        <p class="text-xs text-slate-500">
+                            Excellence • Knowledge • Character
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+>>>>>>> 32606039c9254396b8232ad8ada2b187f70708cd
 
         <!-- Name -->
         <div>
@@ -9,11 +71,464 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
+<<<<<<< HEAD
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('Email')" />
             <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+=======
+    </header>
+
+
+    {{-- ================= MAIN ================= --}}
+    <main
+        class="flex-1 flex items-center
+               justify-center
+               px-5 py-10
+               relative overflow-hidden"
+    >
+
+        {{-- Decorative background --}}
+        <div
+            class="absolute -top-32 -left-32
+                   w-96 h-96 rounded-full
+                   bg-[#0b2a4a]/5
+                   pointer-events-none"
+        ></div>
+
+        <div
+            class="absolute -bottom-40 -right-40
+                   w-[500px] h-[500px]
+                   rounded-full
+                   bg-[#d4af37]/10
+                   pointer-events-none"
+        ></div>
+
+
+        <div class="relative w-full max-w-lg">
+
+
+            {{-- Register Card --}}
+            <div
+                class="bg-white rounded-2xl
+                       border border-slate-200
+                       shadow-xl
+                       shadow-slate-900/5
+                       overflow-hidden"
+            >
+
+
+                {{-- Card Header --}}
+                <div
+                    class="bg-[#0b2a4a]
+                           px-4 py-4
+                           text-center"
+                >
+
+                    <h2 class="text-2xl font-bold text-white">
+                        Create Account
+                    </h2>
+
+                    <p class="mt-1 text-sm text-white/70">
+                        Register for the college portal
+                    </p>
+
+                </div>
+
+
+                <div class="p-8">
+
+
+                    {{-- Errors --}}
+                    @if ($errors->any())
+
+                        <div
+                            class="mb-6
+                                   rounded-lg
+                                   border border-red-200
+                                   bg-red-50
+                                   px-4 py-3"
+                        >
+
+                            <ul
+                                class="text-sm
+                                       text-red-600
+                                       space-y-1"
+                            >
+
+                                @foreach ($errors->all() as $error)
+
+                                    <li>
+                                        {{ $error }}
+                                    </li>
+
+                                @endforeach
+
+                            </ul>
+
+                        </div>
+
+                    @endif
+
+
+                    <form
+                        method="POST"
+                        action="{{ route('register') }}"
+                        class="space-y-5"
+                    >
+
+                        @csrf
+
+
+                        {{-- Name --}}
+                        <div>
+
+                            <label
+                                for="name"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value="{{ old('name') }}"
+                                placeholder="Enter your full name"
+                                required
+                                autocomplete="name"
+                                class="w-full h-12 px-4
+                                       rounded-lg
+                                       border border-slate-300
+                                       bg-slate-50
+                                       text-slate-800
+                                       placeholder-slate-400
+                                       outline-none
+                                       transition
+                                       focus:bg-white
+                                       focus:border-[#0b2a4a]
+                                       focus:ring-4
+                                       focus:ring-[#0b2a4a]/10"
+                            >
+
+                        </div>
+
+
+                        {{-- Email --}}
+                        <div>
+
+                            <label
+                                for="email"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Institute Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value="{{ old('email') }}"
+                                placeholder="example@iiti.ac.in"
+                                required
+                                autocomplete="email"
+                                class="w-full h-12 px-4
+                                       rounded-lg
+                                       border border-slate-300
+                                       bg-slate-50
+                                       text-slate-800
+                                       placeholder-slate-400
+                                       outline-none
+                                       transition
+                                       focus:bg-white
+                                       focus:border-[#0b2a4a]
+                                       focus:ring-4
+                                       focus:ring-[#0b2a4a]/10"
+                            >
+
+                        </div>
+
+
+                        {{-- Password --}}
+                        <div>
+
+                            <label
+                                for="password"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Password
+                            </label>
+
+                            <div class="relative">
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Create a password"
+                                    required
+                                    autocomplete="new-password"
+                                    class="w-full h-12 px-4 pr-12
+                                           rounded-lg
+                                           border border-slate-300
+                                           bg-slate-50
+                                           text-slate-800
+                                           placeholder-slate-400
+                                           outline-none
+                                           transition
+                                           focus:bg-white
+                                           focus:border-[#0b2a4a]
+                                           focus:ring-4
+                                           focus:ring-[#0b2a4a]/10"
+                                >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('password')"
+                                    class="absolute right-4
+                                           top-1/2
+                                           -translate-y-1/2
+                                           text-slate-400
+                                           hover:text-[#0b2a4a]"
+                                >
+                                    <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                            stroke="currentColor"
+                                            class="w-5 h-5"
+                                        >
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943
+                                                   7.523 5 12 5c4.478 0
+                                                   8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.064
+                                                   7-9.542 7-4.477
+                                                   0-8.268-2.943
+                                                   -9.542-7Z"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0
+                                                   3 3 0 0 1 6 0Z"
+                                            />
+
+                                        </svg>
+                                </button>
+
+                            </div>
+
+                            <p class="mt-2 text-xs text-slate-400">
+                                Password must contain at least 8 characters.
+                            </p>
+
+                        </div>
+
+
+                        {{-- Confirm Password --}}
+                        <div>
+
+                            <label
+                                for="password_confirmation"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Confirm Password
+                            </label>
+
+                            <div class="relative">
+
+                                <input
+                                    type="password"
+                                    id="password_confirmation"
+                                    name="password_confirmation"
+                                    placeholder="Confirm your password"
+                                    required
+                                    autocomplete="new-password"
+                                    class="w-full h-12 px-4 pr-12
+                                           rounded-lg
+                                           border border-slate-300
+                                           bg-slate-50
+                                           text-slate-800
+                                           placeholder-slate-400
+                                           outline-none
+                                           transition
+                                           focus:bg-white
+                                           focus:border-[#0b2a4a]
+                                           focus:ring-4
+                                           focus:ring-[#0b2a4a]/10"
+                                >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePassword(
+                                        'password_confirmation'
+                                    )"
+                                    class="absolute right-4
+                                           top-1/2
+                                           -translate-y-1/2
+                                           text-slate-400
+                                           hover:text-[#0b2a4a]"
+                                >
+                                    <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                            stroke="currentColor"
+                                            class="w-5 h-5"
+                                        >
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943
+                                                   7.523 5 12 5c4.478 0
+                                                   8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.064
+                                                   7-9.542 7-4.477
+                                                   0-8.268-2.943
+                                                   -9.542-7Z"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0
+                                                   3 3 0 0 1 6 0Z"
+                                            />
+
+                                        </svg>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        {{-- Terms --}}
+                        <div class="flex items-start gap-3">
+
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                required
+                                class="mt-1 w-4 h-4
+                                       rounded
+                                       border-slate-300
+                                       text-[#0b2a4a]
+                                       focus:ring-[#0b2a4a]"
+                            >
+
+                            <label
+                                for="terms"
+                                class="text-sm
+                                       text-slate-500
+                                       leading-relaxed"
+                            >
+
+                                I agree to the
+                                <a
+                                    href="#"
+                                    class="font-medium
+                                           text-[#0b2a4a]"
+                                >
+                                    Terms of Service
+                                </a>
+
+                                and
+
+                                <a
+                                    href="#"
+                                    class="font-medium
+                                           text-[#0b2a4a]"
+                                >
+                                    Privacy Policy
+                                </a>.
+
+                            </label>
+
+                        </div>
+
+
+                        {{-- Register Button --}}
+                        <button
+                            type="submit"
+                            class="w-full h-12
+                                   rounded-lg
+                                   bg-[#0b2a4a]
+                                   hover:bg-[#123b63]
+                                   text-white
+                                   font-semibold
+                                   tracking-wide
+                                   transition
+                                   shadow-md
+                                   shadow-[#0b2a4a]/20
+                                   cursor-pointer"
+                        >
+                            CREATE ACCOUNT
+                        </button>
+
+                    </form>
+
+
+                    {{-- Login --}}
+                    <div
+                        class="mt-7 pt-6
+                               border-t border-slate-200
+                               text-center"
+                    >
+
+                        <p class="text-sm text-slate-500">
+
+                            Already registered?
+
+                            <a
+                                href="{{ route('login') }}"
+                                class="font-semibold
+                                       text-[#0b2a4a]
+                                       hover:text-[#d4af37]
+                                       transition"
+                            >
+                                Sign in
+                            </a>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <p
+                class="text-center text-xs
+                       text-slate-500 mt-5"
+            >
+                Registration assistance:
+                <span class="font-medium text-[#0b2a4a]">
+                    College Administration
+                </span>
+            </p>
+
+>>>>>>> 32606039c9254396b8232ad8ada2b187f70708cd
         </div>
 
         <!-- Password -->
