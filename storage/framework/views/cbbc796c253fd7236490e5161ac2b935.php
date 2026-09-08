@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Register | Student Portal</title>
+
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+
+</head>
+
+
+<body class="min-h-screen bg-slate-100">
+
+<div class="min-h-screen flex flex-col">
+
+
+    
+    <header class="bg-white border-b border-slate-200">
+
+        <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+            <div class="h-20 flex items-center justify-between">
+
+                <div class="flex items-center gap-4">
+
+                    <div
+                        class="w-12 h-12 rounded-full"
+                    >
+                        <img src="https://upload.wikimedia.org/wikipedia/en/1/14/IITI_Logo.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original" alt="IITI">
+                    </div>
+
+                    <div>
+
+                        <h1
+                            class="text-lg md:text-xl
+                                   font-bold
+                                   text-[#0b2a4a]
+                                   tracking-wide"
+                        >
+                            IIT Indore
+                        </h1>
+
+                        <p class="text-xs text-slate-500">
+                            Excellence • Knowledge • Character
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    
+    <main
+        class="flex-1 flex items-center
+               justify-center
+               px-5 py-10
+               relative overflow-hidden"
+    >
+
+        
+        <div
+            class="absolute -top-32 -left-32
+                   w-96 h-96 rounded-full
+                   bg-[#0b2a4a]/5
+                   pointer-events-none"
+        ></div>
+
+        <div
+            class="absolute -bottom-40 -right-40
+                   w-[500px] h-[500px]
+                   rounded-full
+                   bg-[#d4af37]/10
+                   pointer-events-none"
+        ></div>
+
+
+        <div class="relative w-full max-w-lg">
+
+
+            
+            <div
+                class="bg-white rounded-2xl
+                       border border-slate-200
+                       shadow-xl
+                       shadow-slate-900/5
+                       overflow-hidden"
+            >
+
+
+                
+                <div
+                    class="bg-[#0b2a4a]
+                           px-4 py-4
+                           text-center"
+                >
+
+                    <h2 class="text-2xl font-bold text-white">
+                        Create Account
+                    </h2>
+
+                    <p class="mt-1 text-sm text-white/70">
+                        Register for the college portal
+                    </p>
+
+                </div>
+
+
+                <div class="p-8">
+
+
+                    
+                    <?php if($errors->any()): ?>
+
+                        <div
+                            class="mb-6
+                                   rounded-lg
+                                   border border-red-200
+                                   bg-red-50
+                                   px-4 py-3"
+                        >
+
+                            <ul
+                                class="text-sm
+                                       text-red-600
+                                       space-y-1"
+                            >
+
+                                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+
+                                    <li>
+                                        <?php echo e($error); ?>
+
+                                    </li>
+
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+                            </ul>
+
+                        </div>
+
+                    <?php endif; ?>
+
+
+                    <form
+                        method="POST"
+                        action="<?php echo e(route('register')); ?>"
+                        class="space-y-5"
+                    >
+
+                        <?php echo csrf_field(); ?>
+
+
+                        
+                        <div>
+
+                            <label
+                                for="name"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                value="<?php echo e(old('name')); ?>"
+                                placeholder="Enter your full name"
+                                required
+                                autocomplete="name"
+                                class="w-full h-12 px-4
+                                       rounded-lg
+                                       border border-slate-300
+                                       bg-slate-50
+                                       text-slate-800
+                                       placeholder-slate-400
+                                       outline-none
+                                       transition
+                                       focus:bg-white
+                                       focus:border-[#0b2a4a]
+                                       focus:ring-4
+                                       focus:ring-[#0b2a4a]/10"
+                            >
+
+                        </div>
+
+
+                        
+                        <div>
+
+                            <label
+                                for="email"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Institute Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value="<?php echo e(old('email')); ?>"
+                                placeholder="example@iiti.ac.in"
+                                required
+                                autocomplete="email"
+                                class="w-full h-12 px-4
+                                       rounded-lg
+                                       border border-slate-300
+                                       bg-slate-50
+                                       text-slate-800
+                                       placeholder-slate-400
+                                       outline-none
+                                       transition
+                                       focus:bg-white
+                                       focus:border-[#0b2a4a]
+                                       focus:ring-4
+                                       focus:ring-[#0b2a4a]/10"
+                            >
+
+                        </div>
+
+
+                        
+                        <div>
+
+                            <label
+                                for="password"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Password
+                            </label>
+
+                            <div class="relative">
+
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Create a password"
+                                    required
+                                    autocomplete="new-password"
+                                    class="w-full h-12 px-4 pr-12
+                                           rounded-lg
+                                           border border-slate-300
+                                           bg-slate-50
+                                           text-slate-800
+                                           placeholder-slate-400
+                                           outline-none
+                                           transition
+                                           focus:bg-white
+                                           focus:border-[#0b2a4a]
+                                           focus:ring-4
+                                           focus:ring-[#0b2a4a]/10"
+                                >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('password')"
+                                    class="absolute right-4
+                                           top-1/2
+                                           -translate-y-1/2
+                                           text-slate-400
+                                           hover:text-[#0b2a4a]"
+                                >
+                                    <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                            stroke="currentColor"
+                                            class="w-5 h-5"
+                                        >
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943
+                                                   7.523 5 12 5c4.478 0
+                                                   8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.064
+                                                   7-9.542 7-4.477
+                                                   0-8.268-2.943
+                                                   -9.542-7Z"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0
+                                                   3 3 0 0 1 6 0Z"
+                                            />
+
+                                        </svg>
+                                </button>
+
+                            </div>
+
+                            <p class="mt-2 text-xs text-slate-400">
+                                Password must contain at least 8 characters.
+                            </p>
+
+                        </div>
+
+
+                        
+                        <div>
+
+                            <label
+                                for="password_confirmation"
+                                class="block mb-2
+                                       text-sm font-semibold
+                                       text-slate-700"
+                            >
+                                Confirm Password
+                            </label>
+
+                            <div class="relative">
+
+                                <input
+                                    type="password"
+                                    id="password_confirmation"
+                                    name="password_confirmation"
+                                    placeholder="Confirm your password"
+                                    required
+                                    autocomplete="new-password"
+                                    class="w-full h-12 px-4 pr-12
+                                           rounded-lg
+                                           border border-slate-300
+                                           bg-slate-50
+                                           text-slate-800
+                                           placeholder-slate-400
+                                           outline-none
+                                           transition
+                                           focus:bg-white
+                                           focus:border-[#0b2a4a]
+                                           focus:ring-4
+                                           focus:ring-[#0b2a4a]/10"
+                                >
+
+                                <button
+                                    type="button"
+                                    onclick="togglePassword(
+                                        'password_confirmation'
+                                    )"
+                                    class="absolute right-4
+                                           top-1/2
+                                           -translate-y-1/2
+                                           text-slate-400
+                                           hover:text-[#0b2a4a]"
+                                >
+                                    <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.8"
+                                            stroke="currentColor"
+                                            class="w-5 h-5"
+                                        >
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M2.458 12C3.732 7.943
+                                                   7.523 5 12 5c4.478 0
+                                                   8.268 2.943 9.542 7
+                                                   -1.274 4.057-5.064
+                                                   7-9.542 7-4.477
+                                                   0-8.268-2.943
+                                                   -9.542-7Z"
+                                            />
+
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M15 12a3 3 0 1 1-6 0
+                                                   3 3 0 0 1 6 0Z"
+                                            />
+
+                                        </svg>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        
+                        <div class="flex items-start gap-3">
+
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                required
+                                class="mt-1 w-4 h-4
+                                       rounded
+                                       border-slate-300
+                                       text-[#0b2a4a]
+                                       focus:ring-[#0b2a4a]"
+                            >
+
+                            <label
+                                for="terms"
+                                class="text-sm
+                                       text-slate-500
+                                       leading-relaxed"
+                            >
+
+                                I agree to the
+                                <a
+                                    href="#"
+                                    class="font-medium
+                                           text-[#0b2a4a]"
+                                >
+                                    Terms of Service
+                                </a>
+
+                                and
+
+                                <a
+                                    href="#"
+                                    class="font-medium
+                                           text-[#0b2a4a]"
+                                >
+                                    Privacy Policy
+                                </a>.
+
+                            </label>
+
+                        </div>
+
+
+                        
+                        <button
+                            type="submit"
+                            class="w-full h-12
+                                   rounded-lg
+                                   bg-[#0b2a4a]
+                                   hover:bg-[#123b63]
+                                   text-white
+                                   font-semibold
+                                   tracking-wide
+                                   transition
+                                   shadow-md
+                                   shadow-[#0b2a4a]/20
+                                   cursor-pointer"
+                        >
+                            CREATE ACCOUNT
+                        </button>
+
+                    </form>
+
+
+                    
+                    <div
+                        class="mt-7 pt-6
+                               border-t border-slate-200
+                               text-center"
+                    >
+
+                        <p class="text-sm text-slate-500">
+
+                            Already registered?
+
+                            <a
+                                href="<?php echo e(route('login')); ?>"
+                                class="font-semibold
+                                       text-[#0b2a4a]
+                                       hover:text-[#d4af37]
+                                       transition"
+                            >
+                                Sign in
+                            </a>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <p
+                class="text-center text-xs
+                       text-slate-500 mt-5"
+            >
+                Registration assistance:
+                <span class="font-medium text-[#0b2a4a]">
+                    College Administration
+                </span>
+            </p>
+
+        </div>
+
+    </main>
+
+
+    
+    <footer class="bg-[#0b2a4a]">
+
+        <div
+            class="max-w-7xl mx-auto
+                   px-6 lg:px-10
+                   py-5"
+        >
+
+            <div
+                class="flex flex-col sm:flex-row
+                       items-center
+                       justify-between gap-3"
+            >
+
+                <p class="text-xs text-white/60">
+                    © <?php echo e(date('Y')); ?> Your College Name.
+                    All Rights Reserved.
+                </p>
+
+                <div class="flex gap-5">
+
+                    <a
+                        href="#"
+                        class="text-xs text-white/60
+                               hover:text-white"
+                    >
+                        Privacy Policy
+                    </a>
+
+                    <a
+                        href="#"
+                        class="text-xs text-white/60
+                               hover:text-white"
+                    >
+                        Terms
+                    </a>
+
+                    <a
+                        href="#"
+                        class="text-xs text-white/60
+                               hover:text-white"
+                    >
+                        Help
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</div>
+
+
+<script>
+
+    function togglePassword(id) {
+
+        const input = document.getElementById(id);
+
+        input.type =
+            input.type === 'password'
+                ? 'text'
+                : 'password';
+
+    }
+
+</script>
+
+</body>
+
+</html><?php /**PATH C:\Users\Atharv Vyas\OneDrive\Desktop\Web Dev\learn\laravel-\resources\views/auth/register.blade.php ENDPATH**/ ?>

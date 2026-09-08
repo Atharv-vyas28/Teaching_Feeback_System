@@ -1,0 +1,157 @@
+<?php $__env->startSection('title', 'Feedback Sessions Overview'); ?>
+
+<?php
+    $header = 'Feedback Sessions';
+    $subheader = 'Review anonymous feedback and release it to faculty.';
+?>
+
+<?php $__env->startSection('sidebar-nav'); ?>
+    <?php echo $__env->make('admin.partials.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="card">
+    <div class="card-header">
+        <h3>All Feedback Sessions</h3>
+    </div>
+
+    <?php if(session('success')): ?>
+        <div style="background:#DCFCE7;color:#166534;padding:12px 16px;border-radius:8px;margin:16px;">
+            <?php echo e(session('success')); ?>
+
+        </div>
+    <?php endif; ?>
+
+    <?php if(session('error')): ?>
+        <div style="background:#FEE2E2;color:#991B1B;padding:12px 16px;border-radius:8px;margin:16px;">
+            <?php echo e(session('error')); ?>
+
+        </div>
+    <?php endif; ?>
+
+    <div style="overflow-x:auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Course & Topic</th>
+                    <th>Assigned Faculty</th>
+                    <th>Feedback Staff</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Release Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <?php $__empty_1 = true; $__currentLoopData = $sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
+                        $faculty = $session->classSession?->section?->faculty?->first();
+                    ?>
+
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;">
+                                <?php echo e($session->classSession?->section?->course?->name ?? 'Unknown course'); ?>
+
+                            </div>
+
+                            <div style="font-size:0.8rem;color:#64748B;">
+                                <?php echo e($session->classSession?->topic ?? 'No topic'); ?>
+
+                            </div>
+                        </td>
+
+                        <td>
+                            <?php echo e($faculty?->name ?? 'Unassigned'); ?>
+
+                        </td>
+
+                        <td>
+                            <form method="POST" action="<?php echo e(route('admin.feedback-sessions.assign-staff', $session)); ?>" style="display:flex;gap:6px;align-items:center;">
+                                <?php echo csrf_field(); ?>
+                                <select name="staff_id" class="form-select" style="min-width:145px;" required>
+                                    <option value="">Assign staff...</option>
+                                    <?php $__currentLoopData = $staffMembers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $staff): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($staff->id); ?>" <?php if($session->assigned_staff_id === $staff->id): echo 'selected'; endif; ?>><?php echo e($staff->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
+                                <button type="submit" class="btn-secondary btn-sm">Save</button>
+                            </form>
+                            <?php if($session->assignedStaff): ?>
+                                <div style="font-size:.72rem;color:#059669;margin-top:5px;">Assigned: <?php echo e($session->assignedStaff->name); ?></div>
+                            <?php endif; ?>
+                        </td>
+
+                        <td>
+                            <?php echo e($session->classSession?->session_date?->format('M d, Y') ?? 'N/A'); ?>
+
+                        </td>
+
+                        <td>
+                            <span class="badge badge-<?php echo e([
+                                'draft' => 'gray',
+                                'active' => 'green',
+                                'closed' => 'blue'
+                            ][$session->status] ?? 'gray'); ?>">
+                                <?php echo e(ucfirst($session->status)); ?>
+
+                            </span>
+                        </td>
+
+                        <td>
+                            <?php if($session->isReleased()): ?>
+                                <span class="badge badge-green">
+                                    Released
+                                </span>
+                            <?php else: ?>
+                                <form
+                                    method="POST"
+                                    action="<?php echo e(route('admin.feedback-sessions.release', $session)); ?>"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Release anonymous feedback to the assigned faculty? This will close the feedback session.')"
+                                >
+                                    <?php echo csrf_field(); ?>
+
+                                    <button
+                                        type="submit"
+                                        class="badge badge-yellow"
+                                        style="border:0;cursor:pointer;"
+                                        title="Release anonymous feedback to faculty"
+                                    >
+                                        Not Released · Click to Release
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </td>
+
+                        <td>
+                            <a
+                                href="<?php echo e(route('admin.feedback-sessions.responses', $session)); ?>"
+                                class="btn-secondary btn-sm"
+                            >
+                                View Feedback
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:24px;">
+                            No feedback sessions found.
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if($sessions->hasPages()): ?>
+        <div style="margin:20px;">
+            <?php echo e($sessions->links()); ?>
+
+        </div>
+    <?php endif; ?>
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Atharv Vyas\OneDrive\Desktop\Web Dev\learn\laravel-\resources\views/admin/feedback-sessions/index.blade.php ENDPATH**/ ?>

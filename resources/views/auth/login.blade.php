@@ -1,390 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Smart Feedback System — Login</title>
+    <meta name="description" content="Login to the Smart Feedback & Attendance Portal for IITI">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <title>Student Portal | Login</title>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #EBF5FF 0%, #DBEAFE 40%, #BFDBFE 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Branding */
+        .branding {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.35);
+        }
+        .brand-icon svg { color: white; }
+        .brand-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0F172A;
+            letter-spacing: -0.02em;
+        }
+        .brand-subtitle {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        /* Card */
+        .login-card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 40px rgba(37, 99, 235, 0.10), 0 1px 6px rgba(0,0,0,0.06);
+            padding: 28px 32px 32px;
+            border: 1px solid rgba(219, 234, 254, 0.8);
+        }
+
+        /* Role Tabs */
+        .role-tabs {
+            display: flex;
+            background: #F1F5F9;
+            border-radius: 10px;
+            padding: 4px;
+            gap: 2px;
+            margin-bottom: 24px;
+        }
+        .role-tab {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            border-radius: 7px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748B;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .role-tab.active {
+            background: #ffffff;
+            color: #1D4ED8;
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+        }
+        .role-tab:hover:not(.active) {
+            color: #374151;
+        }
+
+        /* Form */
+        .form-group { margin-bottom: 18px; }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 7px;
+        }
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-icon {
+            position: absolute;
+            left: 13px;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+        }
+        .form-input {
+            width: 100%;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 10px 12px 10px 40px;
+            font-size: 0.9rem;
+            color: #0F172A;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.2s;
+            background: #FAFBFC;
+        }
+        .form-input:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+            background: #fff;
+        }
+        .form-input::placeholder { color: #94A3B8; }
+
+        /* Password row */
+        .password-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 7px;
+        }
+        .forgot-link {
+            font-size: 0.8rem;
+            color: #2563EB;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* Submit */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.30);
+            margin-top: 8px;
+            letter-spacing: 0.01em;
+        }
+        .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.40);
+        }
+        .btn-login:active { transform: translateY(0); }
+
+        /* Alerts */
+        .alert-error {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: #B91C1C;
+            margin-bottom: 16px;
+        }
+        .alert-info {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            color: #1E40AF;
+            margin-bottom: 16px;
+        }
+        .alert-info code {
+            font-family: 'Courier New', monospace;
+            background: rgba(37,99,235,0.12);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 0.78rem;
+        }
+    </style>
 </head>
+<body>
+    <div class="login-wrapper">
+        <!-- Branding -->
+        <div class="branding">
+            <div class="brand-icon">
+                <svg width="30" height="30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 14l9-5-9-5-9 5 9 5z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                </svg>
+            </div>
+            <div class="brand-title">Smart Feedback System</div>
+            <div class="brand-subtitle">Feedback &amp; Attendance Portal</div>
+        </div>
 
-<body class="min-h-screen bg-slate-100">
-
-    <div class="min-h-screen flex flex-col">
-
-        {{-- ================= HEADER ================= --}}
-        <header class="bg-white border-b border-slate-200">
-
-            <div class="max-w-7xl mx-auto px-6 lg:px-10">
-
-                <div class="h-20 flex items-center justify-between">
-
-                    {{-- College Logo --}}
-                    <div class="flex items-center gap-4">
-
-                        <div class="w-12 h-12 rounded-full">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/1/14/IITI_Logo.svg?utm_source=en.wikipedia.org&utm_campaign=index&utm_content=original"
-                                alt="IITI">
-                        </div>
-
-                        <div>
-
-                            <h1
-                                class="text-lg md:text-xl font-bold
-                                       text-[#0b2a4a] tracking-wide">
-                                IIT Indore
-                            </h1>
-
-                            <p class="text-xs text-slate-500 tracking-wide">
-                                Excellence • Knowledge • Character
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
+        <!-- Login Card -->
+        <div class="login-card">
+            <!-- Demo credentials hint -->
+            <div class="alert-info" id="demoHint">
+                Demo: <code>alice@student.iiti.ac.in</code> — password: <code>password</code>
             </div>
 
-        </header>
+            @if($errors->any())
+            <div class="alert-error">
+                {{ $errors->first() }}
+            </div>
+            @endif
 
+            @if(session('status'))
+            <div class="alert-info">{{ session('status') }}</div>
+            @endif
 
-        {{-- ================= MAIN ================= --}}
-        <main class="flex-1 relative flex items-center
-                   justify-center px-5 py-12">
-
-            {{-- Background decoration --}}
-            <div class="absolute inset-0 overflow-hidden
-                       pointer-events-none">
-
-                <div
-                    class="absolute -top-32 -left-32
-                           w-96 h-96 rounded-full
-                           bg-[#0b2a4a]/5">
-                </div>
-
-                <div
-                    class="absolute -bottom-40 -right-40
-                           w-[500px] h-[500px]
-                           rounded-full
-                           bg-[#d4af37]/10">
-                </div>
-
+            <!-- Role Tabs -->
+            <div class="role-tabs" id="roleTabs">
+                <button type="button" class="role-tab active" id="tab-student" onclick="switchTab('student')">Student</button>
+                <button type="button" class="role-tab" id="tab-faculty"  onclick="switchTab('faculty')">Faculty</button>
+                <button type="button" class="role-tab" id="tab-staff"    onclick="switchTab('staff')">Staff</button>
+                <button type="button" class="role-tab" id="tab-admin"    onclick="switchTab('admin')">Admin</button>
             </div>
 
+            <!-- Login Form -->
+            <form method="POST" action="{{ route('login.post') }}" id="loginForm">
+                @csrf
 
-            <div class="relative w-full max-w-md">
-
-
-                {{-- Login Card --}}
-                <div
-                    class="bg-white rounded-2xl
-                           border border-slate-200
-                           shadow-xl shadow-slate-900/5
-                           overflow-hidden">
-
-                    {{-- Card Header --}}
-                    <div
-                        class="bg-[#0b2a4a]
-                               px-8 py-7
-                               text-center">
-
-
-                        <h2 class="text-2xl font-bold text-white">
-                            Student Portal
-                        </h2>
-
-                        <p class="mt-1 text-sm text-white/70">
-                            Sign in to access your account
-                        </p>
-
+                <!-- Email / Roll Number -->
+                <div class="form-group">
+                    <label class="form-label" for="email" id="emailLabel">Institute Email / Roll Number</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </span>
+                        <input id="email" name="email" type="email"
+                               class="form-input"
+                               value="{{ old('email') }}"
+                               placeholder="student@iiti.ac.in"
+                               required autofocus autocomplete="username">
                     </div>
-
-
-                    {{-- Form --}}
-                    <div class="p-8">
-
-                        {{-- Errors --}}
-                        @if ($errors->any())
-
-                            <div
-                                class="mb-6 rounded-lg
-                                       border border-red-200
-                                       bg-red-50
-                                       px-4 py-3">
-
-                                <ul class="text-sm text-red-600
-                                           space-y-1">
-
-                                    @foreach ($errors->all() as $error)
-                                        <li>
-                                            {{ $error }}
-                                        </li>
-                                    @endforeach
-
-                                </ul>
-
-                            </div>
-
-                        @endif
-
-
-                        <form action="{{ route('login') }}" method="POST" class="space-y-5">
-
-                            @csrf
-
-
-                            {{-- Email --}}
-                            <div>
-
-                                <label for="email"
-                                    class="block mb-2
-                                           text-sm font-semibold
-                                           text-slate-700">
-                                    Email Address
-                                </label>
-
-                                <input type="email" id="email" name="email" value="{{ old('email') }}"
-                                    placeholder="Enter your email address" required autofocus autocomplete="email"
-                                    class="w-full h-12 px-4
-                                           rounded-lg
-                                           border border-slate-300
-                                           bg-slate-50
-                                           text-slate-800
-                                           placeholder-slate-400
-                                           outline-none
-                                           transition
-                                           focus:bg-white
-                                           focus:border-[#0b2a4a]
-                                           focus:ring-4
-                                           focus:ring-[#0b2a4a]/10">
-
-                            </div>
-
-
-                            {{-- Password --}}
-                            <div>
-
-                                <div
-                                    class="flex items-center
-                                           justify-between mb-2">
-
-                                    <label for="password"
-                                        class="text-sm font-semibold
-                                               text-slate-700">
-                                        Password
-                                    </label>
-
-                                    <a href="#"
-                                        class="text-xs font-medium
-                                               text-[#0b2a4a]
-                                               hover:text-[#d4af37]
-                                               transition">
-                                        Forgot Password?
-                                    </a>
-
-                                </div>
-
-
-                                <div class="relative">
-
-                                    <input type="password" id="password" name="password"
-                                        placeholder="Enter your password" required autocomplete="current-password"
-                                        class="w-full h-12 px-4 pr-12
-                                               rounded-lg
-                                               border border-slate-300
-                                               bg-slate-50
-                                               text-slate-800
-                                               placeholder-slate-400
-                                               outline-none
-                                               transition
-                                               focus:bg-white
-                                               focus:border-[#0b2a4a]
-                                               focus:ring-4
-                                               focus:ring-[#0b2a4a]/10">
-
-                                    <button type="button" onclick="togglePassword()"
-                                        class="absolute right-4
-                                               top-1/2
-                                               -translate-y-1/2
-                                               text-slate-400
-                                               hover:text-[#0b2a4a]">
-
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.8" stroke="currentColor" class="w-5 h-5">
-
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943
-                                                   7.523 5 12 5c4.478 0
-                                                   8.268 2.943 9.542 7
-                                                   -1.274 4.057-5.064
-                                                   7-9.542 7-4.477
-                                                   0-8.268-2.943
-                                                   -9.542-7Z" />
-
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0
-                                                   3 3 0 0 1 6 0Z" />
-
-                                        </svg>
-
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            {{-- Remember --}}
-                            <div class="flex items-center gap-3">
-
-                                <input type="checkbox" id="remember" name="remember"
-                                    class="w-4 h-4
-                                           rounded
-                                           border-slate-300
-                                           text-[#0b2a4a]
-                                           focus:ring-[#0b2a4a]">
-
-                                <label for="remember" class="text-sm text-slate-600">
-                                    Remember me
-                                </label>
-
-                            </div>
-
-
-                            {{-- Login Button --}}
-                            <button type="submit"
-                                class="w-full h-12
-                                       rounded-lg
-                                       bg-[#0b2a4a]
-                                       hover:bg-[#123b63]
-                                       text-white
-                                       font-semibold
-                                       tracking-wide
-                                       transition
-                                       shadow-md
-                                       shadow-[#0b2a4a]/20
-                                       cursor-pointer">
-                                SIGN IN
-                            </button>
-
-                        </form>
-
-
-                        {{-- Divider --}}
-                        <div class="flex items-center gap-4 my-7">
-
-                            <div class="flex-1 h-px bg-slate-200"></div>
-
-                            <span class="text-xs text-slate-400">
-                                OR
-                            </span>
-
-                            <div class="flex-1 h-px bg-slate-200"></div>
-
-                        </div>
-
-
-                        {{-- Register --}}
-                        <div class="text-center">
-
-                            <p class="text-sm text-slate-500">
-                                Don't have an account?
-                            </p>
-
-                            <a href="{{ route('register') }}"
-                                class="inline-block mt-2
-                                       font-semibold
-                                       text-[#0b2a4a]
-                                       hover:text-[#d4af37]
-                                       transition">
-                                Create a new account →
-                            </a>
-
-                        </div>
-
-                    </div>
-
                 </div>
 
-
-                {{-- Help --}}
-                <p class="text-center text-xs
-                           text-slate-500 mt-6">
-                    Need help?
-                    <a href="#" class="font-medium
-                               text-[#0b2a4a]">
-                        Contact Administration
-                    </a>
-                </p>
-
-            </div>
-
-        </main>
-
-
-        {{-- ================= FOOTER ================= --}}
-        <footer class="bg-[#0b2a4a]">
-
-            <div class="max-w-7xl mx-auto
-                       px-6 lg:px-10
-                       py-5">
-
-                <div
-                    class="flex flex-col sm:flex-row
-                           items-center
-                           justify-between gap-3">
-
-                    <p class="text-xs text-white/60">
-                        © {{ date('Y') }} IIT Indore
-                        All Rights Reserved.
-                    </p>
-
-                    <div class="flex gap-5">
-
-                        <a href="#"
-                            class="text-xs text-white/60
-                                   hover:text-white">
-                            Privacy Policy
-                        </a>
-
-                        <a href="#"
-                            class="text-xs text-white/60
-                                   hover:text-white">
-                            Terms
-                        </a>
-
-                        <a href="#"
-                            class="text-xs text-white/60
-                                   hover:text-white">
-                            Help
-                        </a>
-
+                <!-- Password -->
+                <div class="form-group" style="margin-bottom:22px">
+                    <div class="password-row">
+                        <label class="form-label" for="password" style="margin-bottom:0">Password</label>
+                        <a href="#" class="forgot-link">Forgot Password?</a>
                     </div>
-
+                    <div class="input-wrapper" style="margin-top:7px">
+                        <span class="input-icon">
+                            <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </span>
+                        <input id="password" name="password" type="password"
+                               class="form-input"
+                               placeholder="••••••••••"
+                               required autocomplete="current-password">
+                    </div>
                 </div>
 
-            </div>
-
-        </footer>
-
+                <button type="submit" class="btn-login" id="submitBtn">Login to Dashboard</button>
+            </form>
+        </div>
     </div>
 
-
     <script>
-        function togglePassword() {
+        const placeholders = {
+            student: { placeholder: 'student@iiti.ac.in', label: 'Institute Email / Roll Number', demoEmail: 'alice@student.iiti.ac.in' },
+            faculty: { placeholder: 'aris.thorne@iiti.ac.in', label: 'Institute Email', demoEmail: 'aris.thorne@iiti.ac.in' },
+            staff:   { placeholder: 'staff@iiti.ac.in', label: 'Institute Email', demoEmail: 'staff@iiti.ac.in' },
+            admin:   { placeholder: 'admin@iiti.ac.in',   label: 'Admin Email', demoEmail: 'admin@iiti.ac.in' },
+        };
 
-            const password =
-                document.getElementById('password');
-
-            password.type =
-                password.type === 'password' ?
-                'text' :
-                'password';
+        function switchTab(role) {
+            document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + role).classList.add('active');
+            
+            const emailInput = document.getElementById('email');
+            const emailLabel = document.getElementById('emailLabel');
+            const demoHint = document.getElementById('demoHint');
+            
+            emailInput.placeholder = placeholders[role].placeholder;
+            emailLabel.textContent  = placeholders[role].label;
+            demoHint.innerHTML = `Demo: <code>${placeholders[role].demoEmail}</code> — password: <code>password</code>`;
         }
     </script>
-
 </body>
-
 </html>

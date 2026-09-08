@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+<x-guest-layout>
+    <form method="POST" action="{{ route('register') }}">
+        @csrf
+=======
 <!DOCTYPE html>
 <html lang="en">
 
@@ -57,9 +62,22 @@
                 </div>
 
             </div>
+>>>>>>> 32606039c9254396b8232ad8ada2b187f70708cd
 
+        <!-- Name -->
+        <div>
+            <x-input-label for="name" :value="__('Name')" />
+            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+            <x-input-error :messages="$errors->get('name')" class="mt-2" />
         </div>
 
+<<<<<<< HEAD
+        <!-- Email Address -->
+        <div class="mt-4">
+            <x-input-label for="email" :value="__('Email')" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+=======
     </header>
 
 
@@ -510,83 +528,40 @@
                 </span>
             </p>
 
+>>>>>>> 32606039c9254396b8232ad8ada2b187f70708cd
         </div>
 
-    </main>
+        <!-- Password -->
+        <div class="mt-4">
+            <x-input-label for="password" :value="__('Password')" />
 
+            <x-text-input id="password" class="block mt-1 w-full"
+                            type="password"
+                            name="password"
+                            required autocomplete="new-password" />
 
-    {{-- ================= FOOTER ================= --}}
-    <footer class="bg-[#0b2a4a]">
-
-        <div
-            class="max-w-7xl mx-auto
-                   px-6 lg:px-10
-                   py-5"
-        >
-
-            <div
-                class="flex flex-col sm:flex-row
-                       items-center
-                       justify-between gap-3"
-            >
-
-                <p class="text-xs text-white/60">
-                    © {{ date('Y') }} Your College Name.
-                    All Rights Reserved.
-                </p>
-
-                <div class="flex gap-5">
-
-                    <a
-                        href="#"
-                        class="text-xs text-white/60
-                               hover:text-white"
-                    >
-                        Privacy Policy
-                    </a>
-
-                    <a
-                        href="#"
-                        class="text-xs text-white/60
-                               hover:text-white"
-                    >
-                        Terms
-                    </a>
-
-                    <a
-                        href="#"
-                        class="text-xs text-white/60
-                               hover:text-white"
-                    >
-                        Help
-                    </a>
-
-                </div>
-
-            </div>
-
+            <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-    </footer>
+        <!-- Confirm Password -->
+        <div class="mt-4">
+            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
-</div>
+            <x-text-input id="password_confirmation" class="block mt-1 w-full"
+                            type="password"
+                            name="password_confirmation" required autocomplete="new-password" />
 
+            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
 
-<script>
+        <div class="flex items-center justify-end mt-4">
+            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
+                {{ __('Already registered?') }}
+            </a>
 
-    function togglePassword(id) {
-
-        const input = document.getElementById(id);
-
-        input.type =
-            input.type === 'password'
-                ? 'text'
-                : 'password';
-
-    }
-
-</script>
-
-</body>
-
-</html>
+            <x-primary-button class="ms-4">
+                {{ __('Register') }}
+            </x-primary-button>
+        </div>
+    </form>
+</x-guest-layout>
