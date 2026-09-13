@@ -3,6 +3,8 @@
 @php $header = 'Attendance History'; $subheader = 'Detailed student attendance summary across your assigned sections.'; @endphp
 
 @section('sidebar-nav')
+@include('staff.partials.sidebar')
+<!--
 <div class="nav-section-label">Main</div>
 <a href="{{ route('staff.dashboard') }}" class="nav-link">Dashboard</a>
 <div class="nav-section-label">Attendance</div>
@@ -11,6 +13,7 @@
 <a href="{{ route('staff.attendance.create') }}" class="nav-link">New Session</a>
 <div class="nav-section-label">Feedback</div>
 <a href="{{ route('staff.feedback.index') }}" class="nav-link">Assigned Feedback</a>
+-->
 @endsection
 
 @section('content')

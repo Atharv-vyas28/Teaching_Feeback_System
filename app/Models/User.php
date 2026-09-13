@@ -12,7 +12,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'department_id', 'program_id', 'name', 'email',
-        'roll_number', 'employee_id', 'role', 'current_semester',
+        'roll_number', 'employee_id', 'designation', 'role', 'current_semester',
         'phone', 'avatar', 'is_active', 'password',
     ];
 

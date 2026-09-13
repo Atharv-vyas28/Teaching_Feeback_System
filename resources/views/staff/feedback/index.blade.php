@@ -7,6 +7,8 @@
 @endphp
 
 @section('sidebar-nav')
+@include('staff.partials.sidebar')
+<!--
 <div class="nav-section-label">Main</div>
 <a href="{{ route('staff.dashboard') }}" class="nav-link">Dashboard</a>
 <div class="nav-section-label">Attendance</div>
@@ -14,6 +16,7 @@
 <a href="{{ route('staff.attendance.history') }}" class="nav-link">Attendance History</a>
 <div class="nav-section-label">Feedback</div>
 <a href="{{ route('staff.feedback.index') }}" class="nav-link active">Assigned Feedback</a>
+-->
 @endsection
 
 @section('content')

@@ -10,15 +10,15 @@ use App\Models\User;
 use App\Models\StaffCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\StaffAssignmentAccessService;
 
 class AttendanceController extends Controller
 {
+    public function __construct(private StaffAssignmentAccessService $access) {}
+
     protected function authorizeSection(ClassSection $section): void
     {
-        $assigned = StaffCourse::where('user_id', auth()->id())
-            ->where('class_section_id', $section->id)
-            ->exists();
-        abort_unless($assigned, 403);
+        abort_unless($this->access->canManageSection(auth()->user(), $section), 403);
     }
 
     public function sessions()
