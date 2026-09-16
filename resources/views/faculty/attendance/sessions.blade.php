@@ -196,6 +196,11 @@
         <table class="data-table">
             <thead>
                 <tr>
+                    @if($selectedSectionId)
+                        <th>Lecture</th>
+                    @else
+                        <th>Course Code</th>.
+                    @endif
                     <th>Course</th>
                     <th>Topic</th>
                     <th>Date</th>
@@ -206,14 +211,20 @@
             </thead>
 
             <tbody>
+                @php
+                    $lectures = collect($attendanceTrend);
+                    $labels = $lectures->pluck('label');
+                    $counter = count($labels);
+                @endphp
                 @forelse($sessions as $session)
                     <tr>
                         <td>
-                            <div style="font-weight:600;color:#0F172A;">
+                            {{(explode("·", $labels[$counter-1]))[0]}}
+                            @php($counter--)
+                        </td>
+                        <td>
+                            <div style="font-weight:600;color:#4b5768;">
                                 {{ $session->section?->course?->name ?? 'N/A' }}
-                            </div>
-                            <div style="font-size:0.75rem;color:#94A3B8;">
-                                Section {{ $session->section?->section_name ?? '' }}
                             </div>
                         </td>
 
@@ -310,9 +321,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let trendData = @json($attendanceTrend);
-    console.log(trendData);
+    console.log(@json($attendanceTrend));
     
-    trendData = trendData.filter(data => data.percentage != -1);
+    trendData = trendData.filter(data => data.has_attendance);
     console.log(trendData);
 
     const chartElement = document.getElementById(

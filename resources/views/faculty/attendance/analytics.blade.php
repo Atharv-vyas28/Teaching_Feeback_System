@@ -110,7 +110,10 @@
         <div class="card-header">
             <div>
                 <h3>
-                    {{ $classSession->section?->course?->name ?? 'Course' }}
+                    {{ $classSession->section?->course?->name ?? 'Course' }} 
+                    (
+                    {{ $classSession->section?->course?->code ?? '' }}
+                    )
                     — {{ $classSession->topic ?? 'Class Session' }}
                 </h3>
 

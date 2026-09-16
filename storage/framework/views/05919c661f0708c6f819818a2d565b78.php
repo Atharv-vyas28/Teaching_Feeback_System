@@ -33,11 +33,10 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Course / Session</th>
+                    <th>Course</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Responses</th>
-                    <th>Eligible</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -46,7 +45,6 @@
                 <tr>
                     <td>
                         <div style="font-weight:600;color:#0F172A;"><?php echo e($fb->classSession->section->course->name ?? 'N/A'); ?></div>
-                        <div style="font-size:0.75rem;color:#94A3B8;"><?php echo e($fb->classSession->session_date->format('M d, Y') ?? ''); ?> · <?php echo e($fb->classSession->topic ?? 'No topic'); ?></div>
                     </td>
                     <td><?php echo e($fb->created_at->format('M d, Y')); ?></td>
                     <td>
@@ -59,7 +57,6 @@
                         <?php echo e($fb->isReleased() ? $fb->responses_count : '—'); ?>
 
                     </td>
-                    <td><?php echo e($fb->eligibility->count()); ?></td>
                     <td>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             <?php if($fb->status === 'draft'): ?>

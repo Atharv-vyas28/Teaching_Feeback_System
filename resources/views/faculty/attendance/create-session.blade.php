@@ -35,12 +35,12 @@
         <form method="POST" action="{{ route('faculty.attendance.store-session') }}">
             @csrf
             <div style="margin-bottom:16px;">
-                <label class="form-label">Class Section <span style="color:#DC2626;">*</span></label>
+                <label class="form-label">Courses <span style="color:#DC2626;">*</span></label>
                 <select name="class_section_id" id="class_section_id" class="form-select" required>
-                    <option value="">— Select section —</option>
+                    <option value="">— Select Course —</option>
                     @foreach($sections as $section)
                     <option value="{{ $section->id }}" {{ old('class_section_id') == $section->id ? 'selected' : '' }}>
-                        {{ $section->course->name }} — Section {{ $section->section_name }} ({{ $section->semester->name ?? 'N/A' }})
+                        {{ $section->course->name }} {{ $section->course->code }} ({{ $section->semester->name ?? 'N/A' }})
                     </option>
                     @endforeach
                 </select>
@@ -52,19 +52,19 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
                 <div>
                     <label class="form-label">Start Time <span style="color:#DC2626;">*</span></label>
-                    <input type="time" name="start_time" class="form-input" value="{{ old('start_time') }}" required>
+                    <input type="time" name="start_time" class="form-input" value="{{ old('start_time') }} required">
                 </div>
                 <div>
                     <label class="form-label">End Time <span style="color:#DC2626;">*</span></label>
-                    <input type="time" name="end_time" class="form-input" value="{{ old('end_time') }}" required>
+                    <input type="time" name="end_time" class="form-input" value="{{ old('end_time') }} required">
                 </div>
             </div>
             <div style="margin-bottom:24px;">
-                <label class="form-label">Topic / Chapter (optional)</label>
+                <label class="form-label">Topic / Chapter <span style="color:#6b8795;">(optional)</span></label>
                 <input type="text" name="topic" class="form-input" value="{{ old('topic') }}" placeholder="e.g. Introduction to Binary Trees">
             </div>
             <div style="display:flex;gap:12px;">
-                <button type="submit" class="btn-primary">Create & Take Attendance →</button>
+                <button type="submit" class="btn-primary">Create & Take Attendance</button>
                 <a href="{{ route('faculty.attendance.sessions') }}" class="btn-secondary">Cancel</a>
             </div>
         </form>

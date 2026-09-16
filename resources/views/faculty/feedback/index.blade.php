@@ -34,11 +34,10 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Course / Session</th>
+                    <th>Course</th>
                     <th>Date</th>
                     <th>Status</th>
                     <th>Responses</th>
-                    <th>Eligible</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -47,7 +46,6 @@
                 <tr>
                     <td>
                         <div style="font-weight:600;color:#0F172A;">{{ $fb->classSession->section->course->name ?? 'N/A' }}</div>
-                        <div style="font-size:0.75rem;color:#94A3B8;">{{ $fb->classSession->session_date->format('M d, Y') ?? '' }} · {{ $fb->classSession->topic ?? 'No topic' }}</div>
                     </td>
                     <td>{{ $fb->created_at->format('M d, Y') }}</td>
                     <td>
@@ -58,7 +56,6 @@
                     <td>
                         {{ $fb->isReleased() ? $fb->responses_count : '—' }}
                     </td>
-                    <td>{{ $fb->eligibility->count() }}</td>
                     <td>
                         <div style="display:flex;gap:6px;flex-wrap:wrap;">
                             @if($fb->status === 'draft')

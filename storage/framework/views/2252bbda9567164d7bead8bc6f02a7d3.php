@@ -54,11 +54,17 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Class Sessions</h3>
-            <a href="<?php echo e(route('faculty.attendance.sessions')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
+            <a href="<?php echo e(route('faculty.attendance.sessions')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">
-                <thead><tr><th>Course</th><th>Date</th><th>Status</th><th>Feedback</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <?php $__empty_1 = true; $__currentLoopData = $recentSessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
@@ -68,13 +74,6 @@
                         </td>
                         <td><?php echo e($session->session_date->format('M d, Y')); ?></td>
                         <td><span class="badge <?php echo e(['completed'=>'badge-green','ongoing'=>'badge-blue','scheduled'=>'badge-yellow','cancelled'=>'badge-red'][$session->status] ?? 'badge-gray'); ?>"><?php echo e(ucfirst($session->status)); ?></span></td>
-                        <td>
-                            <?php if($session->feedbackSession): ?>
-                                <span class="badge badge-<?php echo e(['draft'=>'gray','active'=>'green','closed'=>'blue'][$session->feedbackSession->status] ?? 'gray'); ?>"><?php echo e(ucfirst($session->feedbackSession->status)); ?></span>
-                            <?php else: ?>
-                                <span style="color:#94A3B8;font-size:0.78rem;">None</span>
-                            <?php endif; ?>
-                        </td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="4" style="text-align:center;padding:30px;color:#94A3B8;">No sessions yet.</td></tr>
@@ -88,7 +87,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Feedback Ratings</h3>
-            <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
+            <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">

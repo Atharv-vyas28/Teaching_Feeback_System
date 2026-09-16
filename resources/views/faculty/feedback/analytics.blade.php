@@ -192,11 +192,100 @@
 
 <div class="card" style="margin-bottom:24px;">
     <div class="card-header">
-        <h3>Marks Earned by Question</h3>
+        <div>
+            <h3>Department Feedback Leaderboard</h3>
+            <span style="font-size:.78rem;color:#64748B;">
+                Overall anonymous rating across completed feedback sessions.
+            </span>
+        </div>
+
+        <span class="badge badge-blue">
+            Rating out of 5
+        </span>
     </div>
 
-    <div class="card-body" style="height:370px;position:relative;">
-        <canvas id="marksChart"></canvas>
+    <div class="card-body">
+        @forelse($departmentLeaderboard as $department)
+            @php
+                $percentage = min(
+                    100,
+                    max(0, ($department->overall_rating / 5) * 100)
+                );
+            @endphp
+
+            <div style="
+                display:grid;
+                grid-template-columns:42px minmax(0,1fr) auto;
+                gap:14px;
+                align-items:center;
+                padding:16px 0;
+                border-bottom:1px solid #E2E8F0;
+            ">
+                <div style="
+                    width:34px;
+                    height:34px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border-radius:10px;
+                    background:{{ $loop->iteration <= 3 ? '#EFF6FF' : '#F8FAFC' }};
+                    color:{{ $loop->iteration <= 3 ? '#2563EB' : '#64748B' }};
+                    font-weight:800;
+                    font-size:.85rem;
+                ">
+                    #{{ $loop->iteration }}
+                </div>
+
+                <div style="min-width:0;">
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        gap:12px;
+                        margin-bottom:8px;
+                    ">
+                        <div style="
+                            overflow:hidden;
+                            color:#0F172A;
+                            font-weight:700;
+                            text-overflow:ellipsis;
+                            white-space:nowrap;
+                        ">
+                            {{ $department->department_name }}
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        height:8px;
+                        overflow:hidden;
+                        border-radius:999px;
+                        background:#E2E8F0;
+                    ">
+                        <div style="
+                            width:{{ $percentage }}%;
+                            height:100%;
+                            border-radius:999px;
+                            background:linear-gradient(90deg,#4F46E5,#60A5FA);
+                        "></div>
+                    </div>
+                </div>
+
+                <div style="
+                    min-width:58px;
+                    color:#0F172A;
+                    font-size:1.05rem;
+                    font-weight:800;
+                    text-align:right;
+                ">
+                    {{ number_format($department->overall_rating, 2) }}
+                    <span style="color:#94A3B8;font-size:.72rem;">/ 5</span>
+                </div>
+            </div>
+        @empty
+            <div style="padding:35px;text-align:center;color:#94A3B8;">
+                No department feedback is available yet.
+            </div>
+        @endforelse
     </div>
 </div>
 
@@ -211,38 +300,16 @@
 
     <div class="card-body">
         @forelse($ratingRows as $row)
-            <div style="padding:16px 0;border-bottom:1px solid #E2E8F0;">
+            <div style="padding:16px 0; display:flex; justify-content:space-between;border-bottom:1px solid #E2E8F0;">
                 <div style="font-weight:700;color:#0F172A;margin-bottom:12px;">
                     {{ $row['question'] }}
                 </div>
 
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;">
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Average Rating</div>
-                        <div style="font-size:1.1rem;font-weight:700;">
-                            {{ number_format($row['average'], 2) }} / 5
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Maximum Marks</div>
-                        <div style="font-size:1.1rem;font-weight:700;">
-                            {{ number_format($row['maximum_marks'], 2) }}
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Marks Earned</div>
-                        <div style="font-size:1.1rem;font-weight:700;color:#16A34A;">
-                            {{ number_format($row['marks_earned'], 2) }}
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Responses</div>
-                        <div style="font-size:1.1rem;font-weight:700;">
-                            {{ $row['response_count'] }}
-                        </div>
+                <div>
+                    <div style="font-size:0.75rem;color:#64748B;">Average Rating</div>
+                    <div style="font-size:1.1rem;font-weight:700;">
+                        {{ number_format($row['average'], 2) }}
+                        <span style="color:#94A3B8;font-size:.8rem;">/ 5</span>
                     </div>
                 </div>
             </div>
@@ -284,8 +351,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const labels = ratingRows.map(item => item.label);
     const ratings = ratingRows.map(item => item.average);
-    const earnedMarks = ratingRows.map(item => item.marks_earned);
-    const maximumMarks = ratingRows.map(item => item.maximum_marks);
 
     const submittedCount = {{ (int) $responseCount }};
     const pendingCount = {{ (int) $pendingResponses }};
@@ -318,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Average Rating / 5',
+                    label: 'Rating',
                     data: ratings,
                     backgroundColor: '#2563EB',
                     borderRadius: 6
@@ -348,44 +413,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        new Chart(document.getElementById('marksChart'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Marks Earned',
-                        data: earnedMarks,
-                        backgroundColor: '#16A34A',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Maximum Marks',
-                        data: maximumMarks,
-                        backgroundColor: '#BFDBFE',
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Marks'
-                        }
-                    }
-                }
-            }
-        });
     }
 });
 </script>

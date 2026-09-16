@@ -11,10 +11,15 @@ use App\Models\User;
 use App\Services\FeedbackRatingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\FeedbackEligibilityService;
 
 class FeedbackSessionController extends Controller
 {
-    public function __construct(private FeedbackRatingService $ratingService) {}
+    public function __construct(
+        private FeedbackRatingService $ratingService,
+        private FeedbackEligibilityService $eligibilityService
+    ) {
+    }
 
     public function index()
     {
@@ -50,13 +55,13 @@ class FeedbackSessionController extends Controller
     {
         $data = $request->validate([
             'class_session_id' => ['required', 'exists:class_sessions,id', 'unique:feedback_sessions,class_session_id'],
-            'staff_id'         => ['nullable', 'exists:users,id'],
-            'release_at'       => ['nullable', 'date'],
-            'deadline_at'      => ['nullable', 'date', 'after:release_at'],
+            'staff_id' => ['nullable', 'exists:users,id'],
+            'release_at' => ['nullable', 'date'],
+            'deadline_at' => ['nullable', 'date', 'after:release_at'],
         ]);
 
         $staffId = null;
-        if (! empty($data['staff_id'])) {
+        if (!empty($data['staff_id'])) {
             $staff = User::findOrFail($data['staff_id']);
             abort_unless($staff->isStaff(), 422, 'Selected user is not a staff member.');
             $staffId = $staff->id;
@@ -65,19 +70,19 @@ class FeedbackSessionController extends Controller
         $classSession = ClassSession::findOrFail($data['class_session_id']);
 
         $status = 'draft';
-        if (! empty($data['release_at']) && now()->greaterThanOrEqualTo($data['release_at'])) {
+        if (!empty($data['release_at']) && now()->greaterThanOrEqualTo($data['release_at'])) {
             $status = 'active';
         }
 
         FeedbackSession::create([
-            'class_session_id'  => $data['class_session_id'],
-            'created_by'        => auth()->id(),
+            'class_session_id' => $data['class_session_id'],
+            'created_by' => auth()->id(),
             'assigned_staff_id' => $staffId,
-            'status'            => $status,
-            'release_at'        => $data['release_at'] ?? null,
-            'deadline_at'       => $data['deadline_at'] ?? null,
-            'opened_at'         => $status === 'active' ? now() : null,
-            'is_released'       => false,
+            'status' => $status,
+            'release_at' => $data['release_at'] ?? null,
+            'deadline_at' => $data['deadline_at'] ?? null,
+            'opened_at' => $status === 'active' ? now() : null,
+            'is_released' => false,
         ]);
 
         return redirect()
@@ -95,7 +100,7 @@ class FeedbackSessionController extends Controller
             ->where('class_section_id', $session->classSession->class_section_id)
             ->where('is_active', true)->exists();
 
-        if (! $isAssigned) {
+        if (!$isAssigned) {
             return back()->with('error', 'Assign this Staff member to the course section first.');
         }
 
@@ -107,20 +112,23 @@ class FeedbackSessionController extends Controller
     {
         $session->load(['classSession.section.course', 'classSession.section.faculty']);
         $responses = $session->responses()->with('answers.question')->orderBy('submitted_at')->get();
-        $responseTimeline = $responses->filter(fn ($r) => $r->submitted_at)
-            ->groupBy(fn ($r) => $r->submitted_at->format('Y-m-d H:00'))
-            ->map(fn ($items, $period) => ['period' => $period, 'label' => \Carbon\Carbon::parse($period)->format('M d, H:00'), 'count' => $items->count()])->values();
+        $responseTimeline = $responses->filter(fn($r) => $r->submitted_at)
+            ->groupBy(fn($r) => $r->submitted_at->format('Y-m-d H:00'))
+            ->map(fn($items, $period) => ['period' => $period, 'label' => \Carbon\Carbon::parse($period)->format('M d, H:00'), 'count' => $items->count()])->values();
         $questionAnalysis = [];
         $ratingDistribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
-        foreach ($responses as $response) foreach ($response->answers as $answer) {
-            if ($answer->question?->type !== 'rating' || $answer->rating_value === null) continue;
-            $id = $answer->feedback_question_id;
-            $questionAnalysis[$id]['question'] ??= $answer->question->question_text;
-            $questionAnalysis[$id]['ratings'][] = (float) $answer->rating_value;
-            $rating = (int) round($answer->rating_value);
-            if (isset($ratingDistribution[$rating])) $ratingDistribution[$rating]++;
-        }
-        $questionAnalysis = collect($questionAnalysis)->map(fn ($item) => [
+        foreach ($responses as $response)
+            foreach ($response->answers as $answer) {
+                if ($answer->question?->type !== 'rating' || $answer->rating_value === null)
+                    continue;
+                $id = $answer->feedback_question_id;
+                $questionAnalysis[$id]['question'] ??= $answer->question->question_text;
+                $questionAnalysis[$id]['ratings'][] = (float) $answer->rating_value;
+                $rating = (int) round($answer->rating_value);
+                if (isset($ratingDistribution[$rating]))
+                    $ratingDistribution[$rating]++;
+            }
+        $questionAnalysis = collect($questionAnalysis)->map(fn($item) => [
             'question' => $item['question'],
             'average' => round(array_sum($item['ratings']) / count($item['ratings']), 2),
             'response_count' => count($item['ratings']),
@@ -130,14 +138,48 @@ class FeedbackSessionController extends Controller
 
     public function release(Request $request, FeedbackSession $session)
     {
-        if ($session->isReleased()) return back()->with('success', 'This feedback was already released to faculty.');
+        if ($session->isReleased()) {
+            return back()->with(
+                'success',
+                'This feedback was already released to faculty.'
+            );
+        }
+
         $responseCount = $session->responses()->count();
-        if ($responseCount === 0) return back()->with('error', 'No student feedback has been submitted for this session yet.');
+
+        if ($responseCount === 0) {
+            return back()->with(
+                'error',
+                'No student feedback has been submitted for this session yet.'
+            );
+        }
+
         DB::transaction(function () use ($session) {
-            $session->update(['status' => 'closed', 'closed_at' => now()]);
-            $this->ratingService->calculateForSession($session->fresh());
-            $session->update(['is_released' => true]);
+            $session->update([
+                'status' => 'closed',
+                'closed_at' => now(),
+            ]);
+
+            $session = $session->fresh();
+
+            $this->eligibilityService->calculateScoreEligibility(
+                $session
+            );
+
+            $this->ratingService->calculateForSession(
+                $session
+            );
+
+            $session->update([
+                'is_released' => true,
+            ]);
         });
-        return back()->with('success', "{$responseCount} anonymous response(s) released to faculty.");
+
+        return back()->with(
+            'success',
+            "{$responseCount} anonymous response(s) processed and released to faculty."
+        );
+
     }
+
 }

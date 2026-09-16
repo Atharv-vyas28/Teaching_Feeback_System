@@ -2,111 +2,258 @@
 
 namespace App\Services;
 
-use App\Models\FeedbackSession;
-use App\Models\FeedbackQuestion;
 use App\Models\FeedbackAnswer;
 use App\Models\FeedbackEligibility;
-use App\Models\RatingResult;
-use App\Models\ClassSection;
+use App\Models\FeedbackQuestion;
+use App\Models\FeedbackSession;
 use App\Models\FacultyCourse;
-use Illuminate\Support\Facades\DB;
+use App\Models\RatingResult;
 
 class FeedbackRatingService
 {
-    /**
-     * Calculate weighted faculty ratings.
-     *
-     * Example:
-     *   Q1 avg 4.5 weight 30%  → contribution: 4.5 × 0.30 = 1.35
-     *   Q2 avg 4.2 weight 20%  → contribution: 4.2 × 0.20 = 0.84
-     *   Q3 avg 4.7 weight 50%  → contribution: 4.7 × 0.50 = 2.35
-     *   Overall weighted = 1.35 + 0.84 + 2.35 = 4.54
-     */
-    public function calculateForSession(FeedbackSession $feedbackSession): ?RatingResult
-    {
-        $classSession = $feedbackSession->classSession;
-        $section      = $classSession->section;
+    public function calculateForSession(
+        FeedbackSession $feedbackSession
+    ): ?RatingResult {
+        $feedbackSession->load([
+            'classSession.section',
+        ]);
 
-        // Find faculty assigned to this section
-        $facultyCourse = FacultyCourse::where('class_section_id', $section->id)
+        $classSession = $feedbackSession->classSession;
+
+        if (! $classSession) {
+            return null;
+        }
+
+        $section = $classSession->section;
+
+        if (! $section) {
+            return null;
+        }
+
+        $facultyCourse = FacultyCourse::where(
+            'class_section_id',
+            $section->id
+        )
             ->where('is_active', true)
             ->first();
 
-        if (!$facultyCourse) return null;
+        if (! $facultyCourse) {
+            return null;
+        }
 
-        $ratingQuestions = FeedbackQuestion::where('is_active', true)
+        $ratingQuestions = FeedbackQuestion::where(
+            'is_active',
+            true
+        )
             ->where('type', 'rating')
             ->orderBy('display_order')
             ->get();
 
-        $responseIds = $feedbackSession->responses()->pluck('id');
-        $responseCount = $responseIds->count();
-
-        if ($responseCount === 0) return null;
-
-        $questionAverages = [];
-        $totalWeight = 0;
-        $weightedSum = 0;
-
-        foreach ($ratingQuestions as $question) {
-            $avg = FeedbackAnswer::whereIn('feedback_response_id', $responseIds)
-                ->where('feedback_question_id', $question->id)
-                ->whereNotNull('rating_value')
-                ->avg('rating_value') ?? 0;
-
-            $questionAverages[$question->id] = [
-                'question'     => $question->question_text,
-                'average'      => round($avg, 2),
-                'weight'       => $question->weight,
-                'contribution' => round($avg * ($question->weight / 100), 4),
-            ];
-
-            $totalWeight += $question->weight;
-            $weightedSum += $avg * ($question->weight / 100);
+        if ($ratingQuestions->isEmpty()) {
+            return null;
         }
 
-        // Normalize if weights don't sum to 100
-        $overallWeighted = $totalWeight > 0 ? round($weightedSum * (100 / $totalWeight), 2) : 0;
+        $eligibilityRecords = FeedbackEligibility::where(
+            'feedback_session_id',
+            $feedbackSession->id
+        )
+            ->where('has_submitted', true)
+            ->where('included_in_score', true)
+            ->whereNotNull('attendance_weight')
+            ->whereNotNull('anonymous_token')
+            ->get();
 
-        $eligibleCount = FeedbackEligibility::where('feedback_session_id', $feedbackSession->id)->count();
-        $responseRate  = $eligibleCount > 0 ? round(($responseCount / $eligibleCount) * 100, 2) : 0;
+        if ($eligibilityRecords->isEmpty()) {
+            return null;
+        }
+
+        $anonymousTokens = $eligibilityRecords
+            ->pluck('anonymous_token');
+
+        $questionAverages = [];
+
+        $totalQuestionWeight = 0;
+        $overallWeightedSum = 0;
+
+        foreach ($ratingQuestions as $question) {
+
+            $answers = FeedbackAnswer::query()
+                ->join(
+                    'feedback_responses',
+                    'feedback_answers.feedback_response_id',
+                    '=',
+                    'feedback_responses.id'
+                )
+                ->join(
+                    'feedback_eligibility',
+                    'feedback_responses.anonymous_token',
+                    '=',
+                    'feedback_eligibility.anonymous_token'
+                )
+                ->where(
+                    'feedback_responses.feedback_session_id',
+                    $feedbackSession->id
+                )
+                ->where(
+                    'feedback_eligibility.feedback_session_id',
+                    $feedbackSession->id
+                )
+                ->where(
+                    'feedback_answers.feedback_question_id',
+                    $question->id
+                )
+                ->whereNotNull(
+                    'feedback_answers.rating_value'
+                )
+                ->where(
+                    'feedback_eligibility.has_submitted',
+                    true
+                )
+                ->where(
+                    'feedback_eligibility.included_in_score',
+                    true
+                )
+                ->whereNotNull(
+                    'feedback_eligibility.attendance_weight'
+                )
+                ->whereIn(
+                    'feedback_responses.anonymous_token',
+                    $anonymousTokens
+                )
+                ->select(
+                    'feedback_answers.rating_value',
+                    'feedback_eligibility.attendance_weight'
+                )
+                ->get();
+
+            $totalAttendanceWeight =
+                $answers->sum('attendance_weight');
+
+            $weightedAverage = 0;
+
+            if ($totalAttendanceWeight > 0) {
+
+                $weightedSum = $answers->sum(
+                    function ($answer) {
+                        return
+                            $answer->rating_value *
+                            $answer->attendance_weight;
+                    }
+                );
+
+                $weightedAverage =
+                    $weightedSum / $totalAttendanceWeight;
+            }
+
+            $questionAverages[$question->id] = [
+
+                'question' =>
+                    $question->question_text,
+
+                'average' =>
+                    round($weightedAverage, 2),
+
+                'weight' =>
+                    $question->weight,
+
+                'contribution' =>
+                    round(
+                        $weightedAverage *
+                        ($question->weight / 100),
+                        4
+                    ),
+            ];
+
+            $totalQuestionWeight +=
+                $question->weight;
+
+            $overallWeightedSum +=
+                $weightedAverage *
+                ($question->weight / 100);
+        }
+
+        $overallWeighted =
+            $totalQuestionWeight > 0
+                ? round(
+                    $overallWeightedSum *
+                    (100 / $totalQuestionWeight),
+                    2
+                )
+                : 0;
+
+        $responseCount =
+            $eligibilityRecords->count();
 
         return RatingResult::updateOrCreate(
             [
-                'faculty_id'       => $facultyCourse->user_id,
-                'class_section_id' => $section->id,
-                'semester_id'      => $section->semester_id,
+                'faculty_id' =>
+                    $facultyCourse->user_id,
+
+                'class_section_id' =>
+                    $section->id,
+
+                'semester_id' =>
+                    $section->semester_id,
             ],
+
             [
-                'overall_weighted_rating' => $overallWeighted,
-                // 'course_rating'           => $overallWeighted, // same scale for course
-                'response_count'          => $responseCount,
-                // 'eligible_count'          => $eligibleCount,
-                // 'response_rate'           => $responseRate,
-                'question_averages'       => $questionAverages,
-                'calculated_at'           => now(),
+                'overall_weighted_rating' =>
+                    $overallWeighted,
+
+                'response_count' =>
+                    $responseCount,
+
+                'question_averages' =>
+                    $questionAverages,
+
+                'calculated_at' =>
+                    now(),
             ]
         );
     }
 
-    public function calculateForFaculty(int $facultyId, int $semesterId): array
-    {
-        $results = RatingResult::where('faculty_id', $facultyId)
-            ->where('semester_id', $semesterId)
-            ->with(['section.course'])
+    public function calculateForFaculty(
+        int $facultyId,
+        int $semesterId
+    ): array {
+        $results = RatingResult::where(
+            'faculty_id',
+            $facultyId
+        )
+            ->where(
+                'semester_id',
+                $semesterId
+            )
+            ->with([
+                'section.course',
+            ])
             ->get();
 
         if ($results->isEmpty()) {
-            return ['overall' => 0, 'courses' => [], 'response_count' => 0];
+            return [
+                'overall' => 0,
+                'courses' => [],
+                'response_count' => 0,
+            ];
         }
 
-        $overallAvg = $results->avg('overall_weighted_rating');
-
         return [
-            'overall'        => round($overallAvg, 2),
-            'courses'        => $results->toArray(),
-            'response_count' => $results->sum('response_count'),
-            'response_rate'  => round($results->avg('response_rate'), 2),
+
+            'overall' =>
+                round(
+                    $results->avg(
+                        'overall_weighted_rating'
+                    ),
+                    2
+                ),
+
+            'courses' =>
+                $results->toArray(),
+
+            'response_count' =>
+                $results->sum(
+                    'response_count'
+                ),
         ];
     }
 }

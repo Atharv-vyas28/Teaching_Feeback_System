@@ -108,8 +108,11 @@
         <div class="card-header">
             <div>
                 <h3>
-                    <?php echo e($classSession->section?->course?->name ?? 'Course'); ?>
+                    <?php echo e($classSession->section?->course?->name ?? 'Course'); ?> 
+                    (
+                    <?php echo e($classSession->section?->course?->code ?? ''); ?>
 
+                    )
                     — <?php echo e($classSession->topic ?? 'Class Session'); ?>
 
                 </h3>

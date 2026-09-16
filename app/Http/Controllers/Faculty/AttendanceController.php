@@ -52,15 +52,40 @@ class AttendanceController extends Controller
             ? (int) $request->section_id
             : null;
 
-        if ($selectedSectionId && ! $sectionIds->contains($selectedSectionId)) {
+        if ($selectedSectionId && !$sectionIds->contains($selectedSectionId)) {
             abort(403, 'You are not assigned to this course section.');
         }
 
         $sessionCounts = DB::table('class_sessions')
-            ->whereIn('class_section_id', $sectionIds)
-            ->where('conducted_by', $user->id)
-            ->selectRaw('class_section_id, COUNT(*) as total_sessions')
-            ->groupBy('class_section_id');
+            ->join(
+                'attendance',
+                'class_sessions.id',
+                '=',
+                'attendance.class_session_id'
+            )
+            ->whereIn(
+                'class_sessions.class_section_id',
+                $sectionIds
+            )
+            ->where(
+                'class_sessions.conducted_by',
+                $user->id
+            )
+            ->where(
+                'class_sessions.status',
+                'completed'
+            )
+            ->where(
+                'attendance.source',
+                'regular'
+            )
+            ->selectRaw(
+                'class_sessions.class_section_id,
+        COUNT(DISTINCT class_sessions.id) as total_sessions'
+            )
+            ->groupBy(
+                'class_sessions.class_section_id'
+            );
 
         $attendanceStats = DB::table('class_sessions')
             ->leftJoin('attendance', function ($join) {
@@ -142,7 +167,7 @@ class AttendanceController extends Controller
             ->where('conducted_by', $user->id)
             ->when(
                 $selectedSectionId,
-                fn ($query) => $query->where(
+                fn($query) => $query->where(
                     'class_section_id',
                     $selectedSectionId
                 )
@@ -168,7 +193,7 @@ class AttendanceController extends Controller
                     'label' => $selectedSectionId
                         ? 'Lecture ' . ($index + 1) . ' · ' . $date
                         : ($session->section?->course?->code ?? 'Course')
-                            . ' · ' . $date,
+                        . ' · ' . $date,
 
                     'percentage' => $percentage,
                     'has_attendance' => $session->total_attendance > 0,
@@ -191,7 +216,7 @@ class AttendanceController extends Controller
             ->where('conducted_by', $user->id)
             ->when(
                 $selectedSectionId,
-                fn ($query) => $query->where(
+                fn($query) => $query->where(
                     'class_section_id',
                     $selectedSectionId
                 )
@@ -361,7 +386,7 @@ class AttendanceController extends Controller
                 ->flip();
 
             foreach ($validated['attendance'] as $studentId => $data) {
-                if (! isset($enrolledStudentIds[$studentId])) {
+                if (!isset($enrolledStudentIds[$studentId])) {
                     continue;
                 }
 
@@ -369,11 +394,11 @@ class AttendanceController extends Controller
                     [
                         'class_session_id' => $classSession->id,
                         'student_id' => $studentId,
-                        'source' => 'regular',
                     ],
                     [
                         'marked_by' => auth()->id(),
                         'status' => $data['status'],
+                        'source' => 'regular',
                         'feedback_enabled' => false,
                         'marked_at' => now(),
                         'remarks' => $data['remarks'] ?? null,
@@ -405,13 +430,13 @@ class AttendanceController extends Controller
             ->where('source', 'regular')
             ->get()
             ->sortBy(
-                fn ($attendance) => $attendance->student?->name
+                fn($attendance) => $attendance->student?->name
             )
             ->values();
 
         $presentStudents = $records
             ->filter(
-                fn ($attendance) => in_array(
+                fn($attendance) => in_array(
                     $attendance->status,
                     ['present', 'late']
                 )
@@ -420,7 +445,7 @@ class AttendanceController extends Controller
 
         $absentStudents = $records
             ->filter(
-                fn ($attendance) => $attendance->status === 'absent'
+                fn($attendance) => $attendance->status === 'absent'
             )
             ->values();
 
@@ -477,7 +502,7 @@ class AttendanceController extends Controller
             ? (int) $request->section_id
             : null;
 
-        if ($filteredSectionId && ! $sectionIds->contains($filteredSectionId)) {
+        if ($filteredSectionId && !$sectionIds->contains($filteredSectionId)) {
             abort(403, 'You are not assigned to that course section.');
         }
 
@@ -541,10 +566,10 @@ class AttendanceController extends Controller
                             'like',
                             "%{$search}%"
                         )->orWhere(
-                            'users.roll_number',
-                            'like',
-                            "%{$search}%"
-                        );
+                                'users.roll_number',
+                                'like',
+                                "%{$search}%"
+                            );
                     });
                 }
             )
@@ -614,7 +639,7 @@ class AttendanceController extends Controller
             ? (int) $request->section_id
             : null;
 
-        if ($filteredSectionId && ! $sectionIds->contains($filteredSectionId)) {
+        if ($filteredSectionId && !$sectionIds->contains($filteredSectionId)) {
             abort(403);
         }
 

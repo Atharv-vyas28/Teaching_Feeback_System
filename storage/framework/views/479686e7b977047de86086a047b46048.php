@@ -200,6 +200,11 @@
         <table class="data-table">
             <thead>
                 <tr>
+                    <?php if($selectedSectionId): ?>
+                        <th>Lecture</th>
+                    <?php else: ?>
+                        <th>Course Code</th>.
+                    <?php endif; ?>
                     <th>Course</th>
                     <th>Topic</th>
                     <th>Date</th>
@@ -210,15 +215,21 @@
             </thead>
 
             <tbody>
+                <?php
+                    $lectures = collect($attendanceTrend);
+                    $labels = $lectures->pluck('label');
+                    $counter = count($labels);
+                ?>
                 <?php $__empty_1 = true; $__currentLoopData = $sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td>
-                            <div style="font-weight:600;color:#0F172A;">
-                                <?php echo e($session->section?->course?->name ?? 'N/A'); ?>
+                            <?php echo e((explode("·", $labels[$counter-1]))[0]); ?>
 
-                            </div>
-                            <div style="font-size:0.75rem;color:#94A3B8;">
-                                Section <?php echo e($session->section?->section_name ?? ''); ?>
+                            <?php ($counter--); ?>
+                        </td>
+                        <td>
+                            <div style="font-weight:600;color:#4b5768;">
+                                <?php echo e($session->section?->course?->name ?? 'N/A'); ?>
 
                             </div>
                         </td>
@@ -317,9 +328,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     let trendData = <?php echo json_encode($attendanceTrend, 15, 512) ?>;
-    console.log(trendData);
+    console.log(<?php echo json_encode($attendanceTrend, 15, 512) ?>);
     
-    trendData = trendData.filter(data => data.percentage != -1);
+    trendData = trendData.filter(data => data.has_attendance);
     console.log(trendData);
 
     const chartElement = document.getElementById(

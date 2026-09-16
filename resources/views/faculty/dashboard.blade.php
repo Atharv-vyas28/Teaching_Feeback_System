@@ -55,11 +55,17 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Class Sessions</h3>
-            <a href="{{ route('faculty.attendance.sessions') }}" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
+            <a href="{{ route('faculty.attendance.sessions') }}" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">
-                <thead><tr><th>Course</th><th>Date</th><th>Status</th><th>Feedback</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody>
                     @forelse($recentSessions as $session)
                     <tr>
@@ -69,13 +75,6 @@
                         </td>
                         <td>{{ $session->session_date->format('M d, Y') }}</td>
                         <td><span class="badge {{ ['completed'=>'badge-green','ongoing'=>'badge-blue','scheduled'=>'badge-yellow','cancelled'=>'badge-red'][$session->status] ?? 'badge-gray' }}">{{ ucfirst($session->status) }}</span></td>
-                        <td>
-                            @if($session->feedbackSession)
-                                <span class="badge badge-{{ ['draft'=>'gray','active'=>'green','closed'=>'blue'][$session->feedbackSession->status] ?? 'gray' }}">{{ ucfirst($session->feedbackSession->status) }}</span>
-                            @else
-                                <span style="color:#94A3B8;font-size:0.78rem;">None</span>
-                            @endif
-                        </td>
                     </tr>
                     @empty
                     <tr><td colspan="4" style="text-align:center;padding:30px;color:#94A3B8;">No sessions yet.</td></tr>
@@ -89,7 +88,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Feedback Ratings</h3>
-            <a href="{{ route('faculty.feedback.my-ratings') }}" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
+            <a href="{{ route('faculty.feedback.my-ratings') }}" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">

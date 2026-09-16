@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // ── Drop old tables if they exist (from incomplete prior migrations) ──
@@ -161,6 +160,7 @@ return new class extends Migration
             $table->foreignId('marked_by')->constrained('users')->onDelete('cascade');
             $table->enum('status', ['present', 'absent', 'late', 'excused'])->default('absent');
             $table->boolean('feedback_enabled')->default(false);
+            $table->enum('source', ['regular', 'feedback_day'])->default('regular');
             $table->timestamp('marked_at')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
@@ -173,7 +173,7 @@ return new class extends Migration
             $table->text('question_text');
             $table->enum('type', ['rating', 'text', 'boolean'])->default('rating');
             $table->decimal('weight', 5, 2)->default(1.00);
-            $table->integer('order_position')->default(0);
+            $table->integer('display_order')->default(0);
             $table->boolean('is_required')->default(true);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
@@ -182,11 +182,44 @@ return new class extends Migration
         // ── Feedback Sessions ──────────────────────────────────────────────────
         Schema::create('feedback_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_session_id')->unique()->constrained()->onDelete('cascade');
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
-            $table->enum('status', ['draft', 'active', 'closed'])->default('draft');
+
+            // One feedback session per course section
+            $table->foreignId('class_section_id')
+                ->unique()
+                ->constrained()
+                ->onDelete('cascade');
+
+            // The special class session on the feedback day
+            $table->foreignId('class_session_id')
+                ->nullable()
+                ->unique()
+                ->constrained()
+                ->onDelete('set null');
+
+            $table->foreignId('created_by')
+                ->constrained('users')
+                ->onDelete('cascade');
+
+            $table->foreignId('assigned_staff_id')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+
+            $table->enum(
+                'status',
+                ['draft', 'active', 'closed']
+            )->default('draft');
+
+            $table->timestamp('release_at')->nullable();
+
+            $table->timestamp('deadline_at')->nullable();
+
             $table->timestamp('opened_at')->nullable();
+
             $table->timestamp('closed_at')->nullable();
+
+            $table->boolean('is_released')->default(false);
+
             $table->timestamps();
         });
 
@@ -199,6 +232,9 @@ return new class extends Migration
             $table->timestamp('submitted_at')->nullable();
             $table->timestamps();
             $table->unique(['feedback_session_id', 'student_id']);
+            $table->uuid('anonymous_token')->nullable()->unique();
+            $table->boolean('included_in_score')->default(false);
+            $table->decimal('attendance_weight', 5, 4)->nullable();
         });
 
         // ── Feedback Responses (anonymous) ─────────────────────────────────────
@@ -223,14 +259,47 @@ return new class extends Migration
         // ── Rating Results ─────────────────────────────────────────────────────
         Schema::create('rating_results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('faculty_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('class_section_id')->constrained()->onDelete('cascade');
-            $table->foreignId('semester_id')->nullable()->constrained()->onDelete('set null');
-            $table->decimal('overall_weighted_rating', 5, 2)->nullable();
+
+            $table->foreignId('feedback_session_id')
+                ->unique()
+                ->constrained()
+                ->onDelete('cascade');
+
+            $table->foreignId('faculty_id')
+                ->constrained('users')
+                ->onDelete('cascade');
+
+            $table->foreignId('class_section_id')
+                ->constrained()
+                ->onDelete('cascade');
+
+            $table->foreignId('semester_id')
+                ->nullable()
+                ->constrained()
+                ->onDelete('set null');
+
+            $table->decimal(
+                'overall_weighted_rating',
+                5,
+                2
+            )->nullable();
+
             $table->integer('response_count')->default(0);
+
             $table->json('question_averages')->nullable();
+
             $table->timestamp('calculated_at')->nullable();
+
             $table->timestamps();
+
+            $table->unique(
+                [
+                    'faculty_id',
+                    'class_section_id',
+                    'semester_id',
+                ],
+                'rating_results_unique'
+            );
         });
     }
 
