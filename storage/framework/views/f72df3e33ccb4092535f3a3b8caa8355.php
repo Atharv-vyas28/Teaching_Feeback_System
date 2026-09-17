@@ -221,6 +221,11 @@
         Feedback Sessions
     </a>
 
+    <a href="<?php echo e(route('admin.staff-assignments.index')); ?>" class="admin-nav-link <?php echo e(request()->routeIs('admin.staff-assignments.*') ? 'active' : ''); ?>">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M19 8v6m3-3h-6"/></svg>
+        Staff Assignments
+    </a>
+
     <div class="nav-title">Reports</div>
 
     <a
@@ -259,4 +264,5 @@
             Logout
         </button>
     </form>
-</div><?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/admin/partials/sidebar.blade.php ENDPATH**/ ?>
+</div>
+<?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/admin/partials/sidebar.blade.php ENDPATH**/ ?>

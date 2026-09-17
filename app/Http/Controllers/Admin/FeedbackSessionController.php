@@ -8,6 +8,7 @@ use App\Models\ClassSession;
 use App\Models\FeedbackSession;
 use App\Models\StaffCourse;
 use App\Models\User;
+use App\Notifications\NewStaffFeedbackAssignmentNotification;
 use App\Services\FeedbackRatingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -96,15 +97,24 @@ class FeedbackSessionController extends Controller
         $staff = User::findOrFail($data['staff_id']);
         abort_unless($staff->isStaff(), 422, 'Selected user is not a staff member.');
 
-        $isAssigned = StaffCourse::where('user_id', $staff->id)
-            ->where('class_section_id', $session->classSession->class_section_id)
-            ->where('is_active', true)->exists();
+        DB::transaction(function () use ($session, $staff) {
+            StaffCourse::active()->where('feedback_session_id', $session->id)
+                ->update(['is_active' => false, 'status' => 'inactive', 'deactivated_at' => now()]);
 
-        if (!$isAssigned) {
-            return back()->with('error', 'Assign this Staff member to the course section first.');
-        }
+            $assignment = StaffCourse::create([
+                'user_id' => $staff->id,
+                'class_section_id' => $session->classSession->class_section_id,
+                'semester_id' => $session->classSession->section->semester_id,
+                'feedback_session_id' => $session->id,
+                'assigned_by' => auth()->id(),
+                'is_active' => true,
+                'status' => 'active',
+                'assigned_at' => now(),
+            ]);
 
-        $session->update(['assigned_staff_id' => $staff->id]);
+            $session->update(['assigned_staff_id' => $staff->id]);
+            $staff->notify(new NewStaffFeedbackAssignmentNotification($assignment));
+        });
         return back()->with('success', 'Staff assigned to this feedback session.');
     }
 

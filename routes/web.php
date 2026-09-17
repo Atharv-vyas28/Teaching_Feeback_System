@@ -10,12 +10,14 @@ use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\FeedbackQuestionController;
 use App\Http\Controllers\Admin\FeedbackSessionController as AdminFeedbackSessionController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\StaffAssignmentController;
 use App\Http\Controllers\Faculty\DashboardController as FacultyDashboard;
 use App\Http\Controllers\Faculty\AttendanceController as FacultyAttendance;
 use App\Http\Controllers\Faculty\FeedbackSessionController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendance;
 use App\Http\Controllers\Staff\FeedbackSessionController as StaffFeedback;
+use App\Http\Controllers\Staff\NotificationController as StaffNotification;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Student\FeedbackController;
 
@@ -72,6 +74,9 @@ Route::get(
     Route::post('/enrollments', [CourseController::class, 'storeEnrollment'])->name('enrollments.store');
     Route::post('/assign-faculty', [CourseController::class, 'assignFaculty'])->name('faculty.assign');
     Route::post('/assign-staff', [CourseController::class, 'assignStaff'])->name('staff.assign');
+    Route::get('/staff-assignments', [StaffAssignmentController::class, 'index'])->name('staff-assignments.index');
+    Route::post('/staff-assignments', [StaffAssignmentController::class, 'store'])->name('staff-assignments.store');
+    Route::post('/staff-assignments/{assignment}/deactivate', [StaffAssignmentController::class, 'deactivate'])->name('staff-assignments.deactivate');
 
     // Semesters
     Route::get('/semesters', [SemesterController::class, 'index'])->name('semesters.index');
@@ -140,6 +145,9 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff'])->grou
     Route::get('/feedback', [StaffFeedback::class, 'index'])->name('feedback.index');
     Route::post('/feedback/{feedbackSession}/release', [StaffFeedback::class, 'release'])->name('feedback.release');
     Route::post('/feedback/{feedbackSession}/close', [StaffFeedback::class, 'close'])->name('feedback.close');
+    Route::get('/notifications', [StaffNotification::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [StaffNotification::class, 'readAll'])->name('notifications.read-all');
+    Route::get('/notifications/{notification}', [StaffNotification::class, 'read'])->name('notifications.read');
 });
 
 // ─── Student ─────────────────────────────────────────────────────────────────

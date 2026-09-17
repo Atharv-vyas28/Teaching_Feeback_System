@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Models\FeedbackSession;
 use Illuminate\Http\Request;
+use App\Services\StaffAssignmentAccessService;
 
 class FeedbackSessionController extends Controller
 {
+    public function __construct(private StaffAssignmentAccessService $access) {}
+
     public function index()
     {
-        $feedbackSessions = FeedbackSession::with([
+        $feedbackSessions = $this->access->feedbackSessionsFor(auth()->user())->with([
             'classSession.section.course.department',
             'classSession.section.semester',
         ])
@@ -24,7 +27,7 @@ class FeedbackSessionController extends Controller
     private function authorizeAssignment(FeedbackSession $feedbackSession): void
     {
         abort_unless(
-            $feedbackSession->assigned_staff_id === auth()->id(),
+            $this->access->canManageFeedback(auth()->user(), $feedbackSession),
             403,
             'You are not assigned to this feedback session.'
         );
