@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\ClassSession;
 use App\Models\FeedbackSession;
 use App\Models\FacultyCourse;
+use App\Models\RatingResult;
 use App\Services\FeedbackEligibilityService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class FeedbackSessionController extends Controller
 {
@@ -135,7 +137,8 @@ class FeedbackSessionController extends Controller
             'Feedback has not been released by the administrator yet.'
         );
 
-        $responseCount = $feedbackSession->responses()->count();
+        $ratingResult = RatingResult::where('feedback_session_id', $feedbackSession->id)->first();
+        $responseCount = $ratingResult?->response_count ?? 0;
         $eligibleCount = $feedbackSession->eligibility()->count();
 
         $questionStats = [];
@@ -149,6 +152,7 @@ class FeedbackSessionController extends Controller
 
                 if (! isset($questionStats[$questionId])) {
                     $questionStats[$questionId] = [
+                        'question_id' => $questionId,
                         'question' => $answer->question->question_text,
                         'type' => $answer->question->type,
                         'weight' => $answer->question->weight,
@@ -167,28 +171,53 @@ class FeedbackSessionController extends Controller
             }
         }
 
+        $storedQuestionAverages = $ratingResult?->question_averages ?? [];
+
         foreach ($questionStats as &$stat) {
             $stat['average'] = count($stat['values']) > 0
                 ? round(array_sum($stat['values']) / count($stat['values']), 2)
                 : null;
+
+            // Replace the display average with the stored attendance-weighted
+            // result when it is available after Admin release.
+            $stored = $storedQuestionAverages[$stat['question_id']] ?? null;
+            if ($stored && array_key_exists('average', $stored)) {
+                $stat['average'] = $stored['average'];
+            }
         }
 
-        $ratingResult = \App\Models\RatingResult::where(
-            'class_section_id',
-            $feedbackSession->classSession->class_section_id
-        )
-            ->where(
-                'semester_id',
-                $feedbackSession->classSession->section->semester_id
-            )
-            ->first();
+        $semesterId = $feedbackSession->classSession->section->semester_id;
+        $facultyDepartmentScores = RatingResult::query()
+            ->join('class_sections', 'rating_results.class_section_id', '=', 'class_sections.id')
+            ->join('courses', 'class_sections.course_id', '=', 'courses.id')
+            ->whereNotNull('rating_results.overall_weighted_rating')
+            ->when($semesterId, fn ($query) => $query->where('rating_results.semester_id', $semesterId))
+            ->selectRaw('courses.department_id, rating_results.faculty_id, AVG(rating_results.overall_weighted_rating) as faculty_average')
+            ->groupBy('courses.department_id', 'rating_results.faculty_id');
+
+        $departmentLeaderboard = DB::query()
+            ->fromSub($facultyDepartmentScores, 'faculty_scores')
+            ->join('departments', 'departments.id', '=', 'faculty_scores.department_id')
+            ->selectRaw('departments.id, departments.name, departments.code, AVG(faculty_scores.faculty_average) as average_score, COUNT(*) as faculty_count')
+            ->groupBy('departments.id', 'departments.name', 'departments.code')
+            ->orderByDesc('average_score')
+            ->get()
+            ->values()
+            ->map(fn ($department, $index) => [
+                'rank' => $index + 1,
+                'name' => $department->name,
+                'code' => $department->code,
+                'average_score' => round((float) $department->average_score, 2),
+                'faculty_count' => (int) $department->faculty_count,
+            ]);
 
         return view('faculty.feedback.analytics', compact(
             'feedbackSession',
             'questionStats',
             'responseCount',
             'eligibleCount',
-            'ratingResult'
+            'ratingResult',
+            'departmentLeaderboard'
         ));
     }
 

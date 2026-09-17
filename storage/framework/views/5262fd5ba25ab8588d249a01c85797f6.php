@@ -1,10 +1,9 @@
-@extends('layouts.dashboard')
-@section('title', 'Feedback Analytics')
-@php $header = 'Feedback Analytics'; $subheader = 'Anonymous aggregated feedback for this session.'; @endphp
+<?php $__env->startSection('title', 'Feedback Analytics'); ?>
+<?php $header = 'Feedback Analytics'; $subheader = 'Anonymous aggregated feedback for this session.'; ?>
 
-@section('sidebar-nav')
+<?php $__env->startSection('sidebar-nav'); ?>
 <div class="nav-section-label">Main</div>
-<a href="{{ route('faculty.dashboard') }}" class="nav-link">
+<a href="<?php echo e(route('faculty.dashboard')); ?>" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -14,7 +13,7 @@
 
 <div class="nav-section-label">Attendance</div>
 
-<a href="{{ route('faculty.attendance.sessions') }}" class="nav-link">
+<a href="<?php echo e(route('faculty.attendance.sessions')); ?>" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 00-2-2M9 5a2 2 0 012-2h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -22,7 +21,7 @@
     Courses
 </a>
 
-<a href="{{ route('faculty.attendance.create') }}" class="nav-link">
+<a href="<?php echo e(route('faculty.attendance.create')); ?>" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
@@ -31,7 +30,7 @@
 
 <div class="nav-section-label">Feedback</div>
 
-<a href="{{ route('faculty.feedback.index') }}" class="nav-link active">
+<a href="<?php echo e(route('faculty.feedback.index')); ?>" class="nav-link active">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
@@ -39,18 +38,18 @@
     Feedback Sessions
 </a>
 
-<a href="{{ route('faculty.feedback.my-ratings') }}" class="nav-link">
+<a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
     </svg>
     My Ratings
 </a>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-@php
+<?php
     $overallRating = (float) ($ratingResult->overall_weighted_rating ?? 0);
 
     $performancePercentage = $overallRating > 0
@@ -92,43 +91,46 @@
 
     $totalMaximumMarks = $ratingRows->sum('maximum_marks');
     $totalMarksEarned = $ratingRows->sum('marks_earned');
-@endphp
+?>
 
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px;">
 
     <div class="stat-card">
         <div class="stat-label">Eligible Students</div>
-        <div class="stat-value">{{ $eligibleCount }}</div>
+        <div class="stat-value"><?php echo e($eligibleCount); ?></div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Submitted Feedback</div>
-        <div class="stat-value">{{ $responseCount }}</div>
+        <div class="stat-value"><?php echo e($responseCount); ?></div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Response Rate</div>
-        <div class="stat-value">{{ number_format($responseRate, 1) }}%</div>
+        <div class="stat-value"><?php echo e(number_format($responseRate, 1)); ?>%</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Overall Rating</div>
         <div class="stat-value">
-            {{ $overallRating > 0 ? number_format($overallRating, 2) . ' / 5' : '—' }}
+            <?php echo e($overallRating > 0 ? number_format($overallRating, 2) . ' / 5' : '—'); ?>
+
         </div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Teacher Performance</div>
-        <div class="stat-value">{{ number_format($performancePercentage, 1) }}%</div>
+        <div class="stat-value"><?php echo e(number_format($performancePercentage, 1)); ?>%</div>
     </div>
 
     <div class="stat-card">
         <div class="stat-label">Marks Earned</div>
         <div class="stat-value">
-            {{ number_format($totalMarksEarned, 2) }}
+            <?php echo e(number_format($totalMarksEarned, 2)); ?>
+
             <span style="font-size:0.8rem;color:#64748B;">
-                / {{ number_format($totalMaximumMarks, 2) }}
+                / <?php echo e(number_format($totalMaximumMarks, 2)); ?>
+
             </span>
         </div>
     </div>
@@ -153,7 +155,7 @@
 
         <div class="card-body" style="text-align:center;padding-top:35px;">
             <div style="font-size:3.2rem;font-weight:800;color:#2563EB;">
-                {{ number_format($performancePercentage, 1) }}%
+                <?php echo e(number_format($performancePercentage, 1)); ?>%
             </div>
 
             <p style="color:#64748B;font-size:0.85rem;">
@@ -164,7 +166,7 @@
                 <div
                     style="
                         height:100%;
-                        width:{{ min(100, max(0, $performancePercentage)) }}%;
+                        width:<?php echo e(min(100, max(0, $performancePercentage))); ?>%;
                         background:linear-gradient(90deg,#2563EB,#60A5FA);
                         border-radius:999px;
                     "
@@ -203,29 +205,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($departmentLeaderboard as $department)
+                    <?php $__empty_1 = true; $__currentLoopData = $departmentLeaderboard; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $department): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr>
                             <td>
-                                <span style="font-weight:800;color:{{ $department['rank'] <= 3 ? '#2563EB' : '#64748B' }};">
-                                    #{{ $department['rank'] }}
+                                <span style="font-weight:800;color:<?php echo e($department['rank'] <= 3 ? '#2563EB' : '#64748B'); ?>;">
+                                    #<?php echo e($department['rank']); ?>
+
                                 </span>
                             </td>
                             <td>
-                                <strong>{{ $department['name'] }}</strong>
-                                <div style="font-size:.72rem;color:#64748B;margin-top:2px;">{{ $department['code'] }}</div>
+                                <strong><?php echo e($department['name']); ?></strong>
+                                <div style="font-size:.72rem;color:#64748B;margin-top:2px;"><?php echo e($department['code']); ?></div>
                             </td>
-                            <td>{{ $department['faculty_count'] }}</td>
+                            <td><?php echo e($department['faculty_count']); ?></td>
                             <td>
-                                <strong style="color:#0F172A;">{{ number_format($department['average_score'], 2) }} / 5</strong>
+                                <strong style="color:#0F172A;"><?php echo e(number_format($department['average_score'], 2)); ?> / 5</strong>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="4" style="text-align:center;padding:28px;color:#94A3B8;">
                                 No released department ratings are available for this semester yet.
                             </td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -266,52 +269,56 @@
     </div>
 
     <div class="card-body">
-        @forelse($ratingRows as $row)
+        <?php $__empty_1 = true; $__currentLoopData = $ratingRows; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div style="padding:16px 0;border-bottom:1px solid #E2E8F0;">
                 <div style="font-weight:700;color:#0F172A;margin-bottom:12px;">
-                    {{ $row['question'] }}
+                    <?php echo e($row['question']); ?>
+
                 </div>
 
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;">
                     <div>
                         <div style="font-size:0.75rem;color:#64748B;">Average Rating</div>
                         <div style="font-size:1.1rem;font-weight:700;">
-                            {{ number_format($row['average'], 2) }} / 5
+                            <?php echo e(number_format($row['average'], 2)); ?> / 5
                         </div>
                     </div>
 
                     <div>
                         <div style="font-size:0.75rem;color:#64748B;">Maximum Marks</div>
                         <div style="font-size:1.1rem;font-weight:700;">
-                            {{ number_format($row['maximum_marks'], 2) }}
+                            <?php echo e(number_format($row['maximum_marks'], 2)); ?>
+
                         </div>
                     </div>
 
                     <div>
                         <div style="font-size:0.75rem;color:#64748B;">Marks Earned</div>
                         <div style="font-size:1.1rem;font-weight:700;color:#16A34A;">
-                            {{ number_format($row['marks_earned'], 2) }}
+                            <?php echo e(number_format($row['marks_earned'], 2)); ?>
+
                         </div>
                     </div>
 
                     <div>
                         <div style="font-size:0.75rem;color:#64748B;">Responses</div>
                         <div style="font-size:1.1rem;font-weight:700;">
-                            {{ $row['response_count'] }}
+                            <?php echo e($row['response_count']); ?>
+
                         </div>
                     </div>
                 </div>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div style="text-align:center;padding:35px;color:#94A3B8;">
                 No released rating feedback is available.
             </div>
-        @endforelse
+        <?php endif; ?>
     </div>
 </div>
 
-@foreach($questionStats as $stat)
-    @if(($stat['type'] ?? '') === 'text' && !empty($stat['texts']))
+<?php $__currentLoopData = $questionStats; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php if(($stat['type'] ?? '') === 'text' && !empty($stat['texts'])): ?>
         <div class="card" style="margin-top:24px;">
             <div class="card-header">
                 <h3>Comments</h3>
@@ -319,33 +326,34 @@
 
             <div class="card-body">
                 <div style="font-weight:700;margin-bottom:12px;">
-                    {{ $stat['question'] }}
+                    <?php echo e($stat['question']); ?>
+
                 </div>
 
-                @foreach($stat['texts'] as $text)
+                <?php $__currentLoopData = $stat['texts']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $text): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div style="background:#F8FAFC;border-left:4px solid #60A5FA;padding:12px 14px;margin-bottom:10px;border-radius:6px;color:#334155;">
-                        “{{ $text }}”
+                        “<?php echo e($text); ?>”
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
-    @endif
-@endforeach
+    <?php endif; ?>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const ratingRows = @json($ratingRows);
+    const ratingRows = <?php echo json_encode($ratingRows, 15, 512) ?>;
 
     const labels = ratingRows.map(item => item.label);
     const ratings = ratingRows.map(item => item.average);
     const earnedMarks = ratingRows.map(item => item.marks_earned);
     const maximumMarks = ratingRows.map(item => item.maximum_marks);
-    const departmentLeaderboard = @json($departmentLeaderboard);
+    const departmentLeaderboard = <?php echo json_encode($departmentLeaderboard, 15, 512) ?>;
 
-    const submittedCount = {{ (int) $responseCount }};
-    const pendingCount = {{ (int) $pendingResponses }};
+    const submittedCount = <?php echo e((int) $responseCount); ?>;
+    const pendingCount = <?php echo e((int) $pendingResponses); ?>;
 
     if (window.Chart) {
         new Chart(document.getElementById('participationChart'), {
@@ -472,4 +480,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\abhis\Web Dev\Teaching_Feeback_System\resources\views/faculty/feedback/analytics.blade.php ENDPATH**/ ?>
