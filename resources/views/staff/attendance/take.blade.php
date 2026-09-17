@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
-@section('title', 'Take Attendance')
-@php $header = 'Take Attendance'; $subheader = $classSession->section->course->name ?? 'Class Session'; @endphp
+@section('title', !empty($isFeedbackDay) ? 'Feedback-Day Attendance' : 'Take Attendance')
+@php $header = !empty($isFeedbackDay) ? 'Feedback-Day Attendance' : 'Take Attendance'; $subheader = $classSession->section->course->name ?? 'Class Session'; @endphp
 
 @section('sidebar-nav')
 @include('staff.partials.sidebar')
@@ -329,7 +329,7 @@
     <div class="attendance-hero-top">
         <div>
             <div class="session-badge">
-                Staff Attendance Session
+                {{ !empty($isFeedbackDay) ? 'Feedback-Day Attendance' : 'Staff Attendance Session' }}
             </div>
 
             <h2>
@@ -441,7 +441,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('staff.attendance.save', $classSession) }}">
+    <form method="POST" action="{{ $saveRoute ?? route('staff.attendance.save', $classSession) }}">
         @csrf
 
         <div style="overflow-x:auto;">
@@ -545,7 +545,7 @@
 
         <div class="attendance-actions">
             <div style="font-size:.78rem;color:#64748b;">
-                Review the attendance before saving.
+                {{ !empty($isFeedbackDay) ? 'This private record validates feedback scoring; it is not regular attendance.' : 'Review the attendance before saving.' }}
             </div>
 
             <div class="action-buttons">

@@ -11,6 +11,8 @@ use App\Models\Department;
 use App\Models\Semester;
 use App\Models\User;
 use App\Models\RatingResult;
+use App\Models\FeedbackSession;
+use App\Models\FeedbackEligibility;
 use App\Services\FeedbackRatingService;
 use App\Exports\AttendanceExport;
 use App\Exports\AttendanceSummaryExport;
@@ -178,5 +180,61 @@ class ReportsController extends Controller
             ->get();
 
         return view('admin.reports.ratings', compact('ratings', 'semesters', 'semesterId'));
+    }
+
+    /**
+     * Privacy-preserving feedback participation analysis. It intentionally
+     * reports only aggregate attendance bands, never an answer/student match.
+     */
+    public function feedbackParticipationByAttendance(Request $request)
+    {
+        $sessions = FeedbackSession::with('classSession.section.course')
+            ->when($request->filled('feedback_session_id'), fn ($q) => $q->whereKey($request->integer('feedback_session_id')))
+            ->orderByDesc('created_at')->get();
+
+        $bands = [
+            'Below 30%' => ['min' => 0, 'max' => 29.999, 'eligible' => 0, 'submitted' => 0],
+            '30% – 49%' => ['min' => 30, 'max' => 49.999, 'eligible' => 0, 'submitted' => 0],
+            '50% – 74%' => ['min' => 50, 'max' => 74.999, 'eligible' => 0, 'submitted' => 0],
+            '75% and above' => ['min' => 75, 'max' => 100, 'eligible' => 0, 'submitted' => 0],
+        ];
+
+        foreach ($sessions as $session) {
+            // Feedback-day attendance controls eligibility. Regular attendance
+            // alone determines the percentage band; feedback-day records are
+            // deliberately excluded from this calculation.
+            $studentIds = Attendance::where('class_session_id', $session->class_session_id)
+                ->where('source', 'feedback_day')
+                ->whereIn('status', ['present', 'late'])
+                ->pluck('student_id');
+            $regularSessionIds = ClassSession::where('class_section_id', $session->classSession->class_section_id)
+                ->where('status', 'completed')
+                ->whereHas('attendanceRecords', fn ($query) => $query->where('source', 'regular'))
+                ->pluck('id');
+            foreach ($studentIds as $studentId) {
+                $records = Attendance::where('student_id', $studentId)
+                    ->where('source', 'regular')
+                    ->whereIn('class_session_id', $regularSessionIds)
+                    ->get(['status']);
+                $percentage = $records->count() ? $records->whereIn('status', ['present', 'late'])->count() * 100 / $records->count() : 0;
+                $submitted = FeedbackEligibility::where('feedback_session_id', $session->id)->where('student_id', $studentId)->where('has_submitted', true)->exists();
+                foreach ($bands as &$band) {
+                    if ($percentage >= $band['min'] && $percentage <= $band['max']) {
+                        $band['eligible']++;
+                        if ($submitted) $band['submitted']++;
+                        break;
+                    }
+                }
+                unset($band);
+            }
+        }
+
+        foreach ($bands as &$band) {
+            $band['participation_rate'] = $band['eligible'] ? round($band['submitted'] * 100 / $band['eligible'], 1) : 0;
+        }
+        unset($band);
+
+        $feedbackSessions = FeedbackSession::with('classSession.section.course')->orderByDesc('created_at')->get();
+        return view('admin.reports.feedback-participation', compact('bands', 'feedbackSessions'));
     }
 }

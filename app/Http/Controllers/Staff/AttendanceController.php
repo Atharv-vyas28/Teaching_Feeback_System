@@ -8,6 +8,7 @@ use App\Models\ClassSection;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Models\StaffCourse;
+use App\Models\FeedbackSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\StaffAssignmentAccessService;
@@ -84,6 +85,7 @@ class AttendanceController extends Controller
             ->get();
 
         $existingAttendance = Attendance::where('class_session_id', $classSession->id)
+            ->where('source', 'regular')
             ->get()->keyBy('student_id');
 
         return view('staff.attendance.take', compact('classSession', 'students', 'existingAttendance'));
@@ -114,7 +116,7 @@ class AttendanceController extends Controller
                 [
                     'class_session_id' => $classSession->id,
                     'student_id' => $studentId,
-                    'source' => 'feedback_day',
+                    'source' => 'regular',
                 ],
                 [
                     'marked_by' => auth()->id(),
@@ -138,6 +140,65 @@ class AttendanceController extends Controller
         ->route('staff.attendance.sessions')
         ->with('success', 'Regular attendance saved successfully.');
 }
+
+    /** Attendance recorded specifically for the designated feedback day. */
+    public function takeFeedbackDay(FeedbackSession $feedbackSession)
+    {
+        abort_unless(
+            $this->access->canManageFeedback(auth()->user(), $feedbackSession),
+            403,
+            'You are not assigned to this feedback session.'
+        );
+
+        $classSession = $feedbackSession->load('classSession.section.course')->classSession;
+        $students = User::join('course_enrollments', 'users.id', '=', 'course_enrollments.user_id')
+            ->where('course_enrollments.class_section_id', $classSession->class_section_id)
+            ->where('course_enrollments.status', 'active')->where('users.role', 'student')
+            ->select('users.*')->orderBy('users.roll_number')->get();
+        $existingAttendance = Attendance::where('class_session_id', $classSession->id)
+            ->where('source', 'feedback_day')->get()->keyBy('student_id');
+        $saveRoute = route('staff.feedback.attendance.save', $feedbackSession);
+        $isFeedbackDay = true;
+
+        return view('staff.attendance.take', compact(
+            'classSession', 'students', 'existingAttendance', 'saveRoute', 'isFeedbackDay'
+        ));
+    }
+
+    public function saveFeedbackDay(Request $request, FeedbackSession $feedbackSession)
+    {
+        abort_unless(
+            $this->access->canManageFeedback(auth()->user(), $feedbackSession),
+            403,
+            'You are not assigned to this feedback session.'
+        );
+        $request->validate([
+            'attendance' => ['required', 'array'],
+            'attendance.*.status' => ['required', 'in:present,absent,late,excused'],
+        ]);
+        $classSession = $feedbackSession->classSession;
+
+        DB::transaction(function () use ($request, $classSession) {
+            foreach ($request->attendance as $studentId => $data) {
+                $isEnrolled = DB::table('course_enrollments')->where('user_id', $studentId)
+                    ->where('class_section_id', $classSession->class_section_id)
+                    ->where('status', 'active')->exists();
+                if (! $isEnrolled) continue;
+
+                Attendance::updateOrCreate(
+                    ['class_session_id' => $classSession->id, 'student_id' => $studentId, 'source' => 'feedback_day'],
+                    [
+                        'marked_by' => auth()->id(), 'status' => $data['status'],
+                        'feedback_enabled' => in_array($data['status'], ['present', 'late']),
+                        'marked_at' => now(), 'remarks' => $data['remarks'] ?? null,
+                    ]
+                );
+            }
+        });
+
+        return redirect()->route('staff.feedback.index')
+            ->with('success', 'Feedback-day attendance saved. Admin will use it when processing ratings.');
+    }
 
     /**
      * Per-student attendance history/summary for staff-assigned sections.
@@ -177,6 +238,7 @@ class AttendanceController extends Controller
             ->join('class_sections', 'class_sessions.class_section_id', '=', 'class_sections.id')
             ->join('courses', 'class_sections.course_id', '=', 'courses.id')
             ->whereIn('attendance.class_session_id', $sessionIds)
+            ->where('attendance.source', 'regular')
             ->when($request->filled('search'), function ($q) use ($request) {
                 $q->where(function ($sub) use ($request) {
                     $sub->where('users.name', 'like', '%' . $request->search . '%')

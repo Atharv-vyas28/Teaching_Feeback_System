@@ -47,13 +47,17 @@
                     <td>{{ $feedbackSession->classSession->session_date?->format('d M Y') ?? '—' }}</td>
                     <td><span class="badge badge-{{ $badgeColor }}">{{ $statusLabel }}</span></td>
                     <td>
+                        <a href="{{ route('staff.feedback.attendance.take', $feedbackSession) }}" class="btn-secondary btn-sm" style="margin-bottom:7px;">Mark Feedback-Day Attendance</a>
                         @if($feedbackSession->status === 'draft')
-                            <form method="POST" action="{{ route('staff.feedback.release', $feedbackSession) }}" style="display:grid;gap:6px;min-width:210px;">
-                                @csrf
-                                <input type="datetime-local" name="release_at" class="form-input" required>
-                                <input type="datetime-local" name="deadline_at" class="form-input" required>
-                                <button type="submit" class="btn-primary btn-sm">Release Feedback</button>
-                            </form>
+                            <div style="font-size:.76rem;color:#64748B;margin-bottom:7px;">Admin window:<br>{{ $feedbackSession->release_at?->format('d M, h:i A') ?? 'Not configured' }} → {{ $feedbackSession->deadline_at?->format('d M, h:i A') ?? 'Not configured' }}</div>
+                            @if($feedbackSession->release_at && $feedbackSession->deadline_at && now()->between($feedbackSession->release_at, $feedbackSession->deadline_at))
+                                <form method="POST" action="{{ route('staff.feedback.release', $feedbackSession) }}">
+                                    @csrf
+                                    <button type="submit" class="btn-primary btn-sm">Start Feedback</button>
+                                </form>
+                            @else
+                                <span style="font-size:.76rem;color:#94A3B8;">Waiting for the Admin release window.</span>
+                            @endif
                         @elseif($feedbackSession->status === 'active')
                             <div style="font-size:.78rem;color:{{ $isExpired ? '#DC2626' : '#64748B' }};margin-bottom:7px; font-weight: {{ $isExpired ? '600' : 'normal' }};">
                                 Ends: {{ $feedbackSession->deadline_at?->format('d M, h:i A') ?? 'No deadline' }}

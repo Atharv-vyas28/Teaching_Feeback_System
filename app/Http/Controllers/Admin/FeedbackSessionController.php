@@ -30,9 +30,14 @@ class FeedbackSessionController extends Controller
      */
     public function create()
     {
-        // Load class sessions that do NOT already have a feedback session
+        // A section may have only one feedback session in a semester.
+        $sectionIdsWithFeedback = FeedbackSession::query()
+            ->join('class_sessions', 'feedback_sessions.class_session_id', '=', 'class_sessions.id')
+            ->pluck('class_sessions.class_section_id');
+
         $classSessions = ClassSession::with(['section.course.department'])
             ->whereDoesntHave('feedbackSession')
+            ->whereNotIn('class_section_id', $sectionIdsWithFeedback)
             ->orderByDesc('session_date')
             ->get();
 
@@ -64,6 +69,18 @@ class FeedbackSessionController extends Controller
         }
 
         $classSession = ClassSession::findOrFail($data['class_session_id']);
+
+        $feedbackAlreadyExists = FeedbackSession::query()
+            ->whereHas('classSession', fn ($query) => $query->where(
+                'class_section_id', $classSession->class_section_id
+            ))
+            ->exists();
+
+        if ($feedbackAlreadyExists) {
+            return back()->withInput()->withErrors([
+                'class_session_id' => 'Only one feedback session is allowed for this course section in the semester.',
+            ]);
+        }
 
         $status = 'draft';
         if (! empty($data['release_at']) && now()->greaterThanOrEqualTo($data['release_at'])) {

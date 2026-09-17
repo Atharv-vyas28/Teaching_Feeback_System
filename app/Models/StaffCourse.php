@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class StaffCourse extends Model
 {
     protected $fillable = [
-        'user_id', 'class_section_id', 'semester_id', 'feedback_session_id',
+        'user_id', 'class_section_id', 'feedback_session_id', // 'semester_id',
         'assigned_by', 'is_active', 'status', 'assigned_at', 'deactivated_at',
     ];
 

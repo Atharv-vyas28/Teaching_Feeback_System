@@ -12,11 +12,6 @@ Artisan::command('inspire', function () {
 // Server-side automatic feedback closure. Students are also rejected by
 // FeedbackSession::isAcceptingResponses() if a request arrives after deadline.
 Schedule::call(function () {
-    FeedbackSession::readyToOpen()->update([
-        'status' => 'active',
-        'opened_at' => now(),
-    ]);
-
     FeedbackSession::expired()->update([
         'status' => 'closed',
         'closed_at' => now(),

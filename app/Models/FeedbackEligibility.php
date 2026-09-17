@@ -9,7 +9,8 @@ class FeedbackEligibility extends Model
     protected $table = 'feedback_eligibility';
 
     protected $fillable = [
-        'feedback_session_id', 'student_id', 'has_submitted', 'submitted_at',
+        'feedback_session_id', 'student_id', 'anonymous_token', 'has_submitted',
+        'submitted_at', 'included_in_score', 'attendance_weight',
     ];
 
     protected function casts(): array
@@ -17,6 +18,8 @@ class FeedbackEligibility extends Model
         return [
             'has_submitted' => 'boolean',
             'submitted_at'  => 'datetime',
+            'included_in_score' => 'boolean',
+            'attendance_weight' => 'float',
         ];
     }
 

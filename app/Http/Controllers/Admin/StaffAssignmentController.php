@@ -57,7 +57,7 @@ class StaffAssignmentController extends Controller
             $assignment = StaffCourse::create([
                 'user_id' => $staff->id,
                 'class_section_id' => $section->id,
-                'semester_id' => $section->semester_id,
+                // 'semester_id' => $section->semester_id,
                 'feedback_session_id' => $data['feedback_session_id'] ?? null,
                 'assigned_by' => auth()->id(),
                 'is_active' => true,
@@ -74,8 +74,8 @@ class StaffAssignmentController extends Controller
                     'assigned_staff_id' => $staff->id,
                     'release_at' => $releaseAt,
                     'deadline_at' => $deadlineAt,
-                    'status' => $releaseAt && now()->greaterThanOrEqualTo($releaseAt) ? 'active' : 'draft',
-                    'opened_at' => $releaseAt && now()->greaterThanOrEqualTo($releaseAt) ? now() : null,
+                    'status' => 'draft',
+                    'opened_at' => null,
                     'closed_at' => null,
                 ]);
                 $staff->notify(new NewStaffFeedbackAssignmentNotification($assignment));

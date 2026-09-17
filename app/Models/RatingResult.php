@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RatingResult extends Model
 {
     protected $fillable = [
-        'faculty_id', 'class_section_id', 'semester_id',
+        'feedback_session_id', 'faculty_id', 'class_section_id', 'semester_id',
         'overall_weighted_rating', 'course_rating', 'response_count',
         'eligible_count', 'response_rate', 'question_averages', 'calculated_at',
     ];
@@ -21,6 +21,7 @@ class RatingResult extends Model
     }
 
     public function faculty()  { return $this->belongsTo(User::class, 'faculty_id'); }
+    public function feedbackSession() { return $this->belongsTo(FeedbackSession::class); }
     public function section()  { return $this->belongsTo(ClassSection::class, 'class_section_id'); }
     public function semester() { return $this->belongsTo(Semester::class); }
 }

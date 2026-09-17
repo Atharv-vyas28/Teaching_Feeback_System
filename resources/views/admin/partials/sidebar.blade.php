@@ -248,6 +248,11 @@
         Ratings Report
     </a>
 
+    <a href="{{ route('admin.reports.feedback-participation') }}" class="admin-nav-link {{ request()->routeIs('admin.reports.feedback-participation') ? 'active' : '' }}">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6"/></svg>
+        Feedback Participation
+    </a>
+
     <div class="nav-title">Account</div>
 
     <form method="POST" action="{{ route('logout') }}">

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
-use App\Models\Attendance;
 use App\Models\FeedbackAnswer;
 use App\Models\FeedbackEligibility;
 use App\Models\FeedbackQuestion;
@@ -215,13 +214,16 @@ class FeedbackController extends Controller
             }
 
             /*
-             * This table only records whether the authenticated student submitted.
-             * It is not connected to the anonymous feedback response.
+             * This is the private mapping used only by server-side scoring.
+             * Faculty-facing response records never contain student_id.
              */
             if ($eligibilityRecord) {
                 $eligibilityRecord->update([
                     'has_submitted' => true,
                     'submitted_at' => now(),
+                    'anonymous_token' => $response->anonymous_token,
+                    'included_in_score' => false,
+                    'attendance_weight' => null,
                 ]);
             } else {
                 FeedbackEligibility::create([
@@ -229,30 +231,11 @@ class FeedbackController extends Controller
                     'student_id' => $student->id,
                     'has_submitted' => true,
                     'submitted_at' => now(),
+                    'anonymous_token' => $response->anonymous_token,
+                    'included_in_score' => false,
+                    'attendance_weight' => null,
                 ]);
             }
-
-            /*
-             * Automatic feedback-based attendance.
-             *
-             * If regular attendance already exists, it becomes Present.
-             * If no attendance exists, a new Present record is created.
-             */
-            Attendance::updateOrCreate(
-                [
-                    'class_session_id' => $feedbackSession->class_session_id,
-                    'student_id' => $student->id,
-                ],
-                [
-                    'marked_by' => $feedbackSession->assigned_staff_id
-                        ?? $feedbackSession->classSession->conducted_by,
-                    'status' => 'present',
-                    'source' => 'feedback',
-                    'feedback_enabled' => false,
-                    'marked_at' => now(),
-                    'remarks' => 'Marked present after valid feedback submission.',
-                ]
-            );
         });
 
         return redirect()
@@ -262,7 +245,7 @@ class FeedbackController extends Controller
             )
             ->with(
                 'success',
-                'Feedback submitted anonymously. Your attendance has been marked present.'
+                'Feedback submitted anonymously. It will be processed after feedback-day attendance is verified.'
             );
     }
 

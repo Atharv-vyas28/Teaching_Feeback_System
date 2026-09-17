@@ -37,20 +37,16 @@ class FeedbackSessionController extends Controller
     {
         $this->authorizeAssignment($feedbackSession);
 
-        $data = $request->validate([
-            'release_at' => ['required', 'date', 'after_or_equal:now'],
-            'deadline_at' => ['required', 'date', 'after:release_at'],
-        ]);
-
+        abort_unless($feedbackSession->release_at && $feedbackSession->deadline_at, 422, 'The administrator must set the feedback release time and deadline first.');
+        abort_if(now()->lessThan($feedbackSession->release_at), 422, 'Feedback cannot be started before the administrator-set release time.');
+        abort_if(now()->greaterThan($feedbackSession->deadline_at), 422, 'Feedback deadline has already expired.');
         $feedbackSession->update([
             'status' => 'active',
-            'release_at' => $data['release_at'],
-            'deadline_at' => $data['deadline_at'],
             'opened_at' => now(),
             'closed_at' => null,
         ]);
 
-        return back()->with('success', 'Feedback released for the selected time window.');
+        return back()->with('success', 'Feedback started. Enrolled students can submit until the administrator-set deadline. Feedback-day attendance may be recorded before or after submission and is verified by Admin during rating processing.');
     }
 
     public function close(FeedbackSession $feedbackSession)

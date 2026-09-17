@@ -97,6 +97,7 @@ Route::get(
     Route::get('/reports/attendance/export', [ReportsController::class, 'exportAttendanceExcel'])->name('reports.attendance.export');
     Route::get('/reports/attendance/summary', [ReportsController::class, 'attendanceSummary'])->name('reports.attendance.summary');
     Route::get('/reports/ratings', [ReportsController::class, 'ratingsReport'])->name('reports.ratings');
+    Route::get('/reports/feedback-participation', [ReportsController::class, 'feedbackParticipationByAttendance'])->name('reports.feedback-participation');
 
     // Feedback Sessions – add create/store
     Route::get('/feedback-sessions', [AdminFeedbackSessionController::class, 'index'])->name('feedback-sessions.index');
@@ -143,6 +144,8 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff'])->grou
     Route::get('/attendance/{classSession}/take', [StaffAttendance::class, 'take'])->name('attendance.take');
     Route::post('/attendance/{classSession}/save', [StaffAttendance::class, 'save'])->name('attendance.save');
     Route::get('/feedback', [StaffFeedback::class, 'index'])->name('feedback.index');
+    Route::get('/feedback/{feedbackSession}/attendance', [StaffAttendance::class, 'takeFeedbackDay'])->name('feedback.attendance.take');
+    Route::post('/feedback/{feedbackSession}/attendance', [StaffAttendance::class, 'saveFeedbackDay'])->name('feedback.attendance.save');
     Route::post('/feedback/{feedbackSession}/release', [StaffFeedback::class, 'release'])->name('feedback.release');
     Route::post('/feedback/{feedbackSession}/close', [StaffFeedback::class, 'close'])->name('feedback.close');
     Route::get('/notifications', [StaffNotification::class, 'index'])->name('notifications.index');

@@ -1,0 +1,8 @@
+@extends('layouts.dashboard')
+@section('title', 'Feedback Participation')
+@php $header = 'Feedback Participation by Attendance'; $subheader = 'Anonymous aggregate participation only — individual feedback is never linked to a student.'; @endphp
+@section('sidebar-nav') @include('admin.partials.sidebar') @endsection
+@section('content')
+<div class="card" style="margin-bottom:20px;"><div class="card-body"><form method="GET" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;"><div><label class="form-label">Feedback Session</label><select name="feedback_session_id" class="form-select"><option value="">All feedback sessions</option>@foreach($feedbackSessions as $session)<option value="{{ $session->id }}" @selected(request('feedback_session_id') == $session->id)>#{{ $session->id }} — {{ $session->classSession->section->course->code ?? 'Course' }} — {{ $session->classSession->topic ?? 'Feedback' }}</option>@endforeach</select></div><button class="btn-primary" type="submit">Apply</button></form></div></div>
+<div class="card"><div class="card-header"><h3>Participation by Attendance Range</h3></div><div style="overflow-x:auto;"><table class="data-table"><thead><tr><th>Attendance Range</th><th>Eligible Students</th><th>Submitted Feedback</th><th>Participation Rate</th></tr></thead><tbody>@foreach($bands as $label => $band)<tr><td><strong>{{ $label }}</strong></td><td>{{ $band['eligible'] }}</td><td>{{ $band['submitted'] }}</td><td><span class="badge {{ $band['participation_rate'] >= 75 ? 'badge-green' : ($band['participation_rate'] >= 40 ? 'badge-yellow' : 'badge-red') }}">{{ $band['participation_rate'] }}%</span></td></tr>@endforeach</tbody></table></div></div>
+@endsection
