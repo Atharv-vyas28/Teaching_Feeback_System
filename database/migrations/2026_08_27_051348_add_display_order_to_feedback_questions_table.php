@@ -8,8 +8,8 @@ return new class extends Migration
 {
     public function up(): void
 {
-    Schema::table('feedback_questions', function (Blueprint $table) {
-        $table->integer('display_order')->default(0)->after('id');
-    });
+    // Schema::table('feedback_questions', function (Blueprint $table) {
+    //     $table->integer('display_order')->default(0)->after('id');
+    // });
 }
 };

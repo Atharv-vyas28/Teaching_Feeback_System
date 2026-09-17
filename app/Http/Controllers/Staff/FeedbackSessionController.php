@@ -9,7 +9,9 @@ use App\Services\StaffAssignmentAccessService;
 
 class FeedbackSessionController extends Controller
 {
-    public function __construct(private StaffAssignmentAccessService $access) {}
+    public function __construct(private StaffAssignmentAccessService $access)
+    {
+    }
 
     public function index()
     {

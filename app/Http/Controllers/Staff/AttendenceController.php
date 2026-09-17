@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\StaffCourse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\FeedbackSession;
 
 class AttendanceController extends Controller
 {
@@ -50,22 +51,22 @@ class AttendanceController extends Controller
     {
         $request->validate([
             'class_section_id' => 'required|exists:class_sections,id',
-            'session_date'     => 'required|date',
-            'start_time'       => 'required',
-            'end_time'         => 'required|after:start_time',
-            'topic'            => 'nullable|string|max:255',
+            'session_date' => 'required|date',
+            'start_time' => 'required',
+            'end_time' => 'required|after:start_time',
+            'topic' => 'nullable|string|max:255',
         ]);
         $section = ClassSection::findOrFail($request->class_section_id);
         $this->authorizeSection($section);
 
         $session = ClassSession::create([
             'class_section_id' => $request->class_section_id,
-            'conducted_by'     => auth()->id(),
-            'session_date'     => $request->session_date,
-            'start_time'       => $request->start_time,
-            'end_time'         => $request->end_time,
-            'topic'            => $request->topic,
-            'status'           => 'ongoing',
+            'conducted_by' => auth()->id(),
+            'session_date' => $request->session_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'topic' => $request->topic,
+            'status' => 'ongoing',
         ]);
 
         return redirect()->route('staff.attendance.take', $session)->with('success', 'Session created.');
@@ -89,52 +90,163 @@ class AttendanceController extends Controller
         return view('staff.attendance.take', compact('classSession', 'students', 'existingAttendance'));
     }
 
-   public function save(Request $request, ClassSession $classSession)
-{
-    $this->authorizeSection($classSession->section);
+    public function takeFeedbackAttendance(FeedbackSession $feedbackSession)
+    {
+        abort_unless(
+            $feedbackSession->assigned_staff_id === auth()->id(),
+            403,
+            'You are not assigned to this feedback session.'
+        );
 
-    $request->validate([
-        'attendance' => 'required|array',
-        'attendance.*.status' => 'required|in:present,absent,late,excused',
-    ]);
+        $classSession = $feedbackSession->classSession;
 
-    DB::transaction(function () use ($request, $classSession) {
-        foreach ($request->attendance as $studentId => $data) {
-            $isEnrolled = DB::table('course_enrollments')
-                ->where('user_id', $studentId)
-                ->where('class_section_id', $classSession->class_section_id)
-                ->where('status', 'active')
-                ->exists();
+        $this->authorizeSection($classSession->section);
 
-            if (! $isEnrolled) {
-                continue;
+        $students = User::join(
+            'course_enrollments',
+            'users.id',
+            '=',
+            'course_enrollments.user_id'
+        )
+            ->where(
+                'course_enrollments.class_section_id',
+                $classSession->class_section_id
+            )
+            ->where('course_enrollments.status', 'active')
+            ->where('users.role', 'student')
+            ->select('users.*')
+            ->orderBy('users.roll_number')
+            ->get();
+
+        $existingAttendance = Attendance::where(
+            'class_session_id',
+            $classSession->id
+        )
+            ->where('source', 'feedback_day')
+            ->get()
+            ->keyBy('student_id');
+
+        return view(
+            'staff.attendance.take',
+            compact(
+                'classSession',
+                'students',
+                'existingAttendance',
+                'feedbackSession'
+            )
+        );
+    }
+    public function saveFeedbackAttendance(
+        Request $request,
+        FeedbackSession $feedbackSession
+    ) {
+        abort_unless(
+            $feedbackSession->assigned_staff_id === auth()->id(),
+            403,
+            'You are not assigned to this feedback session.'
+        );
+
+        $classSession = $feedbackSession->classSession;
+
+        $this->authorizeSection($classSession->section);
+
+        $request->validate([
+            'attendance' => 'required|array',
+            'attendance.*.status' => 'required|in:present,absent,late,excused',
+        ]);
+
+        DB::transaction(function () use ($request, $classSession, $feedbackSession) {
+            foreach ($request->attendance as $studentId => $data) {
+
+                $isEnrolled = DB::table('course_enrollments')
+                    ->where('user_id', $studentId)
+                    ->where(
+                        'class_section_id',
+                        $classSession->class_section_id
+                    )
+                    ->where('status', 'active')
+                    ->exists();
+
+                if (!$isEnrolled) {
+                    continue;
+                }
+
+                Attendance::updateOrCreate(
+                    [
+                        'class_session_id' => $classSession->id,
+                        'student_id' => $studentId,
+                        'source' => 'feedback_day',
+                    ],
+                    [
+                        'marked_by' => auth()->id(),
+                        'status' => $data['status'],
+                        'feedback_enabled' => true,
+                        'marked_at' => now(),
+                        'remarks' => $data['remarks'] ?? null,
+                    ]
+                );
             }
 
-            Attendance::updateOrCreate(
-                [
-                    'class_session_id' => $classSession->id,
-                    'student_id' => $studentId,
-                ],
-                [
-                    'marked_by' => auth()->id(),
-                    'status' => $data['status'],
-                    'source' => 'regular',
-                    'feedback_enabled' => false,
-                    'marked_at' => now(),
-                    'remarks' => $data['remarks'] ?? null,
-                ]
+            $feedbackSession->update([
+                'status' => 'closed',
+                'closed_at' => now(),
+            ]);
+        });
+
+        return redirect()
+            ->route('staff.feedback.index')
+            ->with(
+                'success',
+                'Feedback-day attendance saved and feedback session closed successfully.'
             );
-        }
+    }
 
-        $classSession->update([
-            'status' => 'completed',
+    public function save(Request $request, ClassSession $classSession)
+    {
+        $this->authorizeSection($classSession->section);
+
+        $request->validate([
+            'attendance' => 'required|array',
+            'attendance.*.status' => 'required|in:present,absent,late,excused',
         ]);
-    });
 
-    return redirect()
-        ->route('staff.attendance.sessions')
-        ->with('success', 'Regular attendance saved successfully.');
-}
+        DB::transaction(function () use ($request, $classSession) {
+            foreach ($request->attendance as $studentId => $data) {
+                $isEnrolled = DB::table('course_enrollments')
+                    ->where('user_id', $studentId)
+                    ->where('class_section_id', $classSession->class_section_id)
+                    ->where('status', 'active')
+                    ->exists();
+
+                if (!$isEnrolled) {
+                    continue;
+                }
+
+                Attendance::updateOrCreate(
+                    [
+                        'class_session_id' => $classSession->id,
+                        'student_id' => $studentId,
+                    ],
+                    [
+                        'marked_by' => auth()->id(),
+                        'status' => $data['status'],
+                        'source' => 'regular',
+                        'feedback_enabled' => false,
+                        'marked_at' => now(),
+                        'remarks' => $data['remarks'] ?? null,
+                    ]
+                );
+            }
+
+            $classSession->update([
+                'status' => 'completed',
+            ]);
+        });
+
+        return redirect()
+            ->route('staff.attendance.sessions')
+            ->with('success', 'Regular attendance saved successfully.');
+    }
 
     /**
      * Per-student attendance history/summary for staff-assigned sections.
@@ -151,7 +263,7 @@ class AttendanceController extends Controller
             ? (int) $request->section_id
             : null;
 
-        if ($filteredSectionId && ! $allSectionIds->contains($filteredSectionId)) {
+        if ($filteredSectionId && !$allSectionIds->contains($filteredSectionId)) {
             abort(403, 'You are not assigned to that section.');
         }
 

@@ -164,7 +164,7 @@ return new class extends Migration {
             $table->timestamp('marked_at')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
-            $table->unique(['class_session_id', 'student_id']);
+            $table->unique(['class_session_id', 'student_id','source']);
         });
 
         // ── Feedback Questions ─────────────────────────────────────────────────

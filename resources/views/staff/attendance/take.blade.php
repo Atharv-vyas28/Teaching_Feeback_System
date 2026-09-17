@@ -1,25 +1,53 @@
 @extends('layouts.dashboard')
-@section('title', 'Take Attendance')
-@php $header = 'Take Attendance'; $subheader = $classSession->section->course->name ?? 'Class Session'; @endphp
+
+@section('title', isset($feedbackSession) ? 'Feedback-Day Attendance' : 'Take Attendance')
+
+@php
+    $feedbackClassSession = isset($feedbackSession)
+        ? $feedbackSession->classSession
+        : $classSession;
+
+    $section = $feedbackClassSession?->section;
+    $course = $section?->course;
+
+    $header = isset($feedbackSession)
+        ? 'Feedback-Day Attendance'
+        : 'Take Attendance';
+
+    $subheader = $course?->name ?? 'Class Session';
+@endphp
 
 @section('sidebar-nav')
-@include('staff.partials.sidebar')
-<!--
-<div class="nav-section-label">Main</div>
-<a href="{{ route('staff.dashboard') }}" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-    Dashboard
-</a>
-<div class="nav-section-label">Attendance</div>
-<a href="{{ route('staff.attendance.sessions') }}" class="nav-link active">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-    My Sessions
-</a>
-<a href="{{ route('staff.attendance.create') }}" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-    New Session
-</a>
--->
+    @include('staff.partials.sidebar')
+
+    <!--
+    <div class="nav-section-label">Main</div>
+    <a href="{{ route('staff.dashboard') }}" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1-1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Dashboard
+    </a>
+
+    <div class="nav-section-label">Attendance</div>
+
+    <a href="{{ route('staff.attendance.sessions') }}" class="nav-link active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        My Sessions
+    </a>
+
+    <a href="{{ route('staff.attendance.create') }}" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4v16m8-8H4"/>
+        </svg>
+        New Session
+    </a>
+    -->
 @endsection
 
 @section('content')
@@ -284,7 +312,7 @@
     .attendance-toggle-btn.absent {
         background: #fee2e2;
         color: #dc2626;
-}
+    }
 
     @media (max-width: 700px) {
         .attendance-summary {
@@ -329,67 +357,84 @@
     <div class="attendance-hero-top">
         <div>
             <div class="session-badge">
-                Staff Attendance Session
+                {{ isset($feedbackSession) ? 'Feedback-Day Attendance' : 'Staff Attendance Session' }}
             </div>
 
             <h2>
-                {{ $classSession->section->course->name ?? 'Class Session' }}
+                {{ $course?->name ?? 'Class Session' }}
             </h2>
 
             <p>
-                {{ $classSession->topic ?? 'No topic specified for this session.' }}
+                {{ isset($feedbackSession)
+                    ? 'Mark attendance for students participating in the feedback session.'
+                    : ($feedbackClassSession->topic ?? 'No topic specified for this session.') }}
             </p>
         </div>
 
         <div class="session-label">
-            Staff Marking Access
+            {{ isset($feedbackSession) ? 'Feedback Attendance' : 'Staff Marking Access' }}
         </div>
     </div>
 
     <div class="session-details">
+
+        <div class="session-detail-card">
+            <div class="session-detail-label">Course</div>
+            <div class="session-detail-value">
+                {{ $course?->name ?? 'N/A' }}
+            </div>
+        </div>
+
         <div class="session-detail-card">
             <div class="session-detail-label">Section</div>
             <div class="session-detail-value">
-                {{ $classSession->section->section_name ?? 'N/A' }}
+                {{ $section?->section_name ?? 'N/A' }}
             </div>
         </div>
 
         <div class="session-detail-card">
             <div class="session-detail-label">Date</div>
             <div class="session-detail-value">
-                {{ $classSession->session_date?->format('M d, Y') ?? 'N/A' }}
+                {{ isset($feedbackSession)
+                    ? ($feedbackClassSession->session_date?->format('M d, Y') ?? 'N/A')
+                    : now()->format('M d, Y')
+                     }}
             </div>
         </div>
 
         <div class="session-detail-card">
             <div class="session-detail-label">Time</div>
-            <div class="session-detail-value">
-                {{ substr($classSession->start_time ?? '', 0, -3) }}
-                –
-                {{ substr($classSession->end_time ?? '', 0, -3) }}
+            <div class="session-detail-value" style="padding:0 10px;">
+                -
             </div>
         </div>
 
         <div class="session-detail-card">
-            <div class="session-detail-label">Topic</div>
+            <div class="session-detail-label">Type</div>
             <div class="session-detail-value">
-                {{ $classSession->topic ?? 'N/A' }}
+                Feedback
             </div>
         </div>
+
     </div>
 </div>
 
 <div class="attendance-summary">
+
     <div class="summary-card summary-total">
         <div class="summary-icon">👥</div>
+
         <div>
             <div class="summary-label">Total Students</div>
-            <div class="summary-number">{{ count($students) }}</div>
+            <div class="summary-number">
+                {{ count($students) }}
+            </div>
         </div>
     </div>
 
     <div class="summary-card summary-present">
         <div class="summary-icon">✓</div>
+
         <div>
             <div class="summary-label">Present / Late</div>
             <div class="summary-number" id="presentCount">0</div>
@@ -398,27 +443,40 @@
 
     <div class="summary-card summary-absent">
         <div class="summary-icon">✕</div>
+
         <div>
             <div class="summary-label">Absent / Excused</div>
             <div class="summary-number" id="absentCount">0</div>
         </div>
     </div>
+
 </div>
 
 <div class="card">
+
     <div class="card-header">
+
         <div>
-            <h3 style="margin-bottom:4px;">Mark Attendance</h3>
+            <h3 style="margin-bottom:4px;">
+                Mark Attendance
+            </h3>
+
             <div style="font-size:.78rem;color:#64748b;">
-                Select Present, Absent, Late, or Excused for each student.
+                Select Present or Absent for each student.
             </div>
         </div>
 
         <div class="attendance-toolbar">
+
             <label class="student-search">
+
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-4.35-4.35m1.35-5.15a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M21 21l-4.35-4.35m1.35-5.15a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"
+                    />
                 </svg>
 
                 <input
@@ -427,25 +485,45 @@
                     oninput="filterStudents(this.value)"
                     autocomplete="off"
                 >
+
             </label>
 
             <div class="attendance-bulk-actions">
-                <button type="button" onclick="markAll('present')" class="btn-success btn-sm">
+
+                <button
+                    type="button"
+                    onclick="markAll('present')"
+                    class="btn-success btn-sm"
+                >
                     ✓ Mark All Present
                 </button>
 
-                <button type="button" onclick="markAll('absent')" class="btn-secondary btn-sm">
+                <button
+                    type="button"
+                    onclick="markAll('absent')"
+                    class="btn-secondary btn-sm"
+                >
                     ✕ Mark All Absent
                 </button>
+
             </div>
+
         </div>
+
     </div>
 
-    <form method="POST" action="{{ route('staff.attendance.save', $classSession) }}">
+    <form
+        method="POST"
+        action="{{ isset($feedbackSession)
+            ? route('staff.feedback.attendance.save', $feedbackSession)
+            : route('staff.attendance.save', $classSession) }}"
+    >
         @csrf
 
         <div style="overflow-x:auto;">
+
             <table class="data-table attendance-table">
+
                 <thead>
                     <tr>
                         <th>#</th>
@@ -457,10 +535,18 @@
                 </thead>
 
                 <tbody>
+
                     @foreach($students as $i => $student)
+
                         @php
                             $existing = $existingAttendance[$student->id] ?? null;
-                            $currentStatus = $existing?->status ?? 'absent';
+
+                            $currentStatus = in_array(
+                                $existing?->status,
+                                ['present', 'late']
+                            )
+                                ? 'present'
+                                : 'absent';
                         @endphp
 
                         <tr
@@ -469,17 +555,21 @@
                                 $student->name . ' ' . ($student->roll_number ?? '')
                             ) }}"
                         >
+
                             <td style="color:#94a3b8;font-weight:650;">
                                 {{ $i + 1 }}
                             </td>
 
                             <td>
+
                                 <div class="student-info">
+
                                     <div class="student-avatar">
                                         {{ strtoupper(substr($student->name, 0, 1)) }}
                                     </div>
 
                                     <div>
+
                                         <div style="font-weight:650;color:#0f172a;">
                                             {{ $student->name }}
                                         </div>
@@ -487,8 +577,11 @@
                                         <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">
                                             Student
                                         </div>
+
                                     </div>
+
                                 </div>
+
                             </td>
 
                             <td style="color:#64748b;font-size:.82rem;">
@@ -496,12 +589,6 @@
                             </td>
 
                             <td>
-                                @php
-                                    $currentStatus = in_array(
-                                        $existing?->status,
-                                        ['present', 'late']
-                                    ) ? 'present' : 'absent';
-                                @endphp
 
                                 <input
                                     type="hidden"
@@ -517,11 +604,15 @@
                                     class="attendance-toggle-btn {{ $currentStatus }}"
                                     onclick="toggleAttendance({{ $student->id }})"
                                 >
-                                    {{ $currentStatus === 'present' ? '✓ Present' : '✕ Absent' }}
+                                    {{ $currentStatus === 'present'
+                                        ? '✓ Present'
+                                        : '✕ Absent' }}
                                 </button>
+
                             </td>
 
                             <td>
+
                                 <input
                                     type="text"
                                     name="attendance[{{ $student->id }}][remarks]"
@@ -530,38 +621,64 @@
                                     value="{{ $existing?->remarks ?? '' }}"
                                     placeholder="Optional remark"
                                 >
+
                             </td>
+
                         </tr>
+
                     @endforeach
 
                     <tr id="studentSearchEmptyRow" hidden>
-                        <td colspan="5" style="padding:32px;text-align:center;color:#94a3b8;">
+                        <td
+                            colspan="5"
+                            style="padding:32px;text-align:center;color:#94a3b8;"
+                        >
                             No student matches your search.
                         </td>
                     </tr>
+
                 </tbody>
+
             </table>
+
         </div>
 
         <div class="attendance-actions">
+
             <div style="font-size:.78rem;color:#64748b;">
                 Review the attendance before saving.
             </div>
 
             <div class="action-buttons">
-                <a href="{{ route('staff.attendance.sessions') }}" class="btn-secondary">
+
+                <a
+                    href="{{ isset($feedbackSession)
+                        ? route('staff.feedback.index')
+                        : route('staff.attendance.sessions') }}"
+                    class="btn-secondary"
+                >
                     Cancel
                 </a>
 
-                <button type="submit" class="btn-primary">
-                    Save Attendance
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    {{ isset($feedbackSession)
+                        ? 'Save Feedback Attendance'
+                        : 'Save Attendance' }}
                 </button>
+
             </div>
+
         </div>
+
     </form>
+
 </div>
 
 @push('scripts')
+
 <script>
     function filterStudents(query) {
         const searchTerm = query.trim().toLowerCase();
@@ -594,6 +711,7 @@
         }
 
         input.value = status;
+
         button.classList.remove('present', 'absent');
         button.classList.add(status);
 
@@ -611,7 +729,9 @@
 
         updateButton(
             studentId,
-            input.value === 'present' ? 'absent' : 'present'
+            input.value === 'present'
+                ? 'absent'
+                : 'present'
         );
 
         updateCounts();
@@ -620,6 +740,7 @@
     function markAll(status) {
         document.querySelectorAll('.status-input').forEach(function (input) {
             const studentId = input.id.replace('status-', '');
+
             updateButton(studentId, status);
         });
 
@@ -644,6 +765,7 @@
 
     document.addEventListener('DOMContentLoaded', updateCounts);
 </script>
+
 @endpush
 
 @endsection

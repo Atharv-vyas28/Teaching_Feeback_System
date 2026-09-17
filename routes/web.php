@@ -148,6 +148,9 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff'])->grou
     Route::get('/notifications', [StaffNotification::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [StaffNotification::class, 'readAll'])->name('notifications.read-all');
     Route::get('/notifications/{notification}', [StaffNotification::class, 'read'])->name('notifications.read');
+    Route::get('/feedback/{feedbackSession}/attendance',[StaffAttendance::class, 'take'])->name('feedback.attendance');
+    Route::post('/feedback/{feedbackSession}/attendance',[StaffAttendance::class, 'save'])->name('feedback.attendance.save');
+
 });
 
 // ─── Student ─────────────────────────────────────────────────────────────────

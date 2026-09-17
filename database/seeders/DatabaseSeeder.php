@@ -136,12 +136,12 @@ class DatabaseSeeder extends Seeder
 
         // ── Feedback Questions ────────────────────────────────────────────────
         $questions = [
-            ['question_text' => 'How clearly did the faculty explain the concepts?',              'type' => 'rating', 'weight' => 2.00, 'order_position' => 1],
-            ['question_text' => 'How punctual was the faculty for the class?',                    'type' => 'rating', 'weight' => 1.00, 'order_position' => 2],
-            ['question_text' => 'How well did the faculty address student doubts and queries?',   'type' => 'rating', 'weight' => 1.50, 'order_position' => 3],
-            ['question_text' => 'How effective was the use of teaching aids and materials?',      'type' => 'rating', 'weight' => 1.00, 'order_position' => 4],
-            ['question_text' => 'Rate the overall quality of the class session.',                 'type' => 'rating', 'weight' => 2.00, 'order_position' => 5],
-            ['question_text' => 'Do you have any suggestions to improve the teaching style?',     'type' => 'text',   'weight' => 0.00, 'order_position' => 6, 'is_required' => false],
+            ['question_text' => 'How clearly did the faculty explain the concepts?',              'type' => 'rating', 'weight' => 2.00],
+            ['question_text' => 'How punctual was the faculty for the class?',                    'type' => 'rating', 'weight' => 1.00],
+            ['question_text' => 'How well did the faculty address student doubts and queries?',   'type' => 'rating', 'weight' => 1.50],
+            ['question_text' => 'How effective was the use of teaching aids and materials?',      'type' => 'rating', 'weight' => 1.00],
+            ['question_text' => 'Rate the overall quality of the class session.',                 'type' => 'rating', 'weight' => 2.00],
+            ['question_text' => 'Do you have any suggestions to improve the teaching style?',     'type' => 'text',   'weight' => 0.00, 'is_required' => false],
         ];
         foreach ($questions as $q) {
             FeedbackQuestion::create(array_merge([
@@ -195,6 +195,7 @@ class DatabaseSeeder extends Seeder
         // Session 1: Closed with some responses
         $fbSession1 = \App\Models\FeedbackSession::create([
             'class_session_id' => $session1->id,
+            'class_section_id' => $session1->class_section_id,
             'status'           => 'closed',
             'opened_at'        => now()->subDays(2),
             'closed_at'        => now()->subDays(1),
@@ -204,6 +205,7 @@ class DatabaseSeeder extends Seeder
         // Session 2: Active (ready for student to submit)
         $fbSession2 = \App\Models\FeedbackSession::create([
             'class_session_id' => $session2->id,
+            'class_section_id' => $session2->class_section_id,
             'status'           => 'active',
             'opened_at'        => now(),
             'created_by'       => $faculty1->id,

@@ -104,7 +104,7 @@ class FeedbackSessionController extends Controller
             $assignment = StaffCourse::create([
                 'user_id' => $staff->id,
                 'class_section_id' => $session->classSession->class_section_id,
-                'semester_id' => $session->classSession->section->semester_id,
+                // 'semester_id' => $session->classSession->section->semester_id,
                 'feedback_session_id' => $session->id,
                 'assigned_by' => auth()->id(),
                 'is_active' => true,
