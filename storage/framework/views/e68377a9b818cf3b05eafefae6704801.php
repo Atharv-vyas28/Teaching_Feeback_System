@@ -1,9 +1,9 @@
 blade
-@extends('layouts.dashboard')
 
-@section('title', 'Feedback Sessions')
 
-@php
+<?php $__env->startSection('title', 'Feedback Sessions'); ?>
+
+<?php
     $header = 'Feedback Sessions';
 
     if (($level ?? 'semester') === 'semester') {
@@ -13,50 +13,51 @@ blade
     } else {
         $subheader = 'Manage feedback sessions for courses.';
     }
-@endphp
+?>
 
-@section('sidebar-nav')
-    @include('admin.partials.sidebar')
-@endsection
+<?php $__env->startSection('sidebar-nav'); ?>
+    <?php echo $__env->make('admin.partials.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <div class="card">
 
-        {{-- Header --}}
+        
         <div class="card-header">
 
             <div>
                 <h3>Feedback Sessions</h3>
 
                 <p style="margin-top:4px;color:#64748B;font-size:.9rem;">
-                    {{ $subheader }}
+                    <?php echo e($subheader); ?>
+
                 </p>
             </div>
 
-            @if (($level ?? 'semester') === 'department')
-                <a href="{{ route('admin.feedback-sessions.index') }}" class="btn-secondary btn-sm">
+            <?php if(($level ?? 'semester') === 'department'): ?>
+                <a href="<?php echo e(route('admin.feedback-sessions.index')); ?>" class="btn-secondary btn-sm">
                     ← Semesters
                 </a>
-            @elseif(($level ?? '') === 'course')
-                <a href="{{ route('admin.feedback-sessions.departments', $semester) }}" class="btn-secondary btn-sm">
+            <?php elseif(($level ?? '') === 'course'): ?>
+                <a href="<?php echo e(route('admin.feedback-sessions.departments', $semester)); ?>" class="btn-secondary btn-sm">
                     ← Departments
                 </a>
-            @elseif(($level ?? '') === 'faculty')
-                <a href="{{ route('admin.feedback-sessions.courses', [
+            <?php elseif(($level ?? '') === 'faculty'): ?>
+                <a href="<?php echo e(route('admin.feedback-sessions.courses', [
                     'semester' => $semester,
                     'department' => $department,
-                ]) }}"
+                ])); ?>"
                     class="btn-secondary btn-sm">
                     ← Courses
                 </a>
-            @endif
+            <?php endif; ?>
 
         </div>
 
 
-        {{-- Flash Messages --}}
-        @if (session('success'))
+        
+        <?php if(session('success')): ?>
             <div
                 style="
             background:#DCFCE7;
@@ -65,11 +66,12 @@ blade
             border-radius:8px;
             margin:16px;
         ">
-                {{ session('success') }}
-            </div>
-        @endif
+                <?php echo e(session('success')); ?>
 
-        @if (session('error'))
+            </div>
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
             <div
                 style="
             background:#FEE2E2;
@@ -78,15 +80,14 @@ blade
             border-radius:8px;
             margin:16px;
         ">
-                {{ session('error') }}
+                <?php echo e(session('error')); ?>
+
             </div>
-        @endif
+        <?php endif; ?>
 
 
-        {{-- =========================================================
-         LEVEL 1 : SEMESTERS
-    ========================================================== --}}
-        @if (($level ?? 'semester') === 'semester')
+        
+        <?php if(($level ?? 'semester') === 'semester'): ?>
 
             <div
                 style="
@@ -96,8 +97,8 @@ blade
             padding:20px;
         ">
 
-                @forelse($semesters as $semester)
-                    <a href="{{ route('admin.feedback-sessions.departments', $semester) }}"
+                <?php $__empty_1 = true; $__currentLoopData = $semesters; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $semester): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <a href="<?php echo e(route('admin.feedback-sessions.departments', $semester)); ?>"
                         style="
                         display:block;
                         text-decoration:none;
@@ -127,7 +128,8 @@ blade
                                 font-weight:600;
                                 color:#0F172A;
                             ">
-                                    {{ $semester->name }}
+                                    <?php echo e($semester->name); ?>
+
                                 </div>
 
                                 <div
@@ -137,22 +139,23 @@ blade
                                 color:#64748B;
                             ">
                                     Academic Year:
-                                    {{ $semester->academicYear?->name ?? 'N/A' }}
+                                    <?php echo e($semester->academicYear?->name ?? 'N/A'); ?>
+
                                 </div>
 
                             </div>
 
-                            @if ($semester->is_current)
+                            <?php if($semester->is_current): ?>
                                 <span class="badge badge-green">
                                     Current
                                 </span>
-                            @endif
+                            <?php endif; ?>
 
                         </div>
 
                     </a>
 
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                     <div
                         style="
@@ -163,31 +166,30 @@ blade
                 ">
                         No semesters found.
                     </div>
-                @endforelse
+                <?php endif; ?>
 
             </div>
 
 
-            {{-- =========================================================
-         LEVEL 2 : DEPARTMENTS
-    ========================================================== --}}
-        @elseif(($level ?? '') === 'department')
+            
+        <?php elseif(($level ?? '') === 'department'): ?>
             <div style="padding:20px;">
 
-                {{-- Breadcrumb --}}
+                
                 <div
                     style="
                 margin-bottom:18px;
                 font-size:.85rem;
                 color:#64748B;
             ">
-                    <a href="{{ route('admin.feedback-sessions.index') }}" style="color:#0F172A;text-decoration:none;">
+                    <a href="<?php echo e(route('admin.feedback-sessions.index')); ?>" style="color:#0F172A;text-decoration:none;">
                         Semesters
                     </a>
 
                     <span style="margin:0 6px;">/</span>
                     <strong style="color:#0F172A;">
-                        {{ $semester->name }}
+                        <?php echo e($semester->name); ?>
+
                     </strong>
                 </div>
 
@@ -199,11 +201,11 @@ blade
                 gap:16px;
             ">
 
-                    @forelse($departments as $department)
-                        <a href="{{ route('admin.feedback-sessions.courses', [
+                    <?php $__empty_1 = true; $__currentLoopData = $departments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $department): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <a href="<?php echo e(route('admin.feedback-sessions.courses', [
                             'semester' => $semester,
                             'department' => $department,
-                        ]) }}"
+                        ])); ?>"
                             style="
                             display:block;
                             text-decoration:none;
@@ -223,7 +225,8 @@ blade
                             font-weight:600;
                             color:#0F172A;
                         ">
-                                {{ $department->name }}
+                                <?php echo e($department->name); ?>
+
                             </div>
 
                             <div
@@ -232,13 +235,14 @@ blade
                             font-size:.85rem;
                             color:#64748B;
                         ">
-                                {{ $department->semester_courses_count ?? 0 }}
+                                <?php echo e($department->semester_courses_count ?? 0); ?>
+
                                 courses
                             </div>
 
                         </a>
 
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <div
                             style="
@@ -249,58 +253,58 @@ blade
                     ">
                             No departments found for this semester.
                         </div>
-                    @endforelse
+                    <?php endif; ?>
 
                 </div>
 
             </div>
 
 
-            {{-- =========================================================
-         LEVEL 3 : COURSES
-    ========================================================== --}}
-        @elseif(($level ?? '') === 'course')
+            
+        <?php elseif(($level ?? '') === 'course'): ?>
             <div style="padding:20px;">
 
-                {{-- Breadcrumb --}}
+                
                 <div
                     style="
             margin-bottom:20px;
             font-size:.85rem;
             color:#64748B;
         ">
-                    <a href="{{ route('admin.feedback-sessions.index') }}" style="color:#0F172A;text-decoration:none;">
+                    <a href="<?php echo e(route('admin.feedback-sessions.index')); ?>" style="color:#0F172A;text-decoration:none;">
                         Semesters
                     </a>
 
                     <span style="margin:0 6px;">/</span>
 
-                    <a href="{{ route('admin.feedback-sessions.departments', $semester) }}"
+                    <a href="<?php echo e(route('admin.feedback-sessions.departments', $semester)); ?>"
                         style="color:#0F172A;text-decoration:none;">
-                        {{ $semester->name }}
+                        <?php echo e($semester->name); ?>
+
                     </a>
 
                     <span style="margin:0 6px;">/</span>
 
                     <strong style="color:#0F172A;">
-                        {{ $department->name }}
+                        <?php echo e($department->name); ?>
+
                     </strong>
                 </div>
 
 
-                {{-- Courses --}}
+                
                 <div style="
             display:flex;
             flex-direction:column;
             gap:12px;
         ">
 
-                    @forelse($courses as $course)
-                        <a href="{{ route('admin.feedback-sessions.faculty', [
+                    <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <a href="<?php echo e(route('admin.feedback-sessions.faculty', [
                             'semester' => $semester,
                             'department' => $department,
                             'course' => $course->id,
-                        ]) }}"
+                        ])); ?>"
                             style="
                             display:block;
                             text-decoration:none;
@@ -324,7 +328,7 @@ blade
                         flex-wrap:wrap;
                     ">
 
-                                {{-- Course Information --}}
+                                
                                 <div>
 
                                     <div
@@ -333,14 +337,16 @@ blade
                                 font-size:1rem;
                                 color:#0F172A;
                             ">
-                                        {{ $course->code }}
+                                        <?php echo e($course->code); ?>
+
 
                                         <span
                                             style="
                                     font-weight:400;
                                     color:#475569;
                                 ">
-                                            — {{ $course->name }}
+                                            — <?php echo e($course->name); ?>
+
                                         </span>
                                     </div>
 
@@ -350,7 +356,7 @@ blade
 
                         </a>
 
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <div
                             style="
@@ -360,17 +366,15 @@ blade
                 ">
                             No courses found for this department.
                         </div>
-                    @endforelse
+                    <?php endif; ?>
 
                 </div>
 
             </div>
-        @elseif(($level ?? '') === 'faculty')
+        <?php elseif(($level ?? '') === 'faculty'): ?>
             <div style="padding:20px;">
 
-                {{-- =========================================================
-             Breadcrumb
-        ========================================================== --}}
+                
                 <div
                     style="
                 display:flex;
@@ -382,7 +386,7 @@ blade
                 color:#64748B;
             ">
 
-                    <a href="{{ route('admin.feedback-sessions.index') }}"
+                    <a href="<?php echo e(route('admin.feedback-sessions.index')); ?>"
                         style="
                     color:#475569;
                     text-decoration:none;
@@ -392,39 +396,40 @@ blade
 
                     <span>/</span>
 
-                    <a href="{{ route('admin.feedback-sessions.departments', $semester) }}"
+                    <a href="<?php echo e(route('admin.feedback-sessions.departments', $semester)); ?>"
                         style="
                     color:#475569;
                     text-decoration:none;
                 ">
-                        {{ $semester->name }}
+                        <?php echo e($semester->name); ?>
+
                     </a>
 
                     <span>/</span>
 
-                    <a href="{{ route('admin.feedback-sessions.courses', [
+                    <a href="<?php echo e(route('admin.feedback-sessions.courses', [
                         'semester' => $semester,
                         'department' => $department,
-                    ]) }}"
+                    ])); ?>"
                         style="
                     color:#475569;
                     text-decoration:none;
                 ">
-                        {{ $department->name }}
+                        <?php echo e($department->name); ?>
+
                     </a>
 
                     <span>/</span>
 
                     <strong style="color:#0F172A;">
-                        {{ $course->code }}
+                        <?php echo e($course->code); ?>
+
                     </strong>
 
                 </div>
 
 
-                {{-- =========================================================
-             Course Header
-        ========================================================== --}}
+                
                 <div style="
                 margin-bottom:22px;
             ">
@@ -446,13 +451,15 @@ blade
                             font-weight:650;
                             color:#0F172A;
                         ">
-                                {{ $course->code }}
+                                <?php echo e($course->code); ?>
+
                                 <span
                                     style="
                                 font-weight:400;
                                 color:#475569;
                             ">
-                                    — {{ $course->name }}
+                                    — <?php echo e($course->name); ?>
+
                                 </span>
                             </div>
 
@@ -467,10 +474,10 @@ blade
 
                         </div>
 
-                        <a href="{{ route('admin.feedback-sessions.courses', [
+                        <a href="<?php echo e(route('admin.feedback-sessions.courses', [
                             'semester' => $semester,
                             'department' => $department,
-                        ]) }}"
+                        ])); ?>"
                             class="btn-secondary btn-sm">
                             ← Courses
                         </a>
@@ -480,9 +487,7 @@ blade
                 </div>
 
 
-                {{-- =========================================================
-             Status Summary
-        ========================================================== --}}
+                
                 <div
                     style="
                 display:grid;
@@ -491,7 +496,7 @@ blade
                 margin-bottom:24px;
             ">
 
-                    {{-- Remaining --}}
+                    
                     <div
                         style="
                     border:1px solid #E2E8F0;
@@ -532,13 +537,14 @@ blade
                         font-weight:650;
                         color:#0F172A;
                     ">
-                            {{ $remainingCount }}
+                            <?php echo e($remainingCount); ?>
+
                         </div>
 
                     </div>
 
 
-                    {{-- Ongoing --}}
+                    
                     <div
                         style="
                     border:1px solid #BFDBFE;
@@ -579,13 +585,14 @@ blade
                         font-weight:650;
                         color:#1D4ED8;
                     ">
-                            {{ $ongoingCount }}
+                            <?php echo e($ongoingCount); ?>
+
                         </div>
 
                     </div>
 
 
-                    {{-- Done --}}
+                    
                     <div
                         style="
                     border:1px solid #BBF7D0;
@@ -626,7 +633,8 @@ blade
                         font-weight:650;
                         color:#15803D;
                     ">
-                            {{ $doneCount }}
+                            <?php echo e($doneCount); ?>
+
                         </div>
 
                     </div>
@@ -634,9 +642,7 @@ blade
                 </div>
 
 
-                {{-- =========================================================
-             Faculty List
-        ========================================================== --}}
+                
                 <div>
 
                     <div
@@ -657,10 +663,10 @@ blade
                     gap:10px;
                 ">
 
-                        @forelse($facultyList as $item)
-                            @php
+                        <?php $__empty_1 = true; $__currentLoopData = $facultyList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
                                 $session = $item->feedbackSession;
-                            @endphp
+                            ?>
 
                             <div
                                 style="
@@ -679,7 +685,7 @@ blade
                                 flex-wrap:wrap;
                             ">
 
-                                    {{-- Faculty Information --}}
+                                    
                                     <div
                                         style="
                                     min-width:220px;
@@ -691,7 +697,8 @@ blade
                                         font-weight:600;
                                         color:#0F172A;
                                     ">
-                                            {{ $item->faculty->name }}
+                                            <?php echo e($item->faculty->name); ?>
+
                                         </div>
 
                                         <div
@@ -706,13 +713,15 @@ blade
                                     ">
 
                                             <span>
-                                                {{ $item->faculty->employee_id ?? $item->faculty->email }}
+                                                <?php echo e($item->faculty->employee_id ?? $item->faculty->email); ?>
+
                                             </span>
 
                                             <span>•</span>
 
                                             <span>
-                                                Section {{ $item->section->section_name ?? $item->section->name }}
+                                                Section <?php echo e($item->section->section_name ?? $item->section->name); ?>
+
                                             </span>
 
                                         </div>
@@ -720,7 +729,7 @@ blade
                                     </div>
 
 
-                                    {{-- Status + Action --}}
+                                    
                                     <div
                                         style="
                                     display:flex;
@@ -729,7 +738,7 @@ blade
                                     flex-wrap:wrap;
                                 ">
 
-                                        @if ($item->feedback_status === 'not_taken')
+                                        <?php if($item->feedback_status === 'not_taken'): ?>
                                             <span
                                                 style="
                                             display:inline-flex;
@@ -744,14 +753,14 @@ blade
                                                 Remaining
                                             </span>
 
-                                            <a href="{{ route('admin.feedback-sessions.open', [
+                                            <a href="<?php echo e(route('admin.feedback-sessions.open', [
                                                 'section' => $item->section->id,
                                                 'faculty' => $item->faculty->id,
-                                            ]) }}"
+                                            ])); ?>"
                                                 class="btn-primary btn-sm">
                                                 Open Feedback
                                             </a>
-                                        @elseif($item->feedback_status === 'ongoing')
+                                        <?php elseif($item->feedback_status === 'ongoing'): ?>
                                             <span
                                                 style="
                                             display:inline-flex;
@@ -766,13 +775,13 @@ blade
                                                 Ongoing
                                             </span>
 
-                                            @if ($session)
-                                                <a href="{{ route('admin.feedback-sessions.responses', $session) }}"
+                                            <?php if($session): ?>
+                                                <a href="<?php echo e(route('admin.feedback-sessions.responses', $session)); ?>"
                                                     class="btn-secondary btn-sm">
                                                     View Responses
                                                 </a>
-                                            @endif
-                                        @elseif($item->feedback_status === 'completed')
+                                            <?php endif; ?>
+                                        <?php elseif($item->feedback_status === 'completed'): ?>
                                             <span
                                                 style="
                                             display:inline-flex;
@@ -787,13 +796,13 @@ blade
                                                 Done
                                             </span>
 
-                                            @if ($session)
-                                                <a href="{{ route('admin.feedback-sessions.responses', $session) }}"
+                                            <?php if($session): ?>
+                                                <a href="<?php echo e(route('admin.feedback-sessions.responses', $session)); ?>"
                                                     class="btn-secondary btn-sm">
                                                     View Results
                                                 </a>
-                                            @endif
-                                        @elseif($item->feedback_status === 'awaiting_release')
+                                            <?php endif; ?>
+                                        <?php elseif($item->feedback_status === 'awaiting_release'): ?>
                                             <span
                                                 style="
                                             display:inline-flex;
@@ -808,13 +817,13 @@ blade
                                                 Awaiting Release
                                             </span>
 
-                                            @if ($session)
-                                                <a href="{{ route('admin.feedback-sessions.responses', $session) }}"
+                                            <?php if($session): ?>
+                                                <a href="<?php echo e(route('admin.feedback-sessions.responses', $session)); ?>"
                                                     class="btn-secondary btn-sm">
                                                     View Responses
                                                 </a>
-                                            @endif
-                                        @elseif($item->feedback_status === 'scheduled')
+                                            <?php endif; ?>
+                                        <?php elseif($item->feedback_status === 'scheduled'): ?>
                                             <span
                                                 style="
                                             display:inline-flex;
@@ -828,7 +837,7 @@ blade
                                         ">
                                                 Scheduled
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
 
                                     </div>
 
@@ -836,7 +845,7 @@ blade
 
                             </div>
 
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                             <div
                                 style="
@@ -850,16 +859,18 @@ blade
                         ">
                                 No faculty members are assigned to this course.
                             </div>
-                        @endforelse
+                        <?php endif; ?>
 
                     </div>
 
                 </div>
 
             </div>
-        @endif
+        <?php endif; ?>
 
 
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Atharv Vyas\OneDrive\Desktop\Web Dev\learn\laravel-\resources\views/admin/feedback-sessions/index.blade.php ENDPATH**/ ?>

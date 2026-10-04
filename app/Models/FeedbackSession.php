@@ -7,13 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class FeedbackSession extends Model
 {
     protected $fillable = [
+        'class_section_id',
+        'faculty_id',
         'class_session_id',
         'created_by',
         'assigned_staff_id',
         'status',
-        'opened_at',
         'release_at',
         'deadline_at',
+        'duration_minutes',
+        'opened_at',
         'closed_at',
         'is_released',
     ];
@@ -21,17 +24,32 @@ class FeedbackSession extends Model
     protected function casts(): array
     {
         return [
-            'opened_at' => 'datetime',
             'release_at' => 'datetime',
             'deadline_at' => 'datetime',
+            'opened_at' => 'datetime',
             'closed_at' => 'datetime',
             'is_released' => 'boolean',
+            'duration_minutes' => 'integer'
         ];
+    }
+
+    public function faculty()
+    {
+        return $this->belongsTo(User::class, 'faculty_id');
     }
 
     public function classSession()
     {
         return $this->belongsTo(ClassSession::class);
+    }
+
+    public function getEndsAtAttribute()
+    {
+        if (!$this->opened_at || !$this->duration_minutes) {
+            return null;
+        }
+
+        return $this->opened_at->copy()->addMinutes($this->duration_minutes);
     }
 
     public function creator()
@@ -69,24 +87,61 @@ class FeedbackSession extends Model
         return (bool) $this->is_released;
     }
 
+    public function classSection()
+    {
+        return $this->belongsTo(ClassSection::class);
+    }
+
     /*
      * Server-side feedback time validation.
      * Students cannot bypass this by changing browser time or JavaScript.
      */
     public function isAcceptingResponses(): bool
     {
+        if ($this->status !== 'active') {
+            return false;
+        }
+
         $now = now();
 
-        return $this->status === 'active'
-            && (! $this->release_at || $now->greaterThanOrEqualTo($this->release_at))
-            && (! $this->deadline_at || $now->lessThanOrEqualTo($this->deadline_at));
+        if ($this->release_at && $now->lt($this->release_at)) {
+            return false;
+        }
+
+        if ($this->opened_at && $this->duration_minutes) {
+            $endsAt = $this->opened_at
+                ->copy()
+                ->addMinutes($this->duration_minutes);
+
+            return $now->lt($endsAt);
+        }
+
+        if ($this->deadline_at) {
+            return $now->lte($this->deadline_at);
+        }
+
+        return true;
     }
 
     public function scopeExpired($query)
     {
         return $query->where('status', 'active')
-            ->whereNotNull('deadline_at')
-            ->where('deadline_at', '<', now());
+            ->where(function ($query) {
+                $query
+                    ->where(function ($q) {
+                        $q->whereNotNull('opened_at')
+                            ->whereNotNull('duration_minutes')
+                            ->whereRaw(
+                                'DATE_ADD(opened_at, INTERVAL duration_minutes MINUTE) < ?',
+                                [now()]
+                            );
+                    })
+                    ->orWhere(function ($q) {
+                        $q->whereNull('duration_minutes')
+                            ->whereNotNull('deadline_at')
+                            ->where('deadline_at', '<', now());
+                    });
+            });
     }
 
     public function scopeReadyToOpen($query)

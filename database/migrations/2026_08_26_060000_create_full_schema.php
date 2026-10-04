@@ -176,6 +176,7 @@ return new class extends Migration {
             $table->integer('display_order')->default(0);
             $table->boolean('is_required')->default(true);
             $table->boolean('is_active')->default(true);
+            $table->integer('order_position')->default(0);
             $table->timestamps();
         });
 
@@ -186,6 +187,7 @@ return new class extends Migration {
             // One feedback session per course section
             $table->foreignId('class_section_id')
                 ->unique()
+                ->nullable()
                 ->constrained()
                 ->onDelete('cascade');
 
@@ -212,10 +214,15 @@ return new class extends Migration {
 
             $table->timestamp('release_at')->nullable();
 
+            // Keep this because existing code may use it
             $table->timestamp('deadline_at')->nullable();
+
+            // New: duration of the feedback session in minutes
+            $table->unsignedSmallInteger('duration_minutes')->nullable();
 
             $table->timestamp('opened_at')->nullable();
 
+            // Keep this — records when the feedback was actually closed
             $table->timestamp('closed_at')->nullable();
 
             $table->boolean('is_released')->default(false);
