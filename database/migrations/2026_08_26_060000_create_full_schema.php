@@ -63,6 +63,9 @@ return new class extends Migration {
             if (!Schema::hasColumn('users', 'email_verified_at')) {
                 $table->timestamp('email_verified_at')->nullable();
             }
+            if (!Schema::hasColumn('users', 'is_head')) {
+                $table->boolean('is_head')->default(false);
+            }
         });
 
         // ── Academic Years ─────────────────────────────────────────────────────
@@ -164,7 +167,7 @@ return new class extends Migration {
             $table->timestamp('marked_at')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
-            $table->unique(['class_session_id', 'student_id']);
+            $table->unique(['class_session_id', 'student_id','source']);
         });
 
         // ── Feedback Questions ─────────────────────────────────────────────────

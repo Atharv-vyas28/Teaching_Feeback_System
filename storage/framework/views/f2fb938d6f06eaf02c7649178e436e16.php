@@ -1,8 +1,6 @@
-@extends('layouts.dashboard')
+<?php $__env->startSection('title', isset($feedbackSession) ? 'Feedback-Day Attendance' : 'Take Attendance'); ?>
 
-@section('title', isset($feedbackSession) ? 'Feedback-Day Attendance' : 'Take Attendance')
-
-@php
+<?php
     $feedbackClassSession = isset($feedbackSession)
         ? $feedbackSession->classSession
         : $classSession;
@@ -15,14 +13,14 @@
         : 'Take Attendance';
 
     $subheader = $course?->name ?? 'Class Session';
-@endphp
+?>
 
-@section('sidebar-nav')
-    @include('staff.partials.sidebar')
+<?php $__env->startSection('sidebar-nav'); ?>
+    <?php echo $__env->make('staff.partials.sidebar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <!--
     <div class="nav-section-label">Main</div>
-    <a href="{{ route('staff.dashboard') }}" class="nav-link">
+    <a href="<?php echo e(route('staff.dashboard')); ?>" class="nav-link">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1-1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -32,7 +30,7 @@
 
     <div class="nav-section-label">Attendance</div>
 
-    <a href="{{ route('staff.attendance.sessions') }}" class="nav-link active">
+    <a href="<?php echo e(route('staff.attendance.sessions')); ?>" class="nav-link active">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -40,7 +38,7 @@
         My Sessions
     </a>
 
-    <a href="{{ route('staff.attendance.create') }}" class="nav-link">
+    <a href="<?php echo e(route('staff.attendance.create')); ?>" class="nav-link">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 4v16m8-8H4"/>
@@ -48,9 +46,9 @@
         New Session
     </a>
     -->
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
     .attendance-hero {
@@ -357,22 +355,26 @@
     <div class="attendance-hero-top">
         <div>
             <div class="session-badge">
-                {{ isset($feedbackSession) ? 'Feedback-Day Attendance' : 'Staff Attendance Session' }}
+                <?php echo e(isset($feedbackSession) ? 'Feedback-Day Attendance' : 'Staff Attendance Session'); ?>
+
             </div>
 
             <h2>
-                {{ $course?->name ?? 'Class Session' }}
+                <?php echo e($course?->name ?? 'Class Session'); ?>
+
             </h2>
 
             <p>
-                {{ isset($feedbackSession)
+                <?php echo e(isset($feedbackSession)
                     ? 'Mark attendance for students participating in the feedback session.'
-                    : ($feedbackClassSession->topic ?? 'No topic specified for this session.') }}
+                    : ($feedbackClassSession->topic ?? 'No topic specified for this session.')); ?>
+
             </p>
         </div>
 
         <div class="session-label">
-            {{ isset($feedbackSession) ? 'Feedback Attendance' : 'Staff Marking Access' }}
+            <?php echo e(isset($feedbackSession) ? 'Feedback Attendance' : 'Staff Marking Access'); ?>
+
         </div>
     </div>
 
@@ -381,24 +383,26 @@
         <div class="session-detail-card">
             <div class="session-detail-label">Course</div>
             <div class="session-detail-value">
-                {{ $course?->name ?? 'N/A' }}
+                <?php echo e($course?->name ?? 'N/A'); ?>
+
             </div>
         </div>
 
         <div class="session-detail-card">
             <div class="session-detail-label">Section</div>
             <div class="session-detail-value">
-                {{ $section?->section_name ?? 'N/A' }}
+                <?php echo e($section?->section_name ?? 'N/A'); ?>
+
             </div>
         </div>
 
         <div class="session-detail-card">
             <div class="session-detail-label">Date</div>
             <div class="session-detail-value">
-                {{ isset($feedbackSession)
+                <?php echo e(isset($feedbackSession)
                     ? ($feedbackClassSession->session_date?->format('M d, Y') ?? 'N/A')
-                    : now()->format('M d, Y')
-                     }}
+                    : now()->format('M d, Y')); ?>
+
             </div>
         </div>
 
@@ -427,7 +431,8 @@
         <div>
             <div class="summary-label">Total Students</div>
             <div class="summary-number">
-                {{ count($students) }}
+                <?php echo e(count($students)); ?>
+
             </div>
         </div>
     </div>
@@ -514,11 +519,11 @@
 
     <form
         method="POST"
-        action="{{ isset($feedbackSession)
+        action="<?php echo e(isset($feedbackSession)
             ? route('staff.feedback.attendance.save', $feedbackSession)
-            : route('staff.attendance.save', $classSession) }}"
+            : route('staff.attendance.save', $classSession)); ?>"
     >
-        @csrf
+        <?php echo csrf_field(); ?>
 
         <div style="overflow-x:auto;">
 
@@ -536,9 +541,9 @@
 
                 <tbody>
 
-                    @foreach($students as $i => $student)
+                    <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                        @php
+                        <?php
                             $existing = $existingAttendance[$student->id] ?? null;
 
                             $currentStatus = in_array(
@@ -547,17 +552,18 @@
                             )
                                 ? 'present'
                                 : 'absent';
-                        @endphp
+                        ?>
 
                         <tr
                             class="student-row"
-                            data-search="{{ strtolower(
+                            data-search="<?php echo e(strtolower(
                                 $student->name . ' ' . ($student->roll_number ?? '')
-                            ) }}"
+                            )); ?>"
                         >
 
                             <td style="color:#94a3b8;font-weight:650;">
-                                {{ $i + 1 }}
+                                <?php echo e($i + 1); ?>
+
                             </td>
 
                             <td>
@@ -565,13 +571,15 @@
                                 <div class="student-info">
 
                                     <div class="student-avatar">
-                                        {{ strtoupper(substr($student->name, 0, 1)) }}
+                                        <?php echo e(strtoupper(substr($student->name, 0, 1))); ?>
+
                                     </div>
 
                                     <div>
 
                                         <div style="font-weight:650;color:#0f172a;">
-                                            {{ $student->name }}
+                                            <?php echo e($student->name); ?>
+
                                         </div>
 
                                         <div style="font-size:.7rem;color:#94a3b8;margin-top:2px;">
@@ -585,28 +593,30 @@
                             </td>
 
                             <td style="color:#64748b;font-size:.82rem;">
-                                {{ $student->roll_number ?? '—' }}
+                                <?php echo e($student->roll_number ?? '—'); ?>
+
                             </td>
 
                             <td>
 
                                 <input
                                     type="hidden"
-                                    name="attendance[{{ $student->id }}][status]"
-                                    value="{{ $currentStatus }}"
+                                    name="attendance[<?php echo e($student->id); ?>][status]"
+                                    value="<?php echo e($currentStatus); ?>"
                                     class="status-input"
-                                    id="status-{{ $student->id }}"
+                                    id="status-<?php echo e($student->id); ?>"
                                 >
 
                                 <button
                                     type="button"
-                                    id="attendance-btn-{{ $student->id }}"
-                                    class="attendance-toggle-btn {{ $currentStatus }}"
-                                    onclick="toggleAttendance({{ $student->id }})"
+                                    id="attendance-btn-<?php echo e($student->id); ?>"
+                                    class="attendance-toggle-btn <?php echo e($currentStatus); ?>"
+                                    onclick="toggleAttendance(<?php echo e($student->id); ?>)"
                                 >
-                                    {{ $currentStatus === 'present'
+                                    <?php echo e($currentStatus === 'present'
                                         ? '✓ Present'
-                                        : '✕ Absent' }}
+                                        : '✕ Absent'); ?>
+
                                 </button>
 
                             </td>
@@ -615,10 +625,10 @@
 
                                 <input
                                     type="text"
-                                    name="attendance[{{ $student->id }}][remarks]"
+                                    name="attendance[<?php echo e($student->id); ?>][remarks]"
                                     class="form-input"
                                     style="width:170px;"
-                                    value="{{ $existing?->remarks ?? '' }}"
+                                    value="<?php echo e($existing?->remarks ?? ''); ?>"
                                     placeholder="Optional remark"
                                 >
 
@@ -626,7 +636,7 @@
 
                         </tr>
 
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                     <tr id="studentSearchEmptyRow" hidden>
                         <td
@@ -652,9 +662,9 @@
             <div class="action-buttons">
 
                 <a
-                    href="{{ isset($feedbackSession)
+                    href="<?php echo e(isset($feedbackSession)
                         ? route('staff.feedback.index')
-                        : route('staff.attendance.sessions') }}"
+                        : route('staff.attendance.sessions')); ?>"
                     class="btn-secondary"
                 >
                     Cancel
@@ -664,9 +674,10 @@
                     type="submit"
                     class="btn-primary"
                 >
-                    {{ isset($feedbackSession)
+                    <?php echo e(isset($feedbackSession)
                         ? 'Save Feedback Attendance'
-                        : 'Save Attendance' }}
+                        : 'Save Attendance'); ?>
+
                 </button>
 
             </div>
@@ -677,7 +688,7 @@
 
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 
 <script>
     function filterStudents(query) {
@@ -766,6 +777,7 @@
     document.addEventListener('DOMContentLoaded', updateCounts);
 </script>
 
-@endpush
+<?php $__env->stopPush(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Atharv Vyas\OneDrive\Desktop\Web Dev\learn\laravel-\resources\views/staff/attendance/take.blade.php ENDPATH**/ ?>

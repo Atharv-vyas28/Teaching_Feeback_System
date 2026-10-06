@@ -12,16 +12,6 @@
     My Sessions
 </a>
 
-<a href="{{ route('staff.attendance.history') }}" class="nav-link {{ request()->routeIs('staff.attendance.history') ? 'active' : '' }}">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-    Attendance History
-</a>
-
-<a href="{{ route('staff.attendance.create') }}" class="nav-link {{ request()->routeIs('staff.attendance.create') || request()->routeIs('staff.attendance.store-session') || request()->routeIs('staff.attendance.take') ? 'active' : '' }}">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-    New Session
-</a>
-
 <div class="nav-section-label">Feedback</div>
 
 <a href="{{ route('staff.feedback.index') }}" class="nav-link {{ request()->routeIs('staff.feedback.*') ? 'active' : '' }}">

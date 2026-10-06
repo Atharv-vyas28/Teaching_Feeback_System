@@ -13,7 +13,7 @@ class User extends Authenticatable
     protected $fillable = [
         'department_id', 'program_id', 'name', 'email',
         'roll_number', 'employee_id', 'designation', 'role', 'current_semester',
-        'phone', 'avatar', 'is_active', 'password',
+        'phone', 'avatar', 'is_active', 'password','is_head',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -32,6 +32,7 @@ class User extends Authenticatable
     public function isFaculty(): bool  { return $this->role === 'faculty'; }
     public function isStaff(): bool    { return $this->role === 'staff'; }
     public function isStudent(): bool  { return $this->role === 'student'; }
+    public function isHOD(): bool  { return ($this->role === 'faculty' && $this->is_head); }
     public function isFacultyOrStaff(): bool { return in_array($this->role, ['faculty', 'staff']); }
 
     // Relationships

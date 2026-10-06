@@ -57,7 +57,7 @@ class StaffAssignmentController extends Controller
             $assignment = StaffCourse::create([
                 'user_id' => $staff->id,
                 'class_section_id' => $section->id,
-                'semester_id' => $section->semester_id,
+                // 'semester_id' => $section->semester_id,
                 'feedback_session_id' => $data['feedback_session_id'] ?? null,
                 'assigned_by' => auth()->id(),
                 'is_active' => true,

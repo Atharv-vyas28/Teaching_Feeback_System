@@ -1,6 +1,3 @@
-blade
-
-
 <?php $__env->startSection('title', 'Feedback Sessions'); ?>
 
 <?php

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\StaffAssignmentController;
 use App\Http\Controllers\Faculty\DashboardController as FacultyDashboard;
 use App\Http\Controllers\Faculty\AttendanceController as FacultyAttendance;
 use App\Http\Controllers\Faculty\FeedbackSessionController;
+use App\Http\Controllers\HOD\FeedbackSessionController as HodFeedbackSessionController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendance;
 use App\Http\Controllers\Staff\FeedbackSessionController as StaffFeedback;
@@ -201,6 +202,12 @@ Route::prefix('faculty')->name('faculty.')->middleware(['auth', 'role:faculty'])
     Route::post('/feedback-session/{feedbackSession}/close', [FeedbackSessionController::class, 'close'])->name('feedback.close');
     Route::get('/feedback-session/{feedbackSession}/analytics', [FeedbackSessionController::class, 'analytics'])->name('feedback.analytics');
     Route::get('/my-ratings', [FeedbackSessionController::class, 'myRatings'])->name('feedback.my-ratings');
+
+    //HOD
+    Route::get(
+        '/hod/feedback-sessions',
+        [HodFeedbackSessionController::class, 'index']
+    )->name('hod.feedback-sessions.index');
 });
 
 // ─── Staff ────────────────────────────────────────────────────────────────────
@@ -220,6 +227,9 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff'])->grou
     Route::get('/notifications', [StaffNotification::class, 'index'])->name('notifications.index');
     Route::post('/notifications/read-all', [StaffNotification::class, 'readAll'])->name('notifications.read-all');
     Route::get('/notifications/{notification}', [StaffNotification::class, 'read'])->name('notifications.read');
+    Route::get('/feedback/{feedbackSession}/attendance', [StaffAttendance::class, 'take'])->name('feedback.attendance');
+    Route::post('/feedback/{feedbackSession}/attendance', [StaffAttendance::class, 'save'])->name('feedback.attendance.save');
+
 });
 
 // ─── Student ─────────────────────────────────────────────────────────────────

@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
 class FeedbackSessionController extends Controller
 {
     public function __construct(
-        private FeedbackEligibilityService $eligibilityService
+        private FeedbackEligibilityService $eligibilityService,
+        private \App\Services\FeedbackRatingService $ratingService
     ) {
     }
 
@@ -42,7 +43,7 @@ class FeedbackSessionController extends Controller
             ->withCount('responses')
             ->whereHas(
                 'classSession',
-                fn ($query) => $query->whereIn('class_section_id', $sectionIds)
+                fn($query) => $query->whereIn('class_section_id', $sectionIds)
             )
             ->latest()
             ->paginate(15);
@@ -138,100 +139,43 @@ class FeedbackSessionController extends Controller
 
         $responseCount = $feedbackSession->responses()->count();
         $eligibleCount = DB::table('course_enrollments')
-        ->where(
-            'class_section_id',
-            $feedbackSession->classSession->class_section_id
-        )
-        ->where('status', 'active')
-        ->count();
+            ->where(
+                'class_section_id',
+                $feedbackSession->classSession->class_section_id
+            )
+            ->where('status', 'active')
+            ->count();
 
         $scoredResponses = $feedbackSession->responses()
-        ->join(
-            'feedback_eligibility as eligibility',
-            function ($join) {
-                $join->on(
-                    'feedback_responses.feedback_session_id',
-                    '=',
-                    'eligibility.feedback_session_id'
-                )->on(
-                    'feedback_responses.anonymous_token',
-                    '=',
-                    'eligibility.anonymous_token'
-                );
-            }
-        )
-        ->where('eligibility.included_in_score', true)
-        ->whereNotNull('eligibility.attendance_weight')
-        ->select(
-            'feedback_responses.*',
-            'eligibility.attendance_weight'
-        )
-        ->with('answers.question')
-        ->get();
-
-    $questionStats = [];
-
-    $weightedRatingTotal = 0;
-    $totalAttendanceWeight = 0;
-
-    foreach ($scoredResponses as $response) {
-        $attendanceWeight = (float) $response->attendance_weight;
-
-        foreach ($response->answers as $answer) {
-            $questionId = $answer->feedback_question_id;
-
-            if (! isset($questionStats[$questionId])) {
-                $questionStats[$questionId] = [
-                    'question' => $answer->question->question_text,
-                    'type' => $answer->question->type,
-                    'weight' => $answer->question->weight,
-                    'values' => [],
-                    'texts' => [],
-                    'weighted_total' => 0,
-                    'total_weight' => 0,
-                ];
-            }
-
-            if ($answer->rating_value !== null && $attendanceWeight > 0) {
-                $questionStats[$questionId]['values'][] = $answer->rating_value;
-
-                $questionStats[$questionId]['weighted_total'] +=
-                    $answer->rating_value * $attendanceWeight;
-
-                $questionStats[$questionId]['total_weight'] +=
-                    $attendanceWeight;
-
-                $weightedRatingTotal +=
-                    $answer->rating_value * $attendanceWeight;
-
-                $totalAttendanceWeight += $attendanceWeight;
-            }
-
-            if (! empty($answer->text_answer)) {
-                $questionStats[$questionId]['texts'][] = $answer->text_answer;
-            }
-        } 
-    }
-
-    foreach ($questionStats as &$stat) {
-        $stat['average'] = $stat['total_weight'] > 0
-            ? round(
-                $stat['weighted_total'] / $stat['total_weight'],
-                2
+            ->join(
+                'feedback_eligibility as eligibility',
+                function ($join) {
+                    $join->on(
+                        'feedback_responses.feedback_session_id',
+                        '=',
+                        'eligibility.feedback_session_id'
+                    )->on(
+                            'feedback_responses.anonymous_token',
+                            '=',
+                            'eligibility.anonymous_token'
+                        );
+                }
             )
-            : null;
-    }
-
-        $overallWeightedRating = $totalAttendanceWeight > 0
-            ? round(
-                $weightedRatingTotal / $totalAttendanceWeight,
-                2
+            ->where('eligibility.included_in_score', true)
+            ->whereNotNull('eligibility.attendance_weight')
+            ->select(
+                'feedback_responses.*',
+                'eligibility.attendance_weight'
             )
-            : 0;
+            ->with('answers.question')
+            ->get();
 
-        $ratingResult = (object) [
-            'overall_weighted_rating' => $overallWeightedRating,
-        ];
+        $questionStats = [];
+
+        $ratingResult = \App\Models\RatingResult::where(
+            'feedback_session_id',
+            $feedbackSession->id
+        )->first();
 
         $facultyScores = DB::table('feedback_answers as answers')
             ->join(
@@ -248,10 +192,10 @@ class FeedbackSessionController extends Controller
                         '=',
                         'eligibility.feedback_session_id'
                     )->on(
-                        'responses.anonymous_token',
-                        '=',
-                        'eligibility.anonymous_token'
-                    );
+                            'responses.anonymous_token',
+                            '=',
+                            'eligibility.anonymous_token'
+                        );
                 }
             )
             ->join(

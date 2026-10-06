@@ -46,10 +46,6 @@
 <div class="card">
     <div class="card-header">
         <h3>Recent Sessions</h3>
-        <a href="{{ route('staff.attendance.create') }}" class="btn-primary btn-sm">
-            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New Session
-        </a>
     </div>
     <div style="overflow-x:auto;">
         <table class="data-table">
