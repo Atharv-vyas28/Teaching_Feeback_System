@@ -349,28 +349,28 @@ class DatabaseSeeder extends Seeder
         $questions = [
             [
                 'question_text' =>
-                    'How clearly did the faculty explain the concepts?',
+                    'Were most of the lectures held regularly for this course? Were the lectures held on time?',
                 'type' => 'rating',
                 'weight' => 2.00,
                 'order_position' => 1,
             ],
             [
                 'question_text' =>
-                    'How punctual was the faculty for the class?',
+                    'In case of absence of instructor, the information passed and alternate arrangements made?		',
                 'type' => 'rating',
                 'weight' => 1.00,
                 'order_position' => 2,
             ],
             [
                 'question_text' =>
-                    'How well did the faculty address student doubts and queries?',
+                    'Was the course evaluation policy announced at the beginning of the semester?',
                 'type' => 'rating',
                 'weight' => 1.50,
                 'order_position' => 3,
             ],
             [
                 'question_text' =>
-                    'How effective was the use of teaching aids and materials?',
+                    'Was the attendance policy announced at the beginning of the semester?',
                 'type' => 'rating',
                 'weight' => 1.00,
                 'order_position' => 4,

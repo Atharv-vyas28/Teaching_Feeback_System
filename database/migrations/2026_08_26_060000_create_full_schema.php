@@ -111,6 +111,7 @@ return new class extends Migration {
             $table->foreignId('semester_id')->nullable()->constrained()->onDelete('set null');
             $table->string('section_name', 50)->default('A');
             $table->boolean('is_active')->default(true);
+            $table->boolean('is_feedback_active')->default(false);
             $table->timestamps();
         });
 

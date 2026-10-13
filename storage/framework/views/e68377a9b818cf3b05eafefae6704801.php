@@ -189,7 +189,15 @@
 
                     </strong>
                 </div>
-
+                <input id="departmentSearch" type="search" placeholder="Search Department"
+                    style="
+        width:100%;
+        max-width:380px;
+        padding:10px 12px;
+        margin-bottom:18px;
+        border:1px solid #CBD5E1;
+        border-radius:8px;
+    ">
 
                 <div
                     style="
@@ -198,11 +206,13 @@
                 gap:16px;
             ">
 
+
                     <?php $__empty_1 = true; $__currentLoopData = $departments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $department): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <a href="<?php echo e(route('admin.feedback-sessions.courses', [
-                            'semester' => $semester,
-                            'department' => $department,
-                        ])); ?>"
+                        <a data-department-name="<?php echo e(strtolower($department->name)); ?>" class="department-card"
+                            href="<?php echo e(route('admin.feedback-sessions.courses', [
+                                'semester' => $semester,
+                                'department' => $department,
+                            ])); ?>"
                             style="
                             display:block;
                             text-decoration:none;
@@ -290,6 +300,32 @@
 
 
                 
+                <input id="courseSearch" type="search" placeholder="Search Courses by Code"
+                    style="
+        width:100%;
+        max-width:380px;
+        padding:10px 12px;
+        margin-bottom:18px;
+        border:1px solid #CBD5E1;
+        border-radius:8px;
+    ">
+
+                <form id="activateVisibleCoursesForm" method="POST"
+                    action="<?php echo e(route('admin.feedback-sessions.activate-visible-courses', [
+                        'semester' => $semester,
+                        'department' => $department,
+                    ])); ?>"
+                    style="margin-bottom:18px;">
+                    <?php echo csrf_field(); ?>
+
+                    <div id="selectedCourseInputs"></div>
+
+                    <button type="submit" class="btn-primary btn-sm">
+                        Open All Shown Courses
+                    </button>
+                </form>
+
+
                 <div style="
             display:flex;
             flex-direction:column;
@@ -297,62 +333,61 @@
         ">
 
                     <?php $__empty_1 = true; $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <a href="<?php echo e(route('admin.feedback-sessions.faculty', [
-                            'semester' => $semester,
-                            'department' => $department,
-                            'course' => $course->id,
-                        ])); ?>"
+                        <div class="course-card" data-course-id="<?php echo e($course->id); ?>"
+                            data-course-code="<?php echo e(strtolower($course->code)); ?>"
                             style="
-                            display:block;
-                            text-decoration:none;
-                            color:inherit;
-                            border:1px solid #E2E8F0;
-                            border-radius:12px;
-                            padding:20px;
-                            background:#FFFFFF;
-                            transition:all .2s ease;
-                        "
-                            onmouseover="this.style.borderColor='#94A3B8';this.style.transform='translateY(-2px)'"
-                            onmouseout="this.style.borderColor='#E2E8F0';this.style.transform='translateY(0)'">
-
-
+            border:1px solid #E2E8F0;
+            border-radius:12px;
+            padding:20px;
+            background:#FFFFFF;
+        ">
                             <div
                                 style="
-                        display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        gap:20px;
-                        flex-wrap:wrap;
-                    ">
-
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:20px;
+            flex-wrap:wrap;
+        ">
                                 
-                                <div>
-
-                                    <div
-                                        style="
-                                font-weight:600;
-                                font-size:1rem;
-                                color:#0F172A;
-                            ">
+                                <a href="<?php echo e(route('admin.feedback-sessions.faculty', [
+                                    'semester' => $semester,
+                                    'department' => $department,
+                                    'course' => $course->id,
+                                ])); ?>"
+                                    style="text-decoration:none;color:inherit;flex:1;">
+                                    <div style="font-weight:600;font-size:1rem;color:#0F172A;">
                                         <?php echo e($course->code); ?>
 
 
-                                        <span
-                                            style="
-                                    font-weight:400;
-                                    color:#475569;
-                                ">
+                                        <span style="font-weight:400;color:#475569;">
                                             — <?php echo e($course->name); ?>
 
                                         </span>
                                     </div>
+                                </a>
 
-                                </div>
+                                
+                                <?php if($course->is_feedback_active): ?>
+                                    <span class="badge badge-green">
+                                        Feedback Open
+                                    </span>
+                                <?php else: ?>
+                                    <form method="POST"
+                                        action="<?php echo e(route('admin.feedback-sessions.activate-course', [
+                                            'semester' => $semester,
+                                            'department' => $department,
+                                            'course' => $course->id,
+                                        ])); ?>">
+                                        <?php echo csrf_field(); ?>
 
+                                        <button type="submit" class="btn-primary btn-sm">
+                                            Open Feedback
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </div>
-
-                        </a>
-
+                        </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
 
                         <div
@@ -471,13 +506,7 @@
 
                         </div>
 
-                        <a href="<?php echo e(route('admin.feedback-sessions.courses', [
-                            'semester' => $semester,
-                            'department' => $department,
-                        ])); ?>"
-                            class="btn-secondary btn-sm">
-                            ← Courses
-                        </a>
+                        
 
                     </div>
 
@@ -749,14 +778,6 @@
                                         ">
                                                 Remaining
                                             </span>
-
-                                            <a href="<?php echo e(route('admin.feedback-sessions.open', [
-                                                'section' => $item->section->id,
-                                                'faculty' => $item->faculty->id,
-                                            ])); ?>"
-                                                class="btn-primary btn-sm">
-                                                Open Feedback
-                                            </a>
                                         <?php elseif($item->feedback_status === 'ongoing'): ?>
                                             <span
                                                 style="
@@ -869,5 +890,57 @@
     </div>
 
 <?php $__env->stopSection(); ?>
+<?php $__env->startPush('scripts'); ?>
+    <script>
+        document.getElementById('departmentSearch')?.addEventListener('input', function() {
+            const search = this.value.trim().toLowerCase();
+
+            document.querySelectorAll('.department-card').forEach((card) => {
+                card.style.display = card.dataset.departmentName.includes(search) ?
+                    'block' :
+                    'none';
+            });
+        });
+
+        document.getElementById('courseSearch')?.addEventListener('input', function() {
+            const search = this.value.trim().toLowerCase();
+
+            document.querySelectorAll('.course-card').forEach((card) => {
+                card.style.display = card.dataset.courseCode.includes(search) ?
+                    'block' :
+                    'none';
+            });
+        });
+
+        document.getElementById('activateVisibleCoursesForm')?.addEventListener('submit', function(event) {
+            const selectedInputs = document.getElementById('selectedCourseInputs');
+
+            selectedInputs.innerHTML = '';
+
+            const visibleCourses = [...document.querySelectorAll('.course-card')]
+                .filter((card) => card.style.display !== 'none');
+
+            if (visibleCourses.length === 0) {
+                event.preventDefault();
+                alert('There are no visible courses to open.');
+                return;
+            }
+
+            visibleCourses.forEach((card) => {
+                const input = document.createElement('input');
+
+                input.type = 'hidden';
+                input.name = 'course_ids[]';
+                input.value = card.dataset.courseId;
+
+                selectedInputs.appendChild(input);
+            });
+
+            if (!confirm(`Open feedback for ${visibleCourses.length} course(s)?`)) {
+                event.preventDefault();
+            }
+        });
+    </script>
+<?php $__env->stopPush(); ?>
 
 <?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\Atharv Vyas\OneDrive\Desktop\Web Dev\learn\laravel-\resources\views/admin/feedback-sessions/index.blade.php ENDPATH**/ ?>

@@ -105,6 +105,12 @@ class FeedbackSessionController extends Controller
                     'code' => $course->code,
                     'name' => $course->name,
                     'sections' => $courseSections,
+                    'is_feedback_active' => $courseSections
+                        ->every('is_feedback_active'),
+                    'active_sections_count' => $courseSections
+                        ->where('is_feedback_active', true)
+                        ->count(),
+                    'sections_count' => $courseSections->count(),
                 ];
             })
             ->values();
@@ -115,6 +121,65 @@ class FeedbackSessionController extends Controller
             'department' => $department,
             'courses' => $courses,
         ]);
+    }
+
+    public function activateCourse(
+        \App\Models\Semester $semester,
+        \App\Models\Department $department,
+        \App\Models\Course $course
+    ) {
+        abort_unless($course->department_id === $department->id, 404);
+
+        $updated = ClassSection::query()
+            ->where('semester_id', $semester->id)
+            ->where('course_id', $course->id)
+            ->where('is_active', true)
+            ->where('is_feedback_active', false)
+            ->update([
+                'is_feedback_active' => true,
+            ]);
+
+        if ($updated === 0) {
+            return back()->with(
+                'error',
+                'Feedback is already open for every active section of this course.'
+            );
+        }
+
+        return back()->with(
+            'success',
+            "Feedback is now open for {$course->code}. The HOD can now schedule its faculty feedback sessions."
+        );
+    }
+
+    public function activateVisibleCourses(
+        Request $request,
+        \App\Models\Semester $semester,
+        \App\Models\Department $department
+    ) {
+        $data = $request->validate([
+            'course_ids' => ['required', 'array', 'min:1'],
+            'course_ids.*' => ['integer', 'distinct', 'exists:courses,id'],
+        ]);
+
+        $updated = ClassSection::query()
+            ->where('semester_id', $semester->id)
+            ->where('is_active', true)
+            ->where('is_feedback_active', false)
+            ->whereIn('course_id', $data['course_ids'])
+            ->whereHas('course', function ($query) use ($department) {
+                $query->where('department_id', $department->id);
+            })
+            ->update([
+                'is_feedback_active' => true,
+            ]);
+
+        return back()->with(
+            'success',
+            $updated > 0
+            ? "Feedback opened for {$updated} course section(s)."
+            : 'Feedback was already open for the selected courses.'
+        );
     }
 
     /*
@@ -166,7 +231,7 @@ class FeedbackSessionController extends Controller
                 });
             })
             ->unique(function ($item) {
-                return $item->faculty->id;
+                return $item->faculty->id . '-' . $item->section->id;
             })
             ->values();
 

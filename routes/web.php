@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\StaffAssignmentController;
 use App\Http\Controllers\Faculty\DashboardController as FacultyDashboard;
 use App\Http\Controllers\Faculty\AttendanceController as FacultyAttendance;
 use App\Http\Controllers\Faculty\FeedbackSessionController;
-use App\Http\Controllers\HOD\FeedbackSessionController as HodFeedbackSessionController;
+use App\Http\Controllers\Hod\FeedbackSessionController as HodFeedbackSessionController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendance;
 use App\Http\Controllers\Staff\FeedbackSessionController as StaffFeedback;
@@ -136,10 +136,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     )->name('feedback-sessions.open');
 
 
-    Route::post(
-        '/feedback-sessions/section/{section}/faculty/{faculty}/open',
-        [AdminFeedbackSessionController::class, 'open']
-    )->name('feedback-sessions.open.store');
+    // Route::post(
+    //     '/feedback-sessions/section/{section}/faculty/{faculty}/open',
+    //     [AdminFeedbackSessionController::class, 'open']
+    // )->name('feedback-sessions.open.store');
 
     /*
     |--------------------------------------------------------------------------
@@ -178,7 +178,48 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         '/feedback-sessions/semester/{semester}/department/{department}/course/{course}/faculty',
         [AdminFeedbackSessionController::class, 'faculty']
     )->name('feedback-sessions.faculty');
+
+    Route::post(
+        '/feedback-sessions/{semester}/{department}/courses/{course}/activate',
+        [AdminFeedbackSessionController::class, 'activateCourse']
+    )->name('feedback-sessions.activate-course');
+
+    Route::post(
+        '/feedback-sessions/{semester}/{department}/courses/activate-visible',
+        [AdminFeedbackSessionController::class, 'activateVisibleCourses']
+    )->name('feedback-sessions.activate-visible-courses');
 });
+
+// ─── HOD ─────────────────────────────────────────────────────────────────
+Route::prefix('hod')
+    ->middleware(['auth'])
+    ->name('hod.')
+    ->group(function () {
+        Route::get(
+            '/hod/feedback-sessions',
+            [HodFeedbackSessionController::class, 'index']
+        )->name('feedback-sessions.index');
+
+        Route::get(
+            '/hod/feedback-sessions/{semester}/courses/{course}/create',
+            [HodFeedbackSessionController::class, 'create']
+        )->name('feedback-sessions.create');
+
+        Route::post(
+            '/hod/feedback-sessions/{semester}/courses/{course}',
+            [HodFeedbackSessionController::class, 'store']
+        )->name('feedback-sessions.store');
+    
+        // Route::get(
+        //     '/feedback-sessions/sections/{section}/faculty/{faculty}/open',
+        //     [HodFeedbackSessionController::class, 'openForm']
+        // )->name('feedback-sessions.open');
+    
+        // Route::post(
+        //     '/feedback-sessions/sections/{section}/faculty/{faculty}/open',
+        //     [HodFeedbackSessionController::class, 'open']
+        // )->name('feedback-sessions.open.store');
+    });
 
 // ─── Faculty ─────────────────────────────────────────────────────────────────
 Route::prefix('faculty')->name('faculty.')->middleware(['auth', 'role:faculty'])->group(function () {
@@ -203,11 +244,6 @@ Route::prefix('faculty')->name('faculty.')->middleware(['auth', 'role:faculty'])
     Route::get('/feedback-session/{feedbackSession}/analytics', [FeedbackSessionController::class, 'analytics'])->name('feedback.analytics');
     Route::get('/my-ratings', [FeedbackSessionController::class, 'myRatings'])->name('feedback.my-ratings');
 
-    //HOD
-    Route::get(
-        '/hod/feedback-sessions',
-        [HodFeedbackSessionController::class, 'index']
-    )->name('hod.feedback-sessions.index');
 });
 
 // ─── Staff ────────────────────────────────────────────────────────────────────
