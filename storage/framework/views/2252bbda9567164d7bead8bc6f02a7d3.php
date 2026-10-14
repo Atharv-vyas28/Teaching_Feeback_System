@@ -17,9 +17,18 @@
     Add Lecture
 </a>
 <div class="nav-section-label">Feedback</div>
+<?php if(auth()->user()->is_head): ?>
+    <a href="<?php echo e(route('hod.feedback-sessions.index')); ?>" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+        </svg>
+        Feedback Sessions
+    </a>
+<?php endif; ?>
 <a href="<?php echo e(route('faculty.feedback.index')); ?>" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-    Feedback Sessions
+    My Feedbacks
 </a>
 <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
@@ -54,11 +63,17 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Class Sessions</h3>
-            <a href="<?php echo e(route('faculty.attendance.sessions')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
+            <a href="<?php echo e(route('faculty.attendance.sessions')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">
-                <thead><tr><th>Course</th><th>Date</th><th>Status</th><th>Feedback</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <?php $__empty_1 = true; $__currentLoopData = $recentSessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
@@ -68,13 +83,6 @@
                         </td>
                         <td><?php echo e($session->session_date->format('M d, Y')); ?></td>
                         <td><span class="badge <?php echo e(['completed'=>'badge-green','ongoing'=>'badge-blue','scheduled'=>'badge-yellow','cancelled'=>'badge-red'][$session->status] ?? 'badge-gray'); ?>"><?php echo e(ucfirst($session->status)); ?></span></td>
-                        <td>
-                            <?php if($session->feedbackSession): ?>
-                                <span class="badge badge-<?php echo e(['draft'=>'gray','active'=>'green','closed'=>'blue'][$session->feedbackSession->status] ?? 'gray'); ?>"><?php echo e(ucfirst($session->feedbackSession->status)); ?></span>
-                            <?php else: ?>
-                                <span style="color:#94A3B8;font-size:0.78rem;">None</span>
-                            <?php endif; ?>
-                        </td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr><td colspan="4" style="text-align:center;padding:30px;color:#94A3B8;">No sessions yet.</td></tr>
@@ -88,7 +96,7 @@
     <div class="card">
         <div class="card-header">
             <h3>Recent Feedback Ratings</h3>
-            <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all →</a>
+            <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" style="font-size:0.78rem;color:#6c55e8;text-decoration:none;font-weight:700;">View all</a>
         </div>
         <div style="overflow-x:auto;">
             <table class="data-table">

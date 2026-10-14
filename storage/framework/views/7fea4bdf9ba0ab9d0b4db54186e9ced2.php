@@ -4,45 +4,34 @@
 <?php $__env->startSection('sidebar-nav'); ?>
 <div class="nav-section-label">Main</div>
 <a href="<?php echo e(route('faculty.dashboard')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-    </svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
     Dashboard
 </a>
-
 <div class="nav-section-label">Attendance</div>
-
 <a href="<?php echo e(route('faculty.attendance.sessions')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 00-2-2M9 5a2 2 0 012-2h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-    </svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
     Courses
 </a>
-
 <a href="<?php echo e(route('faculty.attendance.create')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-    </svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
     Add Lecture
 </a>
-
 <div class="nav-section-label">Feedback</div>
-
+<?php if(auth()->user()->is_head): ?>
+    <a href="<?php echo e(route('hod.feedback-sessions.index')); ?>" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+        </svg>
+        Feedback Sessions
+    </a>
+<?php endif; ?>
 <a href="<?php echo e(route('faculty.feedback.index')); ?>" class="nav-link active">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-    </svg>
-    Feedback Sessions
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+    My Feedbacks
 </a>
-
 <a href="<?php echo e(route('faculty.feedback.my-ratings')); ?>" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-    </svg>
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
     My Ratings
 </a>
 <?php $__env->stopSection(); ?>
@@ -194,11 +183,103 @@
 
 <div class="card" style="margin-bottom:24px;">
     <div class="card-header">
-        <h3>Marks Earned by Question</h3>
+        <div>
+            <h3>Department Feedback Leaderboard</h3>
+            <span style="font-size:.78rem;color:#64748B;">
+                Overall anonymous rating across completed feedback sessions.
+            </span>
+        </div>
+
+        <span class="badge badge-blue">
+            Rating out of 5
+        </span>
     </div>
 
-    <div class="card-body" style="height:370px;position:relative;">
-        <canvas id="marksChart"></canvas>
+    <div class="card-body">
+        <?php $__empty_1 = true; $__currentLoopData = $departmentLeaderboard; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $department): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
+                $percentage = min(
+                    100,
+                    max(0, ($department->overall_rating / 5) * 100)
+                );
+            ?>
+
+            <div style="
+                display:grid;
+                grid-template-columns:42px minmax(0,1fr) auto;
+                gap:14px;
+                align-items:center;
+                padding:16px 0;
+                border-bottom:1px solid #E2E8F0;
+            ">
+                <div style="
+                    width:34px;
+                    height:34px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border-radius:10px;
+                    background:<?php echo e($loop->iteration <= 3 ? '#EFF6FF' : '#F8FAFC'); ?>;
+                    color:<?php echo e($loop->iteration <= 3 ? '#2563EB' : '#64748B'); ?>;
+                    font-weight:800;
+                    font-size:.85rem;
+                ">
+                    #<?php echo e($loop->iteration); ?>
+
+                </div>
+
+                <div style="min-width:0;">
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        gap:12px;
+                        margin-bottom:8px;
+                    ">
+                        <div style="
+                            overflow:hidden;
+                            color:#0F172A;
+                            font-weight:700;
+                            text-overflow:ellipsis;
+                            white-space:nowrap;
+                        ">
+                            <?php echo e($department->department_name); ?>
+
+                        </div>
+
+                    </div>
+
+                    <div style="
+                        height:8px;
+                        overflow:hidden;
+                        border-radius:999px;
+                        background:#E2E8F0;
+                    ">
+                        <div style="
+                            width:<?php echo e($percentage); ?>%;
+                            height:100%;
+                            border-radius:999px;
+                            background:linear-gradient(90deg,#4F46E5,#60A5FA);
+                        "></div>
+                    </div>
+                </div>
+
+                <div style="
+                    min-width:58px;
+                    color:#0F172A;
+                    font-size:1.05rem;
+                    font-weight:800;
+                    text-align:right;
+                ">
+                    <?php echo e(number_format($department->overall_rating, 2)); ?>
+
+                    <span style="color:#94A3B8;font-size:.72rem;">/ 5</span>
+                </div>
+            </div>
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <div style="padding:35px;text-align:center;color:#94A3B8;">
+                No department feedback is available yet.
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -213,42 +294,18 @@
 
     <div class="card-body">
         <?php $__empty_1 = true; $__currentLoopData = $ratingRows; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $row): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div style="padding:16px 0;border-bottom:1px solid #E2E8F0;">
+            <div style="padding:16px 0; display:flex; justify-content:space-between;border-bottom:1px solid #E2E8F0;">
                 <div style="font-weight:700;color:#0F172A;margin-bottom:12px;">
                     <?php echo e($row['question']); ?>
 
                 </div>
 
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;">
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Average Rating</div>
-                        <div style="font-size:1.1rem;font-weight:700;">
-                            <?php echo e(number_format($row['average'], 2)); ?> / 5
-                        </div>
-                    </div>
+                <div>
+                    <div style="font-size:0.75rem;color:#64748B;">Average Rating</div>
+                    <div style="font-size:1.1rem;font-weight:700;">
+                        <?php echo e(number_format($row['average'], 2)); ?>
 
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Maximum Marks</div>
-                        <div style="font-size:1.1rem;font-weight:700;">
-                            <?php echo e(number_format($row['maximum_marks'], 2)); ?>
-
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Marks Earned</div>
-                        <div style="font-size:1.1rem;font-weight:700;color:#16A34A;">
-                            <?php echo e(number_format($row['marks_earned'], 2)); ?>
-
-                        </div>
-                    </div>
-
-                    <div>
-                        <div style="font-size:0.75rem;color:#64748B;">Responses</div>
-                        <div style="font-size:1.1rem;font-weight:700;">
-                            <?php echo e($row['response_count']); ?>
-
-                        </div>
+                        <span style="color:#94A3B8;font-size:.8rem;">/ 5</span>
                     </div>
                 </div>
             </div>
@@ -291,8 +348,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const labels = ratingRows.map(item => item.label);
     const ratings = ratingRows.map(item => item.average);
-    const earnedMarks = ratingRows.map(item => item.marks_earned);
-    const maximumMarks = ratingRows.map(item => item.maximum_marks);
 
     const submittedCount = <?php echo e((int) $responseCount); ?>;
     const pendingCount = <?php echo e((int) $pendingResponses); ?>;
@@ -325,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function () {
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Average Rating / 5',
+                    label: 'Rating',
                     data: ratings,
                     backgroundColor: '#2563EB',
                     borderRadius: 6
@@ -355,44 +410,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        new Chart(document.getElementById('marksChart'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Marks Earned',
-                        data: earnedMarks,
-                        backgroundColor: '#16A34A',
-                        borderRadius: 6
-                    },
-                    {
-                        label: 'Maximum Marks',
-                        data: maximumMarks,
-                        backgroundColor: '#BFDBFE',
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Marks'
-                        }
-                    }
-                }
-            }
-        });
     }
 });
 </script>

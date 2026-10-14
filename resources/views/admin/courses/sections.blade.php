@@ -1,90 +1,92 @@
 @extends('layouts.dashboard')
-@section('title', 'Course Sections')
-@php $header = 'Sections: ' . $course->name; $subheader = 'Manage sections for ' . $course->code; @endphp
+@section('title', 'Take Attendance')
+@php $header = 'Take Attendance'; $subheader = $classSession->section->course->name ?? 'Class Session'; @endphp
 
 @section('sidebar-nav')
 <div class="nav-section-label">Main</div>
-<a href="{{ route('admin.dashboard') }}" class="nav-link">
+<a href="{{ route('staff.dashboard') }}" class="nav-link">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
     Dashboard
 </a>
-<div class="nav-section-label">Academic</div>
-<a href="{{ route('admin.departments.index') }}" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-    Departments
+<div class="nav-section-label">Attendance</div>
+<a href="{{ route('staff.attendance.sessions') }}" class="nav-link active">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+    My Sessions
 </a>
-<a href="{{ route('admin.courses.index') }}" class="nav-link active">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-    Courses
-</a>
-<a href="{{ route('admin.semesters.index') }}" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-    Semesters
-</a>
-<a href="{{ route('admin.enrollments.index') }}" class="nav-link">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-    Enrollments
+<a href="{{ route('staff.attendance.create') }}" class="nav-link">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+    New Session
 </a>
 @endsection
 
 @section('content')
-<div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;">
-    <div class="card" style="align-self:start;">
-        <div class="card-header"><h3>Add New Section</h3></div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('admin.courses.sections.store', $course) }}">
-                @csrf
-                <div style="margin-bottom:16px;">
-                    <label class="form-label">Section Name <span style="color:#DC2626;">*</span></label>
-                    <input type="text" name="name" class="form-input" placeholder="e.g. A, B, C" required>
-                </div>
-                <div style="margin-bottom:16px;">
-                    <label class="form-label">Semester <span style="color:#DC2626;">*</span></label>
-                    <select name="semester_id" class="form-select" required>
-                        @foreach($semesters as $sem)
-                        <option value="{{ $sem->id }}">{{ $sem->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div style="margin-bottom:20px;">
-                    <label class="form-label">Max Students <span style="color:#DC2626;">*</span></label>
-                    <input type="number" name="max_students" class="form-input" value="60" min="1" max="200" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Create Section</button>
-            </form>
+<div class="card" style="margin-bottom:20px;">
+    <div class="card-body" style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div><div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Course</div><div style="font-weight:700;color:#0F172A;">{{ $classSession->section->course->name ?? 'N/A' }}</div></div>
+        <div><div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Date</div><div style="font-weight:700;color:#0F172A;">{{ $classSession->session_date->format('M d, Y') }}</div></div>
+        <div><div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Time</div><div style="font-weight:700;color:#0F172A;">{{ $classSession->start_time }} – {{ $classSession->end_time }}</div></div>
+        <div><div style="font-size:0.7rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">Students</div><div style="font-weight:700;color:#0F172A;">{{ count($students) }} enrolled</div></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Mark Attendance</h3>
+        <div style="display:flex;gap:8px;">
+            <button type="button" onclick="markAll('present')" class="btn-success btn-sm">All Present</button>
+            <button type="button" onclick="markAll('absent')"  class="btn-secondary btn-sm">All Absent</button>
         </div>
     </div>
-
-    <div class="card">
-        <div class="card-header"><h3>Current Sections</h3></div>
+    <form method="POST" action="{{ route('staff.attendance.save', $classSession) }}">
+        @csrf
         <div style="overflow-x:auto;">
             <table class="data-table">
                 <thead>
-                    <tr>
-                        <th>Section</th>
-                        <th>Semester</th>
-                        <th>Enrolled</th>
-                        <th>Status</th>
-                    </tr>
+                    <tr><th>#</th><th>Student</th><th>Roll Number</th><th>Status</th><th>Remarks</th></tr>
                 </thead>
                 <tbody>
-                    @forelse($sections as $sec)
+                    @foreach($students as $i => $student)
+                    @php $existing = $existingAttendance[$student->id] ?? null; @endphp
                     <tr>
-                        <td style="font-weight:600;color:#0F172A;">Section {{ $sec->section_name ?? $sec->name }}</td>
-                        <td>{{ $sec->semester->name ?? 'N/A' }}</td>
-                        <td>{{ $sec->enrollments->count() }} / {{ $sec->max_students }}</td>
+                        <td style="color:#94A3B8;font-weight:600;">{{ $i + 1 }}</td>
                         <td>
-                            <span class="badge {{ $sec->is_active ? 'badge-green' : 'badge-gray' }}">
-                                {{ $sec->is_active ? 'Active' : 'Inactive' }}
-                            </span>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#DBEAFE,#BFDBFE);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#1D4ED8;">
+                                    {{ strtoupper(substr($student->name,0,1)) }}
+                                </div>
+                                {{ $student->name }}
+                            </div>
+                        </td>
+                        <td style="color:#64748B;font-size:0.8rem;">{{ $student->roll_number ?? '—' }}</td>
+                        <td>
+                            <select name="attendance[{{ $student->id }}][status]" class="form-select status-select" style="width:130px;">
+                                @foreach(['present','absent','late','excused'] as $status)
+                                <option value="{{ $status }}" {{ ($existing && $existing->status === $status) ? 'selected' : ($status === 'absent' ? 'selected' : '') }}>
+                                    {{ ucfirst($status) }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="attendance[{{ $student->id }}][remarks]" class="form-input" style="width:150px;" value="{{ $existing->remarks ?? '' }}" placeholder="Optional">
                         </td>
                     </tr>
-                    @empty
-                    <tr><td colspan="4" style="text-align:center;padding:40px;color:#94A3B8;">No sections found.</td></tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
-    </div>
+        <div style="padding:20px;display:flex;gap:12px;">
+            <button type="submit" class="btn-primary">Save Attendance</button>
+            <a href="{{ route('staff.attendance.sessions') }}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
 </div>
+
+@push('scripts')
+<script>
+function markAll(status) {
+    document.querySelectorAll('.status-select').forEach(sel => sel.value = status);
+}
+</script>
+@endpush
 @endsection

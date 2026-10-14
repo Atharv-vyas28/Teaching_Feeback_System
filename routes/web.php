@@ -10,12 +10,15 @@ use App\Http\Controllers\Admin\SemesterController;
 use App\Http\Controllers\Admin\FeedbackQuestionController;
 use App\Http\Controllers\Admin\FeedbackSessionController as AdminFeedbackSessionController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\StaffAssignmentController;
 use App\Http\Controllers\Faculty\DashboardController as FacultyDashboard;
 use App\Http\Controllers\Faculty\AttendanceController as FacultyAttendance;
 use App\Http\Controllers\Faculty\FeedbackSessionController;
+use App\Http\Controllers\Hod\FeedbackSessionController as HodFeedbackSessionController;
 use App\Http\Controllers\Staff\DashboardController as StaffDashboard;
 use App\Http\Controllers\Staff\AttendanceController as StaffAttendance;
 use App\Http\Controllers\Staff\FeedbackSessionController as StaffFeedback;
+use App\Http\Controllers\Staff\NotificationController as StaffNotification;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Student\FeedbackController;
 
@@ -31,14 +34,14 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
     Route::get(
-    '/students-directory',
-    [UserController::class, 'studentDirectory']
-)->name('students.directory');
+        '/students-directory',
+        [UserController::class, 'studentDirectory']
+    )->name('students.directory');
 
-Route::get(
-    '/students-directory/{student}',
-    [UserController::class, 'studentDetails']
-)->name('students.details');
+    Route::get(
+        '/students-directory/{student}',
+        [UserController::class, 'studentDetails']
+    )->name('students.details');
 
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
@@ -72,6 +75,9 @@ Route::get(
     Route::post('/enrollments', [CourseController::class, 'storeEnrollment'])->name('enrollments.store');
     Route::post('/assign-faculty', [CourseController::class, 'assignFaculty'])->name('faculty.assign');
     Route::post('/assign-staff', [CourseController::class, 'assignStaff'])->name('staff.assign');
+    Route::get('/staff-assignments', [StaffAssignmentController::class, 'index'])->name('staff-assignments.index');
+    Route::post('/staff-assignments', [StaffAssignmentController::class, 'store'])->name('staff-assignments.store');
+    Route::post('/staff-assignments/{assignment}/deactivate', [StaffAssignmentController::class, 'deactivate'])->name('staff-assignments.deactivate');
 
     // Semesters
     Route::get('/semesters', [SemesterController::class, 'index'])->name('semesters.index');
@@ -94,13 +100,126 @@ Route::get(
     Route::get('/reports/ratings', [ReportsController::class, 'ratingsReport'])->name('reports.ratings');
 
     // Feedback Sessions – add create/store
-    Route::get('/feedback-sessions', [AdminFeedbackSessionController::class, 'index'])->name('feedback-sessions.index');
-    Route::get('/feedback-sessions/create', [AdminFeedbackSessionController::class, 'create'])->name('feedback-sessions.create');
-    Route::post('/feedback-sessions', [AdminFeedbackSessionController::class, 'store'])->name('feedback-sessions.store');
-    Route::get('/feedback-sessions/{session}/responses', [AdminFeedbackSessionController::class, 'responses'])->name('feedback-sessions.responses');
-    Route::post('/feedback-sessions/{session}/release', [AdminFeedbackSessionController::class, 'release'])->name('feedback-sessions.release');
-    Route::post('/feedback-sessions/{session}/assign-staff', [AdminFeedbackSessionController::class, 'assignStaff'])->name('feedback-sessions.assign-staff');
+    // ─── Feedback Sessions ───────────────────────────────────────────────────────
+
+    Route::get(
+        '/feedback-sessions',
+        [AdminFeedbackSessionController::class, 'index']
+    )->name('feedback-sessions.index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Semester → Department → Courses
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/feedback-sessions/semester/{semester}/departments',
+        [AdminFeedbackSessionController::class, 'departments']
+    )->name('feedback-sessions.departments');
+
+    Route::get(
+        '/feedback-sessions/semester/{semester}/department/{department}/courses',
+        [AdminFeedbackSessionController::class, 'courses']
+    )->name('feedback-sessions.courses');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Open Feedback
+    |--------------------------------------------------------------------------
+    */
+
+
+    Route::get(
+        '/feedback-sessions/section/{section}/faculty/{faculty}/open',
+        [AdminFeedbackSessionController::class, 'openForm']
+    )->name('feedback-sessions.open');
+
+
+    // Route::post(
+    //     '/feedback-sessions/section/{section}/faculty/{faculty}/open',
+    //     [AdminFeedbackSessionController::class, 'open']
+    // )->name('feedback-sessions.open.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Feedback Responses
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/feedback-sessions/{session}/responses',
+        [AdminFeedbackSessionController::class, 'responses']
+    )->name('feedback-sessions.responses');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Staff Assignment
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/feedback-sessions/{session}/assign-staff',
+        [AdminFeedbackSessionController::class, 'assignStaff']
+    )->name('feedback-sessions.assign-staff');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Release Feedback
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/feedback-sessions/{session}/release',
+        [AdminFeedbackSessionController::class, 'release']
+    )->name('feedback-sessions.release');
+
+    Route::get(
+        '/feedback-sessions/semester/{semester}/department/{department}/course/{course}/faculty',
+        [AdminFeedbackSessionController::class, 'faculty']
+    )->name('feedback-sessions.faculty');
+
+    Route::post(
+        '/feedback-sessions/{semester}/{department}/courses/{course}/activate',
+        [AdminFeedbackSessionController::class, 'activateCourse']
+    )->name('feedback-sessions.activate-course');
+
+    Route::post(
+        '/feedback-sessions/{semester}/{department}/courses/activate-visible',
+        [AdminFeedbackSessionController::class, 'activateVisibleCourses']
+    )->name('feedback-sessions.activate-visible-courses');
 });
+
+// ─── HOD ─────────────────────────────────────────────────────────────────
+Route::prefix('hod')
+    ->middleware(['auth'])
+    ->name('hod.')
+    ->group(function () {
+        Route::get(
+            '/hod/feedback-sessions',
+            [HodFeedbackSessionController::class, 'index']
+        )->name('feedback-sessions.index');
+
+        Route::get(
+            '/hod/feedback-sessions/{semester}/courses/{course}/create',
+            [HodFeedbackSessionController::class, 'create']
+        )->name('feedback-sessions.create');
+
+        Route::post(
+            '/hod/feedback-sessions/{semester}/courses/{course}',
+            [HodFeedbackSessionController::class, 'store']
+        )->name('feedback-sessions.store');
+    
+        // Route::get(
+        //     '/feedback-sessions/sections/{section}/faculty/{faculty}/open',
+        //     [HodFeedbackSessionController::class, 'openForm']
+        // )->name('feedback-sessions.open');
+    
+        // Route::post(
+        //     '/feedback-sessions/sections/{section}/faculty/{faculty}/open',
+        //     [HodFeedbackSessionController::class, 'open']
+        // )->name('feedback-sessions.open.store');
+    });
 
 // ─── Faculty ─────────────────────────────────────────────────────────────────
 Route::prefix('faculty')->name('faculty.')->middleware(['auth', 'role:faculty'])->group(function () {
@@ -124,6 +243,7 @@ Route::prefix('faculty')->name('faculty.')->middleware(['auth', 'role:faculty'])
     Route::post('/feedback-session/{feedbackSession}/close', [FeedbackSessionController::class, 'close'])->name('feedback.close');
     Route::get('/feedback-session/{feedbackSession}/analytics', [FeedbackSessionController::class, 'analytics'])->name('feedback.analytics');
     Route::get('/my-ratings', [FeedbackSessionController::class, 'myRatings'])->name('feedback.my-ratings');
+
 });
 
 // ─── Staff ────────────────────────────────────────────────────────────────────
@@ -140,6 +260,12 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:staff'])->grou
     Route::get('/feedback', [StaffFeedback::class, 'index'])->name('feedback.index');
     Route::post('/feedback/{feedbackSession}/release', [StaffFeedback::class, 'release'])->name('feedback.release');
     Route::post('/feedback/{feedbackSession}/close', [StaffFeedback::class, 'close'])->name('feedback.close');
+    Route::get('/notifications', [StaffNotification::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/read-all', [StaffNotification::class, 'readAll'])->name('notifications.read-all');
+    Route::get('/notifications/{notification}', [StaffNotification::class, 'read'])->name('notifications.read');
+    Route::get('/feedback/{feedbackSession}/attendance', [StaffAttendance::class, 'take'])->name('feedback.attendance');
+    Route::post('/feedback/{feedbackSession}/attendance', [StaffAttendance::class, 'save'])->name('feedback.attendance.save');
+
 });
 
 // ─── Student ─────────────────────────────────────────────────────────────────

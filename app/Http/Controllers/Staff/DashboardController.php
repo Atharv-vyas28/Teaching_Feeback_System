@@ -9,26 +9,27 @@ use App\Models\Attendance;
 use App\Models\FeedbackSession;
 use App\Models\Semester;
 use Illuminate\Support\Facades\DB;
+use App\Services\StaffAssignmentAccessService;
 
 class DashboardController extends Controller
 {
+    public function __construct(private StaffAssignmentAccessService $access) {}
+
     public function index()
     {
         $user = auth()->user();
         $currentSemester = Semester::where('is_current', true)->first();
 
-        $sectionIds = StaffCourse::where('user_id', $user->id)
-            ->where('is_active', true)
+        $sectionIds = StaffCourse::active()->where('user_id', $user->id)
             ->pluck('class_section_id');
 
-        $assignedFeedback = FeedbackSession::where('assigned_staff_id', $user->id)->count();
-        $activeFeedback   = FeedbackSession::where('assigned_staff_id', $user->id)
-                                ->where('status', 'active')->count();
-        $closedFeedback   = FeedbackSession::where('assigned_staff_id', $user->id)
-                                ->whereIn('status', ['closed'])->count();
+        $feedbackQuery = $this->access->feedbackSessionsFor($user);
+        $assignedFeedback = (clone $feedbackQuery)->count();
+        $activeFeedback   = (clone $feedbackQuery)->where('status', 'active')->count();
+        $closedFeedback   = (clone $feedbackQuery)->where('status', 'closed')->count();
 
         // Expired = active but past deadline
-        $expiredFeedback  = FeedbackSession::where('assigned_staff_id', $user->id)
+        $expiredFeedback  = (clone $feedbackQuery)
                                 ->where('status', 'active')
                                 ->whereNotNull('deadline_at')
                                 ->where('deadline_at', '<', now())
@@ -51,10 +52,9 @@ class DashboardController extends Controller
             ->take(8)
             ->get();
 
-        $activeFeedbackSessions = FeedbackSession::with([
+        $activeFeedbackSessions = $this->access->feedbackSessionsFor($user)->with([
                 'classSession.section.course',
             ])
-            ->where('assigned_staff_id', $user->id)
             ->where('status', 'active')
             ->orderByDesc('release_at')
             ->take(5)

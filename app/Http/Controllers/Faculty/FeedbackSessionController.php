@@ -7,12 +7,14 @@ use App\Models\ClassSession;
 use App\Models\FeedbackSession;
 use App\Models\FacultyCourse;
 use App\Services\FeedbackEligibilityService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class FeedbackSessionController extends Controller
 {
     public function __construct(
-        private FeedbackEligibilityService $eligibilityService
+        private FeedbackEligibilityService $eligibilityService,
+        private \App\Services\FeedbackRatingService $ratingService
     ) {
     }
 
@@ -41,7 +43,7 @@ class FeedbackSessionController extends Controller
             ->withCount('responses')
             ->whereHas(
                 'classSession',
-                fn ($query) => $query->whereIn('class_section_id', $sectionIds)
+                fn($query) => $query->whereIn('class_section_id', $sectionIds)
             )
             ->latest()
             ->paginate(15);
@@ -136,59 +138,138 @@ class FeedbackSessionController extends Controller
         );
 
         $responseCount = $feedbackSession->responses()->count();
-        $eligibleCount = $feedbackSession->eligibility()->count();
+        $eligibleCount = DB::table('course_enrollments')
+            ->where(
+                'class_section_id',
+                $feedbackSession->classSession->class_section_id
+            )
+            ->where('status', 'active')
+            ->count();
+
+        $scoredResponses = $feedbackSession->responses()
+            ->join(
+                'feedback_eligibility as eligibility',
+                function ($join) {
+                    $join->on(
+                        'feedback_responses.feedback_session_id',
+                        '=',
+                        'eligibility.feedback_session_id'
+                    )->on(
+                            'feedback_responses.anonymous_token',
+                            '=',
+                            'eligibility.anonymous_token'
+                        );
+                }
+            )
+            ->where('eligibility.included_in_score', true)
+            ->whereNotNull('eligibility.attendance_weight')
+            ->select(
+                'feedback_responses.*',
+                'eligibility.attendance_weight'
+            )
+            ->with('answers.question')
+            ->get();
 
         $questionStats = [];
 
-        foreach (
-            $feedbackSession->responses()->with('answers.question')->get()
-            as $response
-        ) {
-            foreach ($response->answers as $answer) {
-                $questionId = $answer->feedback_question_id;
-
-                if (! isset($questionStats[$questionId])) {
-                    $questionStats[$questionId] = [
-                        'question' => $answer->question->question_text,
-                        'type' => $answer->question->type,
-                        'weight' => $answer->question->weight,
-                        'values' => [],
-                        'texts' => [],
-                    ];
-                }
-
-                if ($answer->rating_value !== null) {
-                    $questionStats[$questionId]['values'][] = $answer->rating_value;
-                }
-
-                if (! empty($answer->text_answer)) {
-                    $questionStats[$questionId]['texts'][] = $answer->text_answer;
-                }
-            }
-        }
-
-        foreach ($questionStats as &$stat) {
-            $stat['average'] = count($stat['values']) > 0
-                ? round(array_sum($stat['values']) / count($stat['values']), 2)
-                : null;
-        }
-
         $ratingResult = \App\Models\RatingResult::where(
-            'class_section_id',
-            $feedbackSession->classSession->class_section_id
-        )
-            ->where(
-                'semester_id',
-                $feedbackSession->classSession->section->semester_id
+            'feedback_session_id',
+            $feedbackSession->id
+        )->first();
+
+        $facultyScores = DB::table('feedback_answers as answers')
+            ->join(
+                'feedback_responses as responses',
+                'answers.feedback_response_id',
+                '=',
+                'responses.id'
             )
-            ->first();
+            ->join(
+                'feedback_eligibility as eligibility',
+                function ($join) {
+                    $join->on(
+                        'responses.feedback_session_id',
+                        '=',
+                        'eligibility.feedback_session_id'
+                    )->on(
+                            'responses.anonymous_token',
+                            '=',
+                            'eligibility.anonymous_token'
+                        );
+                }
+            )
+            ->join(
+                'feedback_sessions as feedback_sessions',
+                'responses.feedback_session_id',
+                '=',
+                'feedback_sessions.id'
+            )
+            ->join(
+                'class_sessions as class_sessions',
+                'feedback_sessions.class_session_id',
+                '=',
+                'class_sessions.id'
+            )
+            ->join(
+                'class_sections as class_sections',
+                'class_sessions.class_section_id',
+                '=',
+                'class_sections.id'
+            )
+            ->join(
+                'courses as courses',
+                'class_sections.course_id',
+                '=',
+                'courses.id'
+            )
+            ->whereNotNull('answers.rating_value')
+            ->where('feedback_sessions.status', 'closed')
+            ->where('feedback_sessions.is_released', true)
+            ->where('eligibility.included_in_score', true)
+            ->whereNotNull('eligibility.attendance_weight')
+            ->selectRaw("
+                courses.department_id,
+                class_sessions.conducted_by as faculty_id,
+                COUNT(DISTINCT responses.id) as response_count,
+                SUM(
+                    answers.rating_value * eligibility.attendance_weight
+                ) / NULLIF(
+                    SUM(eligibility.attendance_weight),
+                    0
+                ) as faculty_score
+            ")
+            ->groupBy(
+                'courses.department_id',
+                'class_sessions.conducted_by'
+            );
+
+        $departmentLeaderboard = DB::query()
+            ->fromSub($facultyScores, 'faculty_scores')
+            ->join(
+                'departments',
+                'faculty_scores.department_id',
+                '=',
+                'departments.id'
+            )
+            ->selectRaw("
+                departments.id,
+                departments.name as department_name,
+                ROUND(AVG(faculty_scores.faculty_score), 2) as overall_rating,
+                COUNT(DISTINCT faculty_scores.faculty_id) as faculty_count,
+                SUM(faculty_scores.response_count) as response_count
+            ")
+            ->groupBy('departments.id', 'departments.name')
+            ->orderByDesc('overall_rating')
+            ->orderByDesc('response_count')
+            ->get();
 
         return view('faculty.feedback.analytics', compact(
             'feedbackSession',
-            'questionStats',
-            'responseCount',
+            'ratingResult',
             'eligibleCount',
-            'ratingResult'
+            'responseCount',
+            'questionStats',
+            'departmentLeaderboard'
         ));
     }
 

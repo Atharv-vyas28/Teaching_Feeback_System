@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('feedback_sessions', function (Blueprint $table) {
-            $table->boolean('is_released')->default(false)->after('status');
+            // $table->boolean('is_released')->default(false)->after('status');
         });
     }
 
