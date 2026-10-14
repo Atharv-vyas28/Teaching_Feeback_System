@@ -168,7 +168,7 @@ return new class extends Migration {
             $table->timestamp('marked_at')->nullable();
             $table->string('remarks')->nullable();
             $table->timestamps();
-            $table->unique(['class_session_id', 'student_id','source']);
+            $table->unique(['class_session_id', 'student_id', 'source']);
         });
 
         // ── Feedback Questions ─────────────────────────────────────────────────
@@ -188,45 +188,60 @@ return new class extends Migration {
         Schema::create('feedback_sessions', function (Blueprint $table) {
             $table->id();
 
-            // One feedback session per course section
+            /*
+             * One feedback session per class section.
+             * A course with multiple sections gets one session for each section.
+             */
             $table->foreignId('class_section_id')
-                ->unique()
                 ->nullable()
-                ->constrained()
-                ->onDelete('cascade');
+                ->unique()
+                ->constrained('class_sections')
+                ->cascadeOnDelete();
 
-            // The special class session on the feedback day
+            /*
+             * Feedback-day attendance/class session.
+             */
             $table->foreignId('class_session_id')
                 ->nullable()
                 ->unique()
-                ->constrained()
-                ->onDelete('set null');
+                ->constrained('class_sessions')
+                ->nullOnDelete();
 
+            /*
+             * HOD user who created the schedule.
+             */
             $table->foreignId('created_by')
                 ->constrained('users')
-                ->onDelete('cascade');
+                ->cascadeOnDelete();
 
+            /*
+             * First assigned staff member for compatibility.
+             * All staff assignments are actually stored in staff_courses.
+             */
             $table->foreignId('assigned_staff_id')
                 ->nullable()
                 ->constrained('users')
-                ->onDelete('set null');
+                ->nullOnDelete();
 
-            $table->enum(
-                'status',
-                ['draft', 'active', 'closed']
-            )->default('draft');
+            /*
+             * Not used in the current course-level workflow.
+             * Keep nullable for possible individual-faculty feedback later.
+             */
+            $table->foreignId('faculty_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->enum('status', [
+                'draft',
+                'active',
+                'closed',
+            ])->default('draft');
 
             $table->timestamp('release_at')->nullable();
-
-            // Keep this because existing code may use it
             $table->timestamp('deadline_at')->nullable();
-
-            // New: duration of the feedback session in minutes
             $table->unsignedSmallInteger('duration_minutes')->nullable();
-
             $table->timestamp('opened_at')->nullable();
-
-            // Keep this — records when the feedback was actually closed
             $table->timestamp('closed_at')->nullable();
 
             $table->boolean('is_released')->default(false);

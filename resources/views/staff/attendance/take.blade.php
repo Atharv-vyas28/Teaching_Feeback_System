@@ -664,9 +664,7 @@
                     type="submit"
                     class="btn-primary"
                 >
-                    {{ isset($feedbackSession)
-                        ? 'Save Feedback Attendance'
-                        : 'Save Attendance' }}
+                    Save Attendance
                 </button>
 
             </div>

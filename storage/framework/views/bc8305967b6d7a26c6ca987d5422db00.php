@@ -145,7 +145,7 @@
 
         
 
-        <form method="POST"
+        <form id="feedbackScheduleForm" method="POST"
             action="<?php echo e(route('hod.feedback-sessions.store', [
                 'semester' => $semester,
                 'course' => $course,
@@ -235,17 +235,17 @@
 
                 <div>
 
-                    <label for="Scheduleed_date"
+                    <label for="opened_date"
                         style="
-                        display:block;
-                        margin-bottom:7px;
-                        font-weight:600;
-                        color:#334155;
-                    ">
+        display:block;
+        margin-bottom:7px;
+        font-weight:600;
+        color:#334155;
+    ">
                         Start Date
                     </label>
 
-                    <input type="date" id="Scheduleed_date" class="form-input" required>
+                    <input type="date" id="opened_date" class="form-input" required>
 
                 </div>
 
@@ -292,7 +292,7 @@
 
 
             
-            <input type="hidden" name="Scheduleed_at" id="Scheduleed_at" value="<?php echo e(old('Scheduleed_at')); ?>">
+            <input type="hidden" name="opened_at" id="opened_at" value="<?php echo e(old('opened_at')); ?>">
 
 
             
@@ -376,25 +376,30 @@
 
     
     <script>
-        const form = document.querySelector('form');
-        const dateInput = document.getElementById('Scheduleed_date');
+        const form = document.getElementById('feedbackScheduleForm');
+
+        const dateInput = document.getElementById('opened_date');
         const hourInput = document.getElementById('opened_hour');
         const minuteInput = document.getElementById('opened_minute');
-        const ScheduleedAtInput = document.getElementById('Scheduleed_at');
+        const openedAtInput = document.getElementById('opened_at');
 
-        function updateScheduleedAt() {
-            if (dateInput.value && timeInput.value) {
-                ScheduleedAtInput.value =
-                    dateInput.value + ' ' + timeInput.value;
+        function updateOpenedAt() {
+            if (dateInput.value && hourInput.value && minuteInput.value) {
+                openedAtInput.value =
+                    dateInput.value + ' ' +
+                    hourInput.value + ':' +
+                    minuteInput.value;
+            } else {
+                openedAtInput.value = '';
             }
         }
 
-        dateInput.addEventListener('change', updateScheduleedAt);
-        hourInput.addEventListener('change', updateScheduleedAt);
-        minuteInput.addEventListener('change', updateScheduleedAt);
+        dateInput.addEventListener('change', updateOpenedAt);
+        hourInput.addEventListener('change', updateOpenedAt);
+        minuteInput.addEventListener('change', updateOpenedAt);
 
         form.addEventListener('submit', function(event) {
-            updateScheduleedAt();
+            updateOpenedAt();
 
             const selectedStaff = document.querySelectorAll(
                 'input[name="staff_ids[]"]:checked'
@@ -406,9 +411,9 @@
                 return;
             }
 
-            if (!ScheduleedAtInput.value) {
+            if (!openedAtInput.value) {
                 event.preventDefault();
-                alert('Please select the start date and time.');
+                alert('Please select the start date, hour, and minute.');
             }
         });
     </script>

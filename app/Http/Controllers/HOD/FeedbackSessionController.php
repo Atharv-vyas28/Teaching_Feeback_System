@@ -163,17 +163,6 @@ class FeedbackSessionController extends Controller
             'opened_at' => [
                 'required',
                 'date',
-                function ($attribute, $value, $fail) {
-                    $openedAt = Carbon::parse($value);
-
-                    if ($openedAt->minute % 5 !== 0) {
-                        $fail('The feedback start time must use 5-minute intervals.');
-                    }
-
-                    if ($openedAt->hour < 8 || $openedAt->hour > 19) {
-                        $fail('The feedback start time must be between 08:00 and 19:55.');
-                    }
-                },
             ],
             'duration_minutes' => ['required', 'integer', 'in:30,60,90,120'],
         ]);
